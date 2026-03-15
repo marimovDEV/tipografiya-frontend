@@ -12,7 +12,6 @@ import { getThemeClass } from '@/lib/mode-config'
 // Import mode-specific layouts
 import AdminLayout from './AdminLayout'
 import WorkerLayout from './WorkerLayout'
-import WorkerLayout from './WorkerLayout'
 import ClientLayout from './ClientLayout'
 
 interface MultiModeLayoutProps {
