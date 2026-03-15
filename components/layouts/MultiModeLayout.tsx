@@ -11,7 +11,7 @@ import { getThemeClass } from '@/lib/mode-config'
 
 // Import mode-specific layouts
 import AdminLayout from './AdminLayout'
-import ManagerLayout from './ManagerLayout'
+import WorkerLayout from './WorkerLayout'
 import WorkerLayout from './WorkerLayout'
 import ClientLayout from './ClientLayout'
 
@@ -42,9 +42,6 @@ export default function MultiModeLayout({ children }: MultiModeLayoutProps) {
     switch (mode) {
         case 'admin':
             return <AdminLayout>{children}</AdminLayout>
-
-        case 'manager':
-            return <ManagerLayout>{children}</ManagerLayout>
 
         case 'worker':
             return <WorkerLayout>{children}</WorkerLayout>
