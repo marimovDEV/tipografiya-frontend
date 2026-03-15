@@ -162,6 +162,43 @@ export default function MoliyaPage() {
     t.client_name?.toLowerCase().includes(searchQuery.toLowerCase())
   ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
+  const handleExportExcel = async () => {
+    try {
+      if (transactions.length === 0) {
+        toast.error("Eksport qilish uchun ma'lumot yo'q")
+        return
+      }
+      
+      const xlsx = await import("xlsx")
+      const ws_data = filteredTransactions.map(t => ({
+        "Sana": format(new Date(t.date), "dd.MM.yyyy"),
+        "Turi": t.type === 'income' ? 'KIRIM' : 'CHIQIM',
+        "Kategoriya": t.category,
+        "Izoh": t.description || "",
+        "Bog'lanish": t.worker_name || t.client_name || "Umumiy",
+        "Summa (UZS)": parseFloat(t.amount)
+      }))
+
+      const ws = xlsx.utils.json_to_sheet(ws_data)
+      const wb = xlsx.utils.book_new()
+      xlsx.utils.book_append_sheet(wb, ws, "Tranzaksiyalar")
+
+      // Add simple stats sheet
+      const ws_stats = xlsx.utils.json_to_sheet([{
+        "Jami Kirim": stats.totalIncome,
+        "Jami Chiqim": stats.totalExpense,
+        "Balans": stats.balance
+      }])
+      xlsx.utils.book_append_sheet(wb, ws_stats, "Xulosa")
+
+      xlsx.writeFile(wb, `Moliya_Hisobot_${format(new Date(), "dd_MM_yyyy")}.xlsx`)
+      toast.success("Moliya hisoboti yuklab olindi")
+    } catch (e) {
+      console.error(e)
+      toast.error("Eksport xatoligi")
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -180,7 +217,10 @@ export default function MoliyaPage() {
         </div>
         
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="rounded-xl border-slate-800 bg-slate-900/50 text-slate-400 font-black text-[10px] uppercase tracking-widest gap-2 h-12 px-6 hover:bg-slate-800 transition-all">
+          <Button 
+            variant="outline" 
+            onClick={handleExportExcel}
+            className="rounded-xl border-slate-800 bg-slate-900/50 text-slate-400 font-black text-[10px] uppercase tracking-widest gap-2 h-12 px-6 hover:bg-slate-800 transition-all">
             <Download className="w-4 h-4" />
             Eksport (Excel)
           </Button>
