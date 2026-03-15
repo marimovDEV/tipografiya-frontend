@@ -6,9 +6,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Activity, AlertTriangle, CheckCircle, TrendingUp } from 'lucide-react'
+import { AlertTriangle, CheckCircle, TrendingUp } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { fetchWithAuth } from '@/lib/api-client'
 
 interface CapacityData {
     active_orders: number
@@ -45,18 +46,18 @@ export default function CapacityStatus() {
             const token = localStorage.getItem('token')
 
             // Fetch capacity
-            const capacityRes = await fetch('http://localhost:8000/api/production/capacity/', {
-                headers: { 'Authorization': `Token ${token}` }
-            })
-            const capacityData = await capacityRes.json()
-            setCapacity(capacityData)
+            const capacityRes = await fetchWithAuth('/api/production/capacity/')
+            if (capacityRes.ok) {
+                const capacityData = await capacityRes.json()
+                setCapacity(capacityData)
+            }
 
             // Fetch bottlenecks
-            const bottleneckRes = await fetch('http://localhost:8000/api/production/bottlenecks/', {
-                headers: { 'Authorization': `Token ${token}` }
-            })
-            const bottleneckData = await bottleneckRes.json()
-            setBottlenecks(bottleneckData.bottlenecks || [])
+            const bottleneckRes = await fetchWithAuth('/api/production/bottlenecks/')
+            if (bottleneckRes.ok) {
+                const bottleneckData = await bottleneckRes.json()
+                setBottlenecks(bottleneckData.bottlenecks || [])
+            }
 
         } catch (error) {
             console.error('Failed to fetch capacity data:', error)

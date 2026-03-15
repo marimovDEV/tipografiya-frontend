@@ -42,7 +42,6 @@ export default function ManagerLayout({ children }: ManagerLayoutProps) {
         { name: 'Xodimlar', href: '/employees', icon: Users2 },
         { name: 'Vazifalar', href: '/tasks', icon: CheckSquare },
         { name: 'Hisobotlar', href: '/reports', icon: TrendingUp },
-        { name: 'To\'siqlar', href: '/bottlenecks', icon: AlertCircle },
     ]
 
     return (
