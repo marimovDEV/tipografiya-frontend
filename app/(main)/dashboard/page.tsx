@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { fetchWithAuth } from "@/lib/api-client"
+import { useUserMode } from "@/hooks/useUserMode"
 import { useRole } from "@/lib/context/role-context"
 import {
   Select, 
@@ -52,6 +53,7 @@ const CATEGORIES = {
 }
 
 export default function DashboardPage() {
+  const { isAdmin } = useUserMode()
   const { currentRole } = useRole()
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -218,7 +220,6 @@ export default function DashboardPage() {
   if (!data) return null
 
   const { stats, production_stages, alerts, active_workers, top_worker, chart_data, task_stats } = data
-  const isAdmin = currentRole === 'admin'
 
   return (
     <div className="space-y-6 min-w-[1240px]">

@@ -33,6 +33,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { fetchWithAuth } from "@/lib/api-client"
 import { toast } from "sonner"
 import { format } from "date-fns"
+import { useUserMode } from "@/hooks/useUserMode"
 import { useRole } from "@/lib/context/role-context"
 
 const COLUMN_CONFIG = [
@@ -43,6 +44,7 @@ const COLUMN_CONFIG = [
 ]
 
 export default function TasksPage() {
+  const { isAdmin } = useUserMode()
   const { currentRole } = useRole()
   const [tasks, setTasks] = useState<any[]>([])
   const [employees, setEmployees] = useState<any[]>([])
@@ -155,7 +157,7 @@ export default function TasksPage() {
             <Filter className="w-4 h-4" />
             Saralash
           </Button>
-          {currentRole === 'admin' && (
+          {isAdmin && (
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-primary text-white hover:opacity-90 rounded-xl h-10 px-5 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20 transition-all">
