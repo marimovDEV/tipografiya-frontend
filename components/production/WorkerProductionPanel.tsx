@@ -118,27 +118,86 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
   }
 
   const fetchDailyStats = async () => {
-// ... existing fetchDailyStats ...
+    try {
+      const res = await fetchWithAuth("/api/users/production-stats/")
+      if (res.ok) {
+        const data = await res.json()
+        setDailyStats({
+          produced: data.today?.produced || 0,
+          defects: data.today?.defects || 0
+        })
+      }
+    } catch (e) {
+      console.error("Fetch daily stats error:", e)
+    }
   }
 
   const fetchStepStats = async () => {
-// ... existing fetchStepStats ...
+    try {
+      const res = await fetchWithAuth("/api/production/stats/")
+      if (res.ok) {
+        setStepStats(await res.json())
+      }
+    } catch (e) {
+      console.error("Fetch step stats error:", e)
+    }
   }
 
   const fetchMaterials = async () => {
-// ... existing fetchMaterials ...
+    try {
+      const res = await fetchWithAuth("/api/inventory/")
+      if (res.ok) {
+        const data = await res.json()
+        setMaterials(data.results || data)
+      }
+    } catch (e) {
+      console.error("Fetch materials error:", e)
+    }
   }
 
   const fetchWorkerData = async () => {
-// ... existing fetchWorkerData ...
+    try {
+      setLoading(true)
+      const [activeRes, availableRes] = await Promise.all([
+        fetchWithAuth("/api/production/active/"),
+        fetchWithAuth("/api/production/available/")
+      ])
+
+      if (activeRes.ok) {
+        const activeData = await activeRes.json()
+        setActiveStep(activeData[0] || null)
+      }
+
+      if (availableRes.ok) {
+        setAvailableOrders(await availableRes.json())
+      }
+    } catch (error) {
+      console.error("Fetch worker data error:", error)
+      toast.error("Ma'lumotlarni yuklashda xatolik")
+    } finally {
+      setLoading(false)
+    }
   }
 
   const filteredOrders = useMemo(() => {
-// ... existing filteredOrders ...
+    let filtered = availableOrders
+    if (searchQuery) {
+      filtered = filtered.filter(o => 
+        o.order_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        o.client_name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+    if (stepFilter !== "ALL") {
+      filtered = filtered.filter(o => o.step === stepFilter)
+    }
+    return filtered
   }, [availableOrders, searchQuery, stepFilter]);
 
   const uniqueSteps = useMemo(() => {
-// ... existing uniqueSteps ...
+    const steps = new Set<string>()
+    steps.add("ALL")
+    availableOrders.forEach(o => steps.add(o.step))
+    return Array.from(steps)
   }, [availableOrders]);
 
   const handleStart = async (stepId: string) => {
@@ -161,7 +220,6 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
       return
     }
     if (!activeStep) return
-// ... existing handleReport content ...
     if (!produced) {
       toast.error("Bajarilgan miqdorni kiriting")
       return
@@ -192,11 +250,6 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
       return
     }
     if (!activeStep || !selectedMaterial || !reqQuantity) {
-// ... existing handleRequestMaterial validation ...
-      toast.error("Barcha maydonlarni to'ldiring")
-      return
-    }
-// ... existing handleRequestMaterial logic ...
     try {
       const material = materials.find(m => m.id === selectedMaterial)
       const qty = parseFloat(reqQuantity)
@@ -229,7 +282,6 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
       return
     }
     if (!activeStep) return
-// ... rest of handleComplete ...
     try {
       setSubmitting(true)
       await completeProductionStep(activeStep.id)

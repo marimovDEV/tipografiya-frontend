@@ -36,6 +36,7 @@ import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { format } from "date-fns"
 import WorkerProductionPanel from "@/components/production/WorkerProductionPanel"
+import { ClientFormModal } from "@/components/clients/ClientFormModal"
 
 const CATEGORIES = {
   income: [
@@ -84,6 +85,7 @@ export default function DashboardPage() {
   })
   const [submittingTransaction, setSubmittingTransaction] = useState(false)
   const [isDebtPaymentFlow, setIsDebtPaymentFlow] = useState(false)
+  const [isClientModalOpen, setIsClientModalOpen] = useState(false)
 
   useEffect(() => {
     fetchDashboardData()
@@ -317,37 +319,47 @@ export default function DashboardPage() {
                     <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
                       {isDebtPaymentFlow ? "1. Mijozni Tanlang" : "Mijoz (Qarz To'lovchi)"}
                     </Label>
-                    <Select 
-                      value={transactionFormData.client} 
-                      onValueChange={v => setTransactionFormData({...transactionFormData, client: v})}
-                    >
-                      <SelectTrigger className="h-16 bg-slate-900 border-slate-800 rounded-2xl text-white px-6 text-lg font-bold ring-offset-slate-950 focus:ring-primary/20">
-                        <SelectValue placeholder="Mijozni qidirish..." />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-950 border-slate-800 text-white max-h-[300px]">
-                        {(() => {
-                          const debtors = clients.filter(c => parseFloat(c.balance) < 0);
-                          const list = (isDebtPaymentFlow && debtors.length > 0) ? debtors : clients;
-                          return list.map(c => (
-                            <SelectItem key={c.id} value={c.id.toString()} className="focus:bg-slate-900 font-bold py-4">
-                              <div className="flex flex-col">
-                                <span>{c.full_name}</span>
-                                {parseFloat(c.balance) < 0 && (
-                                  <span className="text-[10px] text-rose-500 font-black">
-                                    Qarz: {Math.abs(parseFloat(c.balance)).toLocaleString()} UZS
-                                  </span>
-                                )}
-                              </div>
-                            </SelectItem>
-                          ));
-                        })()}
-                        {clients.length === 0 && (
-                          <div className="p-4 text-center text-slate-500 text-xs font-black uppercase">
-                            Mijozlar topilmadi
-                          </div>
-                        )}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center gap-2">
+                      <Select 
+                        value={transactionFormData.client} 
+                        onValueChange={v => setTransactionFormData({...transactionFormData, client: v})}
+                      >
+                        <SelectTrigger className="h-16 bg-slate-900 border-slate-800 rounded-2xl text-white px-6 text-lg font-bold ring-offset-slate-950 focus:ring-primary/20 flex-1">
+                          <SelectValue placeholder="Mijozni qidirish..." />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-950 border-slate-800 text-white max-h-[300px]">
+                          {(() => {
+                            const debtors = clients.filter(c => parseFloat(c.balance) < 0);
+                            const list = (isDebtPaymentFlow && debtors.length > 0) ? debtors : clients;
+                            return list.map(c => (
+                              <SelectItem key={c.id} value={c.id.toString()} className="focus:bg-slate-900 font-bold py-4">
+                                <div className="flex flex-col">
+                                  <span>{c.full_name}</span>
+                                  {parseFloat(c.balance) < 0 && (
+                                    <span className="text-[10px] text-rose-500 font-black">
+                                      Qarz: {Math.abs(parseFloat(c.balance)).toLocaleString()} UZS
+                                    </span>
+                                  )}
+                                </div>
+                              </SelectItem>
+                            ));
+                          })()}
+                          {clients.length === 0 && (
+                            <div className="p-4 text-center text-slate-500 text-xs font-black uppercase">
+                              Mijozlar topilmadi
+                            </div>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <Button 
+                        type="button"
+                        onClick={() => setIsClientModalOpen(true)}
+                        className="h-16 w-16 bg-slate-900 border-slate-800 rounded-2xl flex items-center justify-center text-primary hover:bg-slate-800"
+                        title="Yangi mijoz"
+                      >
+                        <Plus size={24} />
+                      </Button>
+                    </div>
                   </div>
 
                   {isDebtPaymentFlow && transactionFormData.client && (
@@ -538,7 +550,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-5 gap-6">
         {[
           { label: 'Yangi Buyurtma', href: '/orders/new', icon: ShoppingCart, color: 'primary' },
-          { label: 'Yangi Mijoz', href: '/clients', icon: Users, color: 'emerald' },
+          { label: 'Yangi Mijoz', onClick: () => setIsClientModalOpen(true), icon: Users, color: 'emerald' },
           { label: 'Yangi Operatsiya', onClick: () => {
             setIsDebtPaymentFlow(false)
             setTransactionFormData({...transactionFormData, type: 'income', category: CATEGORIES.income[0].value})
@@ -1050,6 +1062,20 @@ export default function DashboardPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Quick Client Modal */}
+      {isClientModalOpen && (
+        <ClientFormModal 
+          onClose={() => setIsClientModalOpen(false)}
+          onSave={(newClient) => {
+            setIsClientModalOpen(false)
+            fetchClients()
+            if (newClient && isTransactionModalOpen) {
+              setTransactionFormData(prev => ({ ...prev, client: (newClient as any).id.toString() }))
+            }
+          }}
+        />
+      )}
     </div>
   )
 }
