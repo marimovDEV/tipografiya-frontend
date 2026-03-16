@@ -260,7 +260,7 @@ export default function DashboardPage() {
             </Button>
           </Link>
         </div>
-      </header>
+        </div>
 
       {/* SEARCH BAR - DARK */}
       {showFilters && (
