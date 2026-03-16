@@ -582,9 +582,8 @@ export default function ProfilePage() {
                     </CardContent>
                 </Card>
             </div>
-        </div>
       </div>
-      </div>
+    </div>
 
       {/* Edit Profile Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
