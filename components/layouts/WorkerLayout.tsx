@@ -148,8 +148,10 @@ export default function WorkerLayout({ children }: WorkerLayoutProps) {
                     </div>
                 </header>
 
-                <main className="p-4 md:p-10 w-full max-w-full overflow-x-hidden">
-                    {children}
+                <main className="flex-1 p-4 md:p-10 w-full overflow-x-hidden">
+                    <div className="max-w-[1400px] mx-auto w-full">
+                        {children}
+                    </div>
                 </main>
             </div>
         </div>

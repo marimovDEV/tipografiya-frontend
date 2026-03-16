@@ -461,7 +461,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                 </div>
 
                 {/* Progress Stats */}
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                    <div className="p-3 sm:p-4 bg-slate-950/50 border border-slate-800 rounded-2xl sm:rounded-3xl text-center">
                      <p className="text-[7px] sm:text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">JAMI</p>
                      <p className="text-lg sm:text-xl font-black font-mono text-white">{activeStep.input_qty}</p>
@@ -556,7 +556,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
         </Card>
 
         {/* RECENT LOGS - SMALL */}
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <Card className="border border-slate-800 bg-slate-900/40 rounded-[2rem] overflow-hidden">
               <CardContent className="p-6 flex items-center gap-4">
                  <div className="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center border border-emerald-500/20">

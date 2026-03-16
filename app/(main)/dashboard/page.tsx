@@ -595,154 +595,133 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-12 gap-6">
-        {/* Left: Financial & Production KPIs */}
-        <div className="col-span-1 lg:col-span-8 space-y-6">
-          {/* Moliya KPI - NEW */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-             <Card className="bg-slate-900/40 border-slate-800 rounded-[2rem] p-6 hover:border-primary/30 transition-all group relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:scale-110 transition-transform">
-                  <TrendingUp className="w-20 h-20 text-white" />
-                </div>
-                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">BUGUNGI DAROMAD</p>
-                <h4 className="text-2xl font-black text-white italic tracking-tighter">{stats.today_income?.toLocaleString()} <span className="text-[10px] opacity-30 not-italic">UZS</span></h4>
-                <div className="mt-4 flex items-center gap-2">
-                   <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[8px] px-1.5 h-4 font-black">ACTIVE</Badge>
-                </div>
-             </Card>
-             <Card className="bg-slate-900/40 border-slate-800 rounded-[2rem] p-6 hover:border-rose-500/30 transition-all group relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:scale-110 transition-transform">
-                  <TrendingDown className="w-20 h-20 text-white" />
-                </div>
-                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">BUGUNGI XARAJAT</p>
-                <h4 className="text-2xl font-black text-rose-400 italic tracking-tighter">{stats.today_expense?.toLocaleString()} <span className="text-[10px] opacity-30 not-italic">UZS</span></h4>
-                <div className="mt-4 flex items-center gap-2">
-                   <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
-                      <div className="h-full bg-rose-500 w-1/3" />
-                   </div>
-                </div>
-             </Card>
-             <Card className="bg-slate-950/60 border-primary/20 rounded-[2rem] p-6 group relative overflow-hidden shadow-[0_15px_40px_rgba(79,70,229,0.15)]">
-                <div className="absolute top-0 right-0 p-6 opacity-[0.05] group-hover:scale-110 transition-transform">
-                  <DollarSign className="w-20 h-20 text-white" />
-                </div>
-                <p className="text-[9px] font-black text-primary uppercase tracking-widest mb-1">SOF FOYDA</p>
-                <h4 className="text-2xl font-black text-white italic tracking-tighter">{(stats.today_income - stats.today_expense)?.toLocaleString()} <span className="text-[10px] opacity-30 not-italic">UZS</span></h4>
-                <div className="mt-4">
-                   <Sparkline data={[10, 40, 30, 50, 40, 60, 80]} className="h-4 text-primary" />
-                </div>
-             </Card>
+      {/* 1. KPI STATS SECTION - 4/2/1 GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Finance KPIs */}
+        <Card className="bg-slate-900/40 border-slate-800 rounded-[2rem] p-6 hover:border-primary/30 transition-all group relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:scale-110 transition-transform">
+            <TrendingUp className="w-20 h-20 text-white" />
           </div>
-
-          {/* Buyurtmalar KPI - NEW */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-             <div className="bg-slate-900/40 border border-slate-800 rounded-[2rem] p-6 flex flex-col justify-between">
-                <div>
-                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Faol buyurtmalar</p>
-                   <h4 className="text-3xl font-black text-white italic">{stats.active_orders}</h4>
-                </div>
-                <div className="mt-4 flex gap-1">
-                   {Array.from({length: 8}).map((_, i) => <div key={i} className={`h-1 flex-1 rounded-full ${i < stats.active_orders ? 'bg-primary' : 'bg-slate-800'}`} />)}
-                </div>
-             </div>
-             <div className="bg-slate-900/40 border border-slate-800 rounded-[2rem] p-6 flex flex-col justify-between">
-                <div>
-                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Jarayonda</p>
-                   <h4 className="text-3xl font-black text-amber-500 italic">{production_stages.printing || 0}</h4>
-                </div>
-                <p className="text-[8px] font-black text-slate-600 uppercase mt-2">Chop etish va ishlov berishda</p>
-             </div>
-             <div className="bg-slate-900/40 border border-slate-800 rounded-[2rem] p-6 flex flex-col justify-between">
-                <div>
-                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Tugallangan (Bugun)</p>
-                   <h4 className="text-3xl font-black text-emerald-500 italic">{stats.today_orders}</h4>
-                </div>
-                <div className="flex items-center gap-2 mt-2">
-                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                   <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">Yetkazib berishga tayyor</p>
-                </div>
-             </div>
+          <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">BUGUNGI DAROMAD</p>
+          <h4 className="text-2xl font-black text-white italic tracking-tighter">{stats.today_income?.toLocaleString()} <span className="text-[10px] opacity-30 not-italic">UZS</span></h4>
+          <div className="mt-4 flex items-center gap-2">
+            <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[8px] px-1.5 h-4 font-black">ACTIVE</Badge>
           </div>
+        </Card>
 
-          {/* Ishlab chiqarish KPI - NEW */}
-          <Card className="bg-slate-900/40 border-slate-800 rounded-[2.5rem] p-6 sm:p-8 relative group overflow-hidden">
-             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12">
-                <div className="space-y-1">
-                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Bugungi ishlab chiqarish</p>
-                   <h4 className="text-4xl font-black text-white italic tracking-tighter">{stats.today_produced_qty?.toLocaleString()} <span className="text-[10px] opacity-30 not-italic">DONA</span></h4>
-                </div>
-                <div className="space-y-1">
-                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Brak (Zarar)</p>
-                   <h4 className="text-4xl font-black text-rose-500 italic tracking-tighter">{stats.today_defect_qty?.toLocaleString()} <span className="text-[10px] opacity-30 not-italic">DONA</span></h4>
-                </div>
-                <div className="space-y-1">
-                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Samaradorlik</p>
-                   <div className="flex items-center gap-3">
-                      <h4 className="text-4xl font-black text-emerald-400 italic tracking-tighter">{stats.today_efficiency}%</h4>
-                      <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-500">
-                         <TrendingUp size={16} />
-                      </div>
-                   </div>
-                </div>
-             </div>
-             <div className="mt-8 h-1.5 w-full bg-slate-950 rounded-full overflow-hidden border border-white/5">
-                <div className="h-full bg-gradient-to-r from-emerald-500 to-primary shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all duration-1000" style={{ width: `${stats.today_efficiency}%` }} />
-             </div>
-          </Card>
+        <Card className="bg-slate-900/40 border-slate-800 rounded-[2rem] p-6 hover:border-rose-500/30 transition-all group relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:scale-110 transition-transform">
+            <TrendingDown className="w-20 h-20 text-white" />
+          </div>
+          <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">BUGUNGI XARAJAT</p>
+          <h4 className="text-2xl font-black text-rose-400 italic tracking-tighter">{stats.today_expense?.toLocaleString()} <span className="text-[10px] opacity-30 not-italic">UZS</span></h4>
+          <div className="mt-4 flex items-center gap-2">
+            <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+              <div className="h-full bg-rose-500 w-1/3" />
+            </div>
+          </div>
+        </Card>
+
+        <div className="bg-slate-900/40 border border-slate-800 rounded-[2rem] p-6 flex flex-col justify-between">
+          <div>
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Faol buyurtmalar</p>
+            <h4 className="text-3xl font-black text-white italic">{stats.active_orders}</h4>
+          </div>
+          <div className="mt-4 flex gap-1">
+            {Array.from({length: 8}).map((_, j) => <div key={j} className={`h-1 flex-1 rounded-full ${j < stats.active_orders ? 'bg-primary' : 'bg-slate-800'}`} />)}
+          </div>
         </div>
 
-        {/* Right: Moliya Tezkor Panel - NEW */}
-        <div className="col-span-1 lg:col-span-4">
-           <Card className="h-full bg-slate-900/40 border-slate-800 rounded-[2.5rem] overflow-hidden flex flex-col">
-              <div className="bg-slate-800/30 p-8 border-b border-slate-800">
-                 <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-2">
-                       <Wallet className="w-3.5 h-3.5 text-primary" /> MOLIYA TERMINALI
-                    </h4>
-                    <Button 
-                      size="icon" 
-                      variant="ghost" 
-                      onClick={() => {
-                        setTransactionFormData({...transactionFormData, type: 'income', category: CATEGORIES.income[0].value})
-                        setIsTransactionModalOpen(true)
-                      }}
-                      className="h-8 w-8 rounded-xl bg-slate-800 flex items-center justify-center text-primary group-hover:bg-slate-700"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                 </div>
-                 
-                 <div className="space-y-6">
-                    <div className="flex items-end justify-between">
-                       <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Bugungi jami kirim</p>
-                       <p className="text-2xl font-black text-white italic tracking-tighter">{stats.today_income?.toLocaleString()} <span className="text-[10px] opacity-30 not-italic ml-1">UZS</span></p>
-                    </div>
-                    <div className="flex items-end justify-between">
-                       <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Bugungi jami chiqim</p>
-                       <p className="text-2xl font-black text-rose-400 italic tracking-tighter">{stats.today_expense?.toLocaleString()} <span className="text-[10px] opacity-30 not-italic ml-1">UZS</span></p>
-                    </div>
-                 </div>
-              </div>
-              
-              <div className="p-8 flex-1 flex flex-col justify-center bg-slate-950/20">
-                 <div className="flex items-center justify-between mb-2">
-                    <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest">BALANS</p>
-                    <Badge className="bg-primary/20 text-primary border-none text-[8px] font-black">XAVFSIZ</Badge>
-                 </div>
-                 <h2 className="text-5xl font-black text-white italic tracking-tighter mb-8">{(stats.today_income - stats.today_expense)?.toLocaleString()} <span className="text-sm opacity-20 not-italic ml-2">UZS</span></h2>
-                 
-                 <Button 
-                    onClick={() => {
-                      setTransactionFormData({...transactionFormData, type: 'income', category: CATEGORIES.income[0].value})
-                      setIsTransactionModalOpen(true)
-                    }}
-                    className="w-full h-14 bg-primary text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl shadow-2xl hover:opacity-90 transition-all"
-                  >
-                    + OPERATSIYA KIRITISH
-                 </Button>
-              </div>
-           </Card>
+        <div className="bg-slate-900/40 border border-slate-800 rounded-[2rem] p-6 flex flex-col justify-between">
+          <div>
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Tugallangan (Bugun)</p>
+            <h4 className="text-3xl font-black text-emerald-500 italic">{stats.today_orders}</h4>
+          </div>
+          <div className="flex items-center gap-2 mt-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">Yetkazib berishga tayyor</p>
+          </div>
         </div>
+      </div>
+
+      {/* 2. FINANCE TERMINAL & PRODUCTION SUMMARY - 12 COL GRID */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Production Efficiency - Span 8 */}
+        <Card className="col-span-1 lg:col-span-8 bg-slate-900/40 border-slate-800 rounded-[2.5rem] p-6 sm:p-8 relative group overflow-hidden flex flex-col justify-center">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12">
+            <div className="space-y-1">
+              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest"><span className="hidden sm:inline">Bugungi </span>Ishlab chiqarish</p>
+              <h4 className="text-4xl font-black text-white italic tracking-tighter">{stats.today_produced_qty?.toLocaleString()} <span className="text-[10px] opacity-30 not-italic">DONA</span></h4>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Brak <span className="hidden sm:inline">(Zarar)</span></p>
+              <h4 className="text-4xl font-black text-rose-500 italic tracking-tighter">{stats.today_defect_qty?.toLocaleString()} <span className="text-[10px] opacity-30 not-italic">DONA</span></h4>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Samaradorlik</p>
+              <div className="flex items-center gap-3">
+                <h4 className="text-4xl font-black text-emerald-400 italic tracking-tighter">{stats.today_efficiency}%</h4>
+                <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-500">
+                  <TrendingUp size={16} />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="mt-8 h-1.5 w-full bg-slate-950 rounded-full overflow-hidden border border-white/5">
+            <div className="h-full bg-gradient-to-r from-emerald-500 to-primary shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all duration-1000" style={{ width: `${stats.today_efficiency}%` }} />
+          </div>
+        </Card>
+
+        {/* Finance Terminal - Span 4 */}
+        <Card className="col-span-1 lg:col-span-4 bg-slate-900/40 border-slate-800 rounded-[2.5rem] overflow-hidden flex flex-col">
+          <div className="bg-slate-800/30 p-8 border-b border-slate-800">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-2">
+                <Wallet className="w-3.5 h-3.5 text-primary" /> MOLIYA TERMINALI
+              </h4>
+              <Button 
+                size="icon" 
+                variant="ghost" 
+                onClick={() => {
+                  setTransactionFormData({...transactionFormData, type: 'income', category: CATEGORIES.income[0].value})
+                  setIsTransactionModalOpen(true)
+                }}
+                className="h-8 w-8 rounded-xl bg-slate-800 flex items-center justify-center text-primary"
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="flex items-end justify-between">
+                <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Bugungi jami kirim</p>
+                <p className="text-2xl font-black text-white italic tracking-tighter">{stats.today_income?.toLocaleString()} <span className="text-[10px] opacity-30 not-italic ml-1">UZS</span></p>
+              </div>
+              <div className="flex items-end justify-between">
+                <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Bugungi jami chiqim</p>
+                <p className="text-2xl font-black text-rose-400 italic tracking-tighter">{stats.today_expense?.toLocaleString()} <span className="text-[10px] opacity-30 not-italic ml-1">UZS</span></p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="p-8 flex-1 flex flex-col justify-center bg-slate-950/20">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest">BALANS</p>
+              <Badge className="bg-primary/20 text-primary border-none text-[8px] font-black">XAVFSIZ</Badge>
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white italic tracking-tighter mb-8">{(stats.today_income - stats.today_expense)?.toLocaleString()} <span className="text-sm opacity-20 not-italic ml-2">UZS</span></h2>
+            
+            <Button 
+              onClick={() => {
+                setTransactionFormData({...transactionFormData, type: 'income', category: CATEGORIES.income[0].value})
+                setIsTransactionModalOpen(true)
+              }}
+              className="w-full h-14 bg-primary text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl shadow-2xl hover:opacity-90 transition-all border-none"
+            >
+              + OPERATSIYA KIRITISH
+            </Button>
+          </div>
+        </Card>
       </div>
 
       {/* OYLIK REJA TERMINAL - DARK */}
@@ -849,7 +828,7 @@ export default function DashboardPage() {
               <CardHeader className="bg-slate-800/30 border-b border-slate-800 py-4 px-8">
                   <div className="flex items-center gap-3">
                       <div className="p-2.5 bg-rose-500/10 text-rose-500 rounded-xl"><AlertCircle size={20} /></div>
-                      <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Ombor holati ogohlantirishi</h3>
+                      <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500"><span className="hidden sm:inline">Ombor holati </span>Ogohlantirish</h3>
                   </div>
               </CardHeader>
               <CardContent className="p-8">
