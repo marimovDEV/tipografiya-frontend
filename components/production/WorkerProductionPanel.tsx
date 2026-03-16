@@ -354,6 +354,9 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                   Smenani Tugatish
                 </Button>
               ) : (
+                <Button 
+                  onClick={handleStartShift}
+                  disabled={submitting}
                   className="h-12 sm:h-14 flex-1 sm:flex-none px-6 sm:px-8 rounded-xl sm:rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-indigo-900/20 border-none transition-all group"
                 >
                   <Play className="w-4 h-4 mr-2 sm:mr-3 group-hover:scale-110 transition-transform fill-current" />
