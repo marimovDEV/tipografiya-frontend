@@ -16,8 +16,11 @@ import {
     Briefcase,
     Zap,
     ShieldCheck,
-    Clock
+    Clock,
+    Menu,
+    X
 } from 'lucide-react'
+import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { uz } from 'date-fns/locale'
@@ -29,6 +32,7 @@ interface WorkerLayoutProps {
 export default function WorkerLayout({ children }: WorkerLayoutProps) {
     const pathname = usePathname()
     const router = useRouter()
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
     const handleLogout = () => {
         localStorage.removeItem('token')
@@ -43,9 +47,23 @@ export default function WorkerLayout({ children }: WorkerLayoutProps) {
     ]
 
     return (
-        <div className="min-h-screen bg-slate-950 flex flex-row text-slate-100 font-sans">
+        <div className="min-h-screen bg-slate-950 flex flex-col md:flex-row text-slate-100 font-sans overflow-x-hidden">
+            {/* Mobile Overlay */}
+            {isSidebarOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[45] md:hidden transition-opacity duration-300"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
             {/* Desktop Professional Sidebar - DARK */}
-            <aside className="w-64 fixed inset-y-0 left-0 bg-slate-900 border-r border-slate-800 flex flex-col z-50 shadow-2xl">
+            <aside 
+                className={`
+                    w-64 fixed inset-y-0 left-0 bg-slate-900 border-r border-slate-800 flex flex-col z-50 shadow-2xl
+                    transition-transform duration-300 ease-in-out
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+                `}
+            >
                 <div className="p-8 pb-4">
                     <div className="flex items-center gap-3 mb-1">
                         <div className="w-9 h-9 bg-primary/20 rounded-xl flex items-center justify-center text-primary font-black shadow-inner border border-primary/30">P</div>
@@ -73,6 +91,7 @@ export default function WorkerLayout({ children }: WorkerLayoutProps) {
                                         : 'text-slate-500 hover:text-white hover:bg-white/5 hover:translate-x-1'
                                     }
                                 `}
+                                onClick={() => setIsSidebarOpen(false)}
                             >
                                 {isActive && <div className="absolute left-0 top-3 bottom-3 w-1 bg-primary rounded-full shadow-[0_0_8px_rgba(79,70,229,0.5)]" />}
                                 <Icon className={`w-4.5 h-4.5 transition-colors ${isActive ? 'text-primary' : 'text-slate-600 group-hover:text-white'}`} />
@@ -100,11 +119,17 @@ export default function WorkerLayout({ children }: WorkerLayoutProps) {
             </aside>
 
             {/* Main Content Area */}
-            <div className="flex-1 ml-64 min-w-[1000px] flex flex-col">
+            <div className="flex-1 md:ml-64 flex flex-col w-full max-w-full overflow-x-hidden">
                 {/* Global Top Bar - DARK */}
-                <header className="h-14 bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 sticky top-0 z-40 px-8 flex items-center justify-between">
+                <header className="h-16 md:h-14 bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 sticky top-0 z-40 px-4 md:px-8 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 border border-slate-700/50 rounded-lg">
+                        <button 
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="p-2 -ml-2 text-slate-400 hover:text-white md:hidden"
+                        >
+                            <Menu className="w-6 h-6" />
+                        </button>
+                        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-800 border border-slate-700/50 rounded-lg">
                             <Clock className="w-3.5 h-3.5 text-slate-500" />
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-tight">{format(new Date(), "EEEE, d-MMMM", { locale: uz })}</span>
                         </div>
@@ -123,7 +148,7 @@ export default function WorkerLayout({ children }: WorkerLayoutProps) {
                     </div>
                 </header>
 
-                <main className="p-10">
+                <main className="p-4 md:p-10 w-full max-w-full overflow-x-hidden">
                     {children}
                 </main>
             </div>

@@ -316,10 +316,9 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
           ? "border-emerald-500/30 bg-emerald-500/5 shadow-[0_20px_50px_rgba(16,185,129,0.1)]" 
           : "border-slate-800 bg-slate-900/40"
         }`}>
-          <div className="px-8 py-6 flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <div className={`p-4 rounded-2xl border transition-all duration-500 ${
-                user?.status === 'working'
+          <div className="px-4 sm:px-8 py-4 sm:py-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto">
+              <div className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-500 ${
                 ? "bg-emerald-500 text-white border-emerald-400 shadow-lg shadow-emerald-500/20 animate-pulse"
                 : "bg-slate-800 text-slate-500 border-slate-700"
               }`}>
@@ -343,7 +342,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 w-full sm:w-auto">
               {user?.status === 'working' ? (
                 <Button 
                   onClick={handleEndShift}
@@ -354,12 +353,9 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                   Smenani Tugatish
                 </Button>
               ) : (
-                <Button 
-                  onClick={handleStartShift}
-                  disabled={submitting}
-                  className="h-14 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-indigo-900/20 border-none transition-all group"
+                  className="h-12 sm:h-14 flex-1 sm:flex-none px-6 sm:px-8 rounded-xl sm:rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-[10px] sm:text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-indigo-900/20 border-none transition-all group"
                 >
-                  <Play className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform fill-current" />
+                  <Play className="w-4 h-4 mr-2 sm:mr-3 group-hover:scale-110 transition-transform fill-current" />
                   Smenani Boshlash
                 </Button>
               )}
@@ -421,9 +417,9 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       {/* ACTIVE PRODUCTION - LEFT (Span 7) */}
-      <div className="col-span-7 space-y-6">
+      <div className="col-span-1 lg:col-span-7 space-y-6">
         <Card className="border border-indigo-500/30 bg-slate-900/60 backdrop-blur-xl rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(79,70,229,0.1)]">
           <CardHeader className="bg-indigo-600/10 border-b border-indigo-500/20 py-6 px-8">
             <div className="flex items-center justify-between">
@@ -445,97 +441,99 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
           </CardHeader>
           <CardContent className="p-8">
             {activeStep ? (
-              <div className="space-y-8">
+              <div className="space-y-6 sm:space-y-8">
                 {/* Order Details */}
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                   <div>
-                    <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase">#{activeStep.order_number}</h2>
-                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1 italic">{activeStep.client_name}</p>
+                    <h2 className="text-2xl sm:text-3xl font-black text-white italic tracking-tighter uppercase">#{activeStep.order_number}</h2>
+                    <p className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1 italic">{activeStep.client_name}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ish bosqichi</p>
-                    <Badge variant="outline" className="mt-1 border-slate-700 text-slate-300 font-black text-[11px] uppercase px-4 py-1.5 rounded-xl bg-slate-800">
+                  <div className="text-left sm:text-right">
+                    <p className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest">Ish bosqichi</p>
+                    <Badge variant="outline" className="mt-1 border-slate-700 text-slate-300 font-black text-[10px] sm:text-[11px] uppercase px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-slate-800">
                       {activeStep.step}
                     </Badge>
                   </div>
                 </div>
 
                 {/* Progress Stats */}
-                <div className="grid grid-cols-5 gap-3">
-                   <div className="p-4 bg-slate-950/50 border border-slate-800 rounded-3xl text-center">
-                     <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">JAMI</p>
-                     <p className="text-xl font-black font-mono text-white">{activeStep.input_qty}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                   <div className="p-3 sm:p-4 bg-slate-950/50 border border-slate-800 rounded-2xl sm:rounded-3xl text-center">
+                     <p className="text-[7px] sm:text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">JAMI</p>
+                     <p className="text-lg sm:text-xl font-black font-mono text-white">{activeStep.input_qty}</p>
                    </div>
-                   <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-3xl text-center">
-                     <p className="text-[8px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">BAJARILDI</p>
-                     <p className="text-xl font-black font-mono text-emerald-400">{activeStep.produced_qty || 0}</p>
+                   <div className="p-3 sm:p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl sm:rounded-3xl text-center">
+                     <p className="text-[7px] sm:text-[8px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">BAJARILDI</p>
+                     <p className="text-lg sm:text-xl font-black font-mono text-emerald-400">{activeStep.produced_qty || 0}</p>
                    </div>
-                   <div className="p-4 bg-rose-500/5 border border-rose-500/20 rounded-3xl text-center">
-                     <p className="text-[8px] font-black text-rose-500/60 uppercase tracking-widest mb-1">BRAK</p>
-                     <p className="text-xl font-black font-mono text-rose-500">{activeStep.defect_qty || 0}</p>
+                   <div className="p-3 sm:p-4 bg-rose-500/5 border border-rose-500/20 rounded-2xl sm:rounded-3xl text-center">
+                     <p className="text-[7px] sm:text-[8px] font-black text-rose-500/60 uppercase tracking-widest mb-1">BRAK</p>
+                     <p className="text-lg sm:text-xl font-black font-mono text-rose-500">{activeStep.defect_qty || 0}</p>
                    </div>
-                   <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-3xl text-center">
-                     <p className="text-[8px] font-black text-amber-500/60 uppercase tracking-widest mb-1">MAVJUD</p>
-                     <p className="text-xl font-black font-mono text-amber-400">
+                   <div className="p-3 sm:p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl sm:rounded-3xl text-center">
+                     <p className="text-[7px] sm:text-[8px] font-black text-amber-500/60 uppercase tracking-widest mb-1">MAVJUD</p>
+                     <p className="text-lg sm:text-xl font-black font-mono text-amber-400">
                         {activeStep.available_qty || 0}
                      </p>
                    </div>
-                    <div className="p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-3xl text-center">
-                      <p className="text-[8px] font-black text-indigo-400/60 uppercase tracking-widest mb-1">QOLGAN</p>
-                      <p className="text-xl font-black font-mono text-indigo-400">
+                    <div className="p-3 sm:p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-2xl sm:rounded-3xl text-center col-span-2 sm:col-span-1">
+                      <p className="text-[7px] sm:text-[8px] font-black text-indigo-400/60 uppercase tracking-widest mb-1">QOLGAN</p>
+                      <p className="text-lg sm:text-xl font-black font-mono text-indigo-400">
                          {Math.max(0, activeStep.input_qty - (activeStep.produced_qty || 0))}
                       </p>
                     </div>
-                </div>
+                 </div>
 
                 {/* Input Controls */}
                 <div className="space-y-6 pt-4 border-t border-slate-800/50">
-                   <div className="grid grid-cols-2 gap-6">
+                   <div className="grid grid-cols-2 gap-4 sm:gap-6">
                       <div className="space-y-2">
-                         <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Bajarildi (dona)</Label>
+                         <Label className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Bajarildi (dona)</Label>
                          <Input 
                            type="number" 
                            placeholder="0"
-                           className="h-14 bg-slate-950 border-slate-800 rounded-2xl text-xl font-black font-mono focus:ring-indigo-500/20"
+                           className="h-12 sm:h-14 bg-slate-950 border-slate-800 rounded-xl sm:rounded-2xl text-lg sm:text-xl font-black font-mono focus:ring-indigo-500/20 text-white"
                            value={produced}
                            onChange={e => setProduced(e.target.value)}
                          />
                       </div>
                       <div className="space-y-2">
-                         <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Brak (nuqson)</Label>
+                         <Label className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Brak (nuqson)</Label>
                          <Input 
                            type="number" 
                            placeholder="0"
-                           className="h-14 bg-slate-950 border-slate-800 rounded-2xl text-xl font-black font-mono focus:ring-rose-500/20 text-rose-500"
+                           className="h-12 sm:h-14 bg-slate-950 border-slate-800 rounded-xl sm:rounded-2xl text-lg sm:text-xl font-black font-mono focus:ring-rose-500/20 text-rose-500"
                            value={defects}
                            onChange={e => setDefects(e.target.value)}
                          />
                       </div>
                    </div>
                    
-                   <div className="flex gap-4">
+                   <div className="flex flex-col sm:flex-row gap-4">
                       <Button 
                         variant="outline" 
-                        className="flex-1 h-14 rounded-2xl border-slate-800 bg-slate-900 text-slate-400 font-black text-[11px] uppercase tracking-widest hover:bg-slate-800"
+                        className="h-12 sm:h-14 rounded-xl sm:rounded-2xl border-slate-800 bg-slate-900 text-slate-400 font-black text-[10px] sm:text-[11px] uppercase tracking-widest hover:bg-slate-800 order-2 sm:order-1"
                         onClick={() => setIsRequisitionOpen(true)}
                       >
                         <Package className="w-4 h-4 mr-2" />
                         Material Olish
                       </Button>
-                       <Button 
-                        className="flex-[2] h-14 rounded-2xl bg-indigo-600 text-white font-black text-[11px] uppercase tracking-[0.15em] shadow-lg shadow-indigo-500/30 hover:bg-indigo-500 transition-all border-none"
-                        onClick={handleReport}
-                        disabled={submitting}
-                      >
-                        {submitting ? "SAQLANMOQDA..." : "SAQLASH"}
-                      </Button>
-                      <Button 
-                        className="flex-1 h-14 rounded-2xl bg-emerald-600 text-white font-black text-[11px] uppercase tracking-[0.15em] shadow-lg shadow-emerald-500/30 hover:bg-emerald-500 transition-all border-none"
-                        onClick={handleComplete}
-                        disabled={submitting}
-                      >
-                        {submitting ? "..." : "TAMOMLASH"}
-                      </Button>
+                       <div className="flex gap-4 flex-1 order-1 sm:order-2">
+                         <Button 
+                          className="flex-[2] h-12 sm:h-14 rounded-xl sm:rounded-2xl bg-indigo-600 text-white font-black text-[10px] sm:text-[11px] uppercase tracking-[0.15em] shadow-lg shadow-indigo-500/30 hover:bg-indigo-500 transition-all border-none"
+                          onClick={handleReport}
+                          disabled={submitting}
+                        >
+                          {submitting ? "..." : "SAQLASH"}
+                        </Button>
+                        <Button 
+                          className="flex-1 h-12 sm:h-14 rounded-xl sm:rounded-2xl bg-emerald-600 text-white font-black text-[10px] sm:text-[11px] uppercase tracking-[0.15em] shadow-lg shadow-emerald-500/30 hover:bg-emerald-500 transition-all border-none"
+                          onClick={handleComplete}
+                          disabled={submitting}
+                        >
+                          {submitting ? "..." : "TAMOMLASH"}
+                        </Button>
+                       </div>
                    </div>
                 </div>
               </div>
@@ -581,7 +579,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
       </div>
 
       {/* AVAILABLE ORDERS - RIGHT (Span 5) */}
-      <div className="col-span-5">
+      <div className="col-span-1 lg:col-span-5">
         <Card className="border border-slate-800 shadow-2xl bg-slate-900/40 rounded-[2.5rem] h-full flex flex-col overflow-hidden">
           <CardHeader className="bg-slate-800/30 border-b border-slate-800 py-6 px-8 flex flex-row items-center justify-between">
             <div className="flex items-center gap-3">

@@ -232,20 +232,21 @@ export default function DashboardPage() {
   const { stats, production_stages, alerts, active_workers, top_worker, chart_data, task_stats } = data
 
   return (
-    <div className="space-y-6 min-w-[1240px]">
+  return (
+    <div className="space-y-6 w-full max-w-full overflow-x-hidden">
       {/* Header Space - DARK */}
-      <header className="flex items-center justify-between pb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-8">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <h1 className="text-3xl font-black tracking-tighter text-white uppercase italic">Boshqaruv Markazi</h1>
+          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tighter text-white uppercase italic">Boshqaruv Markazi</h1>
             <Badge className="bg-primary/20 text-primary border border-primary/30 text-[8px] font-black uppercase px-2 py-0.5 rounded-full shadow-lg shadow-primary/10">FAOL MONITORING</Badge>
           </div>
-          <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 pl-1">
+          <p className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 pl-1">
             <Binary className="w-3.5 h-3.5 text-primary/40" />
-            Terminal: ERP-DASH-X10 • Session: {currentTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            Terminal: ERP-DASH-X10 • <span className="hidden sm:inline">Session:</span> {currentTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Button 
             variant="outline" 
             onClick={() => setShowFilters(!showFilters)}
@@ -555,7 +556,7 @@ export default function DashboardPage() {
       ) : (
         <>
       {/* Quick Actions - NEW */}
-      <div className="grid grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
         {[
           { label: 'Yangi Buyurtma', href: '/orders/new', icon: ShoppingCart, color: 'primary' },
           { label: 'Yangi Mijoz', onClick: () => setIsClientModalOpen(true), icon: Users, color: 'emerald' },
@@ -597,9 +598,9 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-12 gap-6">
         {/* Left: Financial & Production KPIs */}
-        <div className="col-span-8 space-y-6">
+        <div className="col-span-1 lg:col-span-8 space-y-6">
           {/* Moliya KPI - NEW */}
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
              <Card className="bg-slate-900/40 border-slate-800 rounded-[2rem] p-6 hover:border-primary/30 transition-all group relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:scale-110 transition-transform">
                   <TrendingUp className="w-20 h-20 text-white" />
@@ -635,7 +636,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Buyurtmalar KPI - NEW */}
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
              <div className="bg-slate-900/40 border border-slate-800 rounded-[2rem] p-6 flex flex-col justify-between">
                 <div>
                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Faol buyurtmalar</p>
@@ -665,8 +666,8 @@ export default function DashboardPage() {
           </div>
 
           {/* Ishlab chiqarish KPI - NEW */}
-          <Card className="bg-slate-900/40 border-slate-800 rounded-[2.5rem] p-8 relative group overflow-hidden">
-             <div className="grid grid-cols-3 gap-12">
+          <Card className="bg-slate-900/40 border-slate-800 rounded-[2.5rem] p-6 sm:p-8 relative group overflow-hidden">
+             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12">
                 <div className="space-y-1">
                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Bugungi ishlab chiqarish</p>
                    <h4 className="text-4xl font-black text-white italic tracking-tighter">{stats.today_produced_qty?.toLocaleString()} <span className="text-[10px] opacity-30 not-italic">DONA</span></h4>
@@ -692,7 +693,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Right: Moliya Tezkor Panel - NEW */}
-        <div className="col-span-4">
+        <div className="col-span-1 lg:col-span-4">
            <Card className="h-full bg-slate-900/40 border-slate-800 rounded-[2.5rem] overflow-hidden flex flex-col">
               <div className="bg-slate-800/30 p-8 border-b border-slate-800">
                  <div className="flex items-center justify-between mb-4">
@@ -760,8 +761,8 @@ export default function DashboardPage() {
                     </Button>
                   </div>
               </CardHeader>
-              <CardContent className="p-10">
-                  <div className="grid grid-cols-4 gap-12">
+              <CardContent className="p-6 sm:p-10">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
                       <div className="col-span-1 space-y-1">
                           <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                              <Binary className="w-3.5 h-3.5 text-primary/40" />
@@ -777,7 +778,7 @@ export default function DashboardPage() {
                             {monthlyPlan.completed.toLocaleString()} <span className="text-[10px] font-black text-slate-600 uppercase italic">uzs</span>
                           </h4>
                       </div>
-                      <div className="col-span-2 space-y-5">
+                      <div className="col-span-1 lg:col-span-2 space-y-5">
                           <div className="flex justify-between items-end">
                               <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Ijro darajasi progressi</p>
                               <span className="text-3xl font-black font-mono text-primary leading-none">{monthlyPlan.progress}%</span>
@@ -797,18 +798,18 @@ export default function DashboardPage() {
       )}
 
       {/* PIPELINE & CONTROLS - DARK */}
-      <div className="grid grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* PRODUCTION FLOW (Span 8) */}
-          <Card className="col-span-8 border border-slate-800 shadow-2xl bg-slate-900/40 rounded-[2.5rem]">
+          <Card className="col-span-1 lg:col-span-8 border border-slate-800 shadow-2xl bg-slate-900/40 rounded-[2.5rem]">
               <CardHeader className="bg-slate-800/30 border-b border-slate-800 py-4 px-8">
                   <div className="flex items-center gap-3">
                       <div className="p-2.5 bg-primary/10 text-primary rounded-xl"><Activity size={20} /></div>
                       <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Ishlab chiqarish yo'nalishi vizualizatsiyasi</h3>
                   </div>
               </CardHeader>
-              <CardContent className="p-12 relative overflow-hidden">
-                  <div className="absolute top-1/2 left-8 right-8 h-1 bg-slate-800/50 -translate-y-[2.5rem]" />
-                  <div className="flex items-center justify-between relative z-10">
+              <CardContent className="p-6 sm:p-12 relative overflow-hidden">
+                  <div className="hidden sm:block absolute top-1/2 left-8 right-8 h-1 bg-slate-800/50 -translate-y-[2.5rem]" />
+                  <div className="flex flex-col sm:flex-row items-center justify-between relative z-10 gap-8 sm:gap-4">
                       {[
                         { id: 'warehouse', label: 'OMBOR', icon: Package },
                         { id: 'printing', label: 'CHOP ETISH', icon: Factory },
@@ -845,7 +846,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* ALERTS TERMINAL (Span 4) */}
-          <Card className="col-span-4 border border-slate-800 shadow-2xl bg-slate-900/40 rounded-[2.5rem]">
+          <Card className="col-span-1 lg:col-span-4 border border-slate-800 shadow-2xl bg-slate-900/40 rounded-[2.5rem]">
               <CardHeader className="bg-slate-800/30 border-b border-slate-800 py-4 px-8">
                   <div className="flex items-center gap-3">
                       <div className="p-2.5 bg-rose-500/10 text-rose-500 rounded-xl"><AlertCircle size={20} /></div>

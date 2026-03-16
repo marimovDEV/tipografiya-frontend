@@ -74,12 +74,14 @@ export default function ClientsPage() {
     <div className="space-y-6 pb-20">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tight font-outfit">Mijozlar</h1>
-          <p className="text-muted-foreground mt-1 font-medium">Jami: {clients.length} ta hamkor</p>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight font-outfit uppercase italic">Mijozlar</h1>
+          <p className="text-[10px] text-slate-500 mt-1 font-black uppercase tracking-widest pl-1 border-l-2 border-primary ml-1 h-3 flex items-center">
+             &nbsp; Jami: {clients.length} ta hamkor
+          </p>
         </div>
-        <div className="flex gap-2">
-          <Link href="/clients/new">
-            <Button className="font-bold shadow-lg rounded-xl h-11">
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Link href="/clients/new" className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto font-black shadow-lg rounded-xl h-12 bg-primary text-white border-none text-[11px] uppercase tracking-widest px-8">
               <Plus className="h-4 w-4 mr-2" />
               Yangi mijoz
             </Button>
@@ -99,10 +101,10 @@ export default function ClientsPage() {
           />
         </div>
 
-        <div className="flex items-center gap-4 w-full sm:w-auto justify-end">
-          <div className="flex items-center gap-2 bg-card border border-border px-3 py-2 rounded-xl shadow-sm">
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+          <div className="flex items-center gap-3 bg-slate-900/40 border border-slate-800 px-4 py-2.5 rounded-xl shadow-sm">
             <Switch id="debtors-mode" checked={showDebtors} onCheckedChange={setShowDebtors} />
-            <Label htmlFor="debtors-mode" className="cursor-pointer text-xs font-bold text-muted-foreground">Qarzdorlar</Label>
+            <Label htmlFor="debtors-mode" className="cursor-pointer text-[10px] font-black text-slate-500 uppercase tracking-widest">Qarzdorlar</Label>
           </div>
 
           <div className="flex items-center gap-1 bg-muted/20 p-1 rounded-lg border border-border">

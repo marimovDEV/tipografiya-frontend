@@ -138,107 +138,159 @@ export default function OrdersPage() {
 
 
       {/* High Density Table */}
-      <Card className="border border-slate-800 shadow-2xl bg-slate-900/40 rounded-[2.5rem] overflow-hidden">
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader className="bg-slate-800/30">
-                <TableRow className="hover:bg-transparent border-b border-slate-800">
-                  <TableHead className="w-[100px] font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5 pl-8">Buyurtma ID</TableHead>
-                  <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5">Mijoz ma'lumotlari</TableHead>
-                  <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5">Mahsulot turi</TableHead>
-                  <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5 text-right">Miqdor</TableHead>
-                  <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5 text-right">Umumiy Summa</TableHead>
-                  <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5 text-right">Avans</TableHead>
-                  <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5 text-right">Qoldiq</TableHead>
-                  <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5 text-center">To'lov</TableHead>
-                  <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5 text-center">Holat</TableHead>
-                  <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5 text-right pr-8 w-[80px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow className="border-none">
-                    <TableCell colSpan={10} className="text-center py-32 text-slate-500">
-                      <div className="flex flex-col items-center gap-4">
-                        <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">Tizim yuklanmoqda...</span>
-                      </div>
-                    </TableCell>
+      {/* Responsive View - Desktop Table / Mobile Cards */}
+      <div className="hidden md:block">
+        <Card className="border border-slate-800 shadow-2xl bg-slate-900/40 rounded-[2.5rem] overflow-hidden">
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-slate-800/30">
+                  <TableRow className="hover:bg-transparent border-b border-slate-800">
+                    <TableHead className="w-[100px] font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5 pl-8">Buyurtma ID</TableHead>
+                    <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5">Mijoz ma'lumotlari</TableHead>
+                    <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5">Mahsulot turi</TableHead>
+                    <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5 text-right">Miqdor</TableHead>
+                    <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5 text-right">Umumiy Summa</TableHead>
+                    <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5 text-right">Avans</TableHead>
+                    <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5 text-right">Qoldiq</TableHead>
+                    <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5 text-center">To'lov</TableHead>
+                    <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5 text-center">Holat</TableHead>
+                    <TableHead className="font-black text-slate-500 text-[9px] uppercase tracking-[0.2em] py-5 text-right pr-8 w-[80px]"></TableHead>
                   </TableRow>
-                ) : filteredOrders.length === 0 ? (
-                  <TableRow className="border-none">
-                    <TableCell colSpan={10} className="text-center py-32 text-slate-500">
-                      <div className="flex flex-col items-center gap-2">
-                        <p className="font-black text-lg text-slate-400 uppercase tracking-tighter italic">BUYURTMALAR TOPILMADI</p>
-                        <p className="text-[10px] font-black uppercase tracking-widest opacity-50">Qidiruv so'zini tahrirlang yoki filtrni o'zgartiring</p>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredOrders.map((order) => (
-                    <TableRow key={order.id} className="group hover:bg-slate-800/20 transition-all border-b border-slate-800/50 text-xs">
-                      <TableCell className="py-5 font-mono font-black text-xs text-slate-400 pl-8">
-                        #{order.order_number?.split('-').pop()}
-                      </TableCell>
-                      <TableCell className="py-5">
-                        <div className="font-black text-white text-[13px] leading-tight uppercase tracking-tight italic group-hover:text-primary transition-colors">{order.client?.full_name}</div>
-                        {order.client?.company && (
-                          <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest truncate max-w-[150px] mt-1">{order.client.company}</div>
-                        )}
-                      </TableCell>
-                      <TableCell className="py-5">
-                        <div className="font-black text-[11px] text-slate-100 uppercase tracking-tight">{order.box_type || 'Standart'}</div>
-                      </TableCell>
-                      <TableCell className="py-5 text-right font-mono text-[11px] text-slate-400 font-bold">
-                        {order.quantity.toLocaleString()}
-                      </TableCell>
-                      <TableCell className="py-5 text-right font-mono font-black text-sm text-white italic">
-                        {formatCurrency(order.total_price || 0)}
-                      </TableCell>
-                      <TableCell className="py-5 text-right font-mono text-[11px] text-amber-500 font-black">
-                        {order.advance_payment ? formatCurrency(order.advance_payment) : "-"}
-                      </TableCell>
-                      <TableCell className="py-5 text-right font-mono text-[11px] text-slate-500 font-bold">
-                        {formatCurrency(Math.max(0, (order.total_price || 0) - (order.advance_payment || 0)))}
-                      </TableCell>
-                      <TableCell className="py-5 text-center">
-                        <PaymentStatusPill status={order.payment_status || 'unpaid'} />
-                      </TableCell>
-                      <TableCell className="py-5 text-center">
-                        <StatusPill status={order.status} className="shadow-lg shadow-black/20" />
-                      </TableCell>
-                      <TableCell className="py-5 text-right pr-8">
-                        <div className="opacity-0 group-hover:opacity-100 transition-all flex justify-end">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button size="icon" variant="ghost" className="h-8 w-8 rounded-xl hover:bg-slate-800 hover:text-white border border-transparent hover:border-slate-700">
-                                <MoreVertical className="h-4 w-4 text-slate-500" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="rounded-2xl border-slate-800 bg-slate-900 shadow-2xl p-2 min-w-[180px]">
-                              <Link href={`/orders/${order.id}`}>
-                                <DropdownMenuItem className="gap-3 cursor-pointer font-black text-[10px] uppercase tracking-widest py-3 rounded-xl focus:bg-primary/10 focus:text-primary">
-                                  <Eye className="h-4 w-4" /> Ko'rish (Monitoring)
-                                </DropdownMenuItem>
-                              </Link>
-                               <Link href={`/orders/${order.id}/edit`}>
-                                <DropdownMenuItem className="gap-3 cursor-pointer font-black text-[10px] uppercase tracking-widest py-3 rounded-xl focus:bg-indigo-500/10 focus:text-indigo-400">
-                                  <Edit className="h-4 w-4" /> Tahrirlash
-                                </DropdownMenuItem>
-                              </Link>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                </TableHeader>
+                <TableBody>
+                  {loading ? (
+                    <TableRow className="border-none">
+                      <TableCell colSpan={10} className="text-center py-32 text-slate-500">
+                        <div className="flex flex-col items-center gap-4">
+                          <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                          <span className="text-[10px] font-black uppercase tracking-[0.2em]">Tizim yuklanmoqda...</span>
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : filteredOrders.length === 0 ? (
+                    <TableRow className="border-none">
+                      <TableCell colSpan={10} className="text-center py-32 text-slate-500">
+                        <div className="flex flex-col items-center gap-2">
+                          <p className="font-black text-lg text-slate-400 uppercase tracking-tighter italic">BUYURTMALAR TOPILMADI</p>
+                          <p className="text-[10px] font-black uppercase tracking-widest opacity-50">Qidiruv so'zini tahrirlang yoki filtrni o'zgartiring</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredOrders.map((order) => (
+                      <TableRow key={order.id} className="group hover:bg-slate-800/20 transition-all border-b border-slate-800/50 text-xs text-white">
+                        <TableCell className="py-5 font-mono font-black text-xs text-slate-400 pl-8">
+                          #{order.order_number?.split('-').pop()}
+                        </TableCell>
+                        <TableCell className="py-5">
+                          <div className="font-black text-white text-[13px] leading-tight uppercase tracking-tight italic group-hover:text-primary transition-colors">{order.client?.full_name}</div>
+                          {order.client?.company && (
+                            <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest truncate max-w-[150px] mt-1">{order.client.company}</div>
+                          )}
+                        </TableCell>
+                        <TableCell className="py-5">
+                          <div className="font-black text-[11px] text-slate-100 uppercase tracking-tight">{order.box_type || 'Standart'}</div>
+                        </TableCell>
+                        <TableCell className="py-5 text-right font-mono text-[11px] text-slate-400 font-bold">
+                          {order.quantity.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="py-5 text-right font-mono font-black text-sm text-white italic">
+                          {formatCurrency(order.total_price || 0)}
+                        </TableCell>
+                        <TableCell className="py-5 text-right font-mono text-[11px] text-amber-500 font-black">
+                          {order.advance_payment ? formatCurrency(order.advance_payment) : "-"}
+                        </TableCell>
+                        <TableCell className="py-5 text-right font-mono text-[11px] text-slate-500 font-bold">
+                          {formatCurrency(Math.max(0, (order.total_price || 0) - (order.advance_payment || 0)))}
+                        </TableCell>
+                        <TableCell className="py-5 text-center">
+                          <PaymentStatusPill status={order.payment_status || 'unpaid'} />
+                        </TableCell>
+                        <TableCell className="py-5 text-center">
+                          <StatusPill status={order.status} className="shadow-lg shadow-black/20" />
+                        </TableCell>
+                        <TableCell className="py-5 text-right pr-8">
+                          <div className="opacity-0 group-hover:opacity-100 transition-all flex justify-end">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-xl hover:bg-slate-800 hover:text-white border border-transparent hover:border-slate-700">
+                                  <MoreVertical className="h-4 w-4 text-slate-500" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="rounded-2xl border-slate-800 bg-slate-900 shadow-2xl p-2 min-w-[180px]">
+                                <Link href={`/orders/${order.id}`}>
+                                  <DropdownMenuItem className="gap-3 cursor-pointer font-black text-[10px] uppercase tracking-widest py-3 rounded-xl focus:bg-primary/10 focus:text-primary">
+                                    <Eye className="h-4 w-4" /> Ko'rish (Monitoring)
+                                  </DropdownMenuItem>
+                                </Link>
+                                 <Link href={`/orders/${order.id}/edit`}>
+                                  <DropdownMenuItem className="gap-3 cursor-pointer font-black text-[10px] uppercase tracking-widest py-3 rounded-xl focus:bg-indigo-500/10 focus:text-indigo-400">
+                                    <Edit className="h-4 w-4" /> Tahrirlash
+                                  </DropdownMenuItem>
+                                </Link>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-4">
+        {loading ? (
+          <div className="text-center py-20 text-slate-500">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Yuklanmoqda...</span>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        ) : filteredOrders.length === 0 ? (
+          <div className="text-center py-20 text-slate-500">
+            <p className="font-black text-lg text-slate-400 uppercase tracking-tighter italic">BUYURTMALAR TOPILMADI</p>
+          </div>
+        ) : (
+          filteredOrders.map((order) => (
+            <Card key={order.id} className="bg-slate-900/40 border-slate-800 rounded-2xl overflow-hidden p-6 space-y-4">
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <div className="text-[10px] font-black text-slate-500">#{order.order_number?.split('-').pop()}</div>
+                  <div className="font-black text-white text-lg uppercase italic">{order.client?.full_name}</div>
+                  <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{order.box_type || 'Standart'}</div>
+                </div>
+                <StatusPill status={order.status} className="text-[8px] h-5" />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 py-4 border-y border-slate-800">
+                <div>
+                   <p className="text-[8px] font-black text-slate-500 uppercase mb-1">MIQDOR</p>
+                   <p className="text-sm font-black text-white italic">{order.quantity.toLocaleString()}</p>
+                </div>
+                <div className="text-right">
+                   <p className="text-[8px] font-black text-slate-500 uppercase mb-1">SUMMA</p>
+                   <p className="text-sm font-black text-primary italic">{formatCurrency(order.total_price || 0)}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <PaymentStatusPill status={order.payment_status || 'unpaid'} />
+                <Link href={`/orders/${order.id}`} className="flex-1 ml-4">
+                  <Button className="w-full bg-slate-800 hover:bg-slate-700 text-white rounded-xl h-10 font-black text-[9px] uppercase tracking-widest">
+                    Batafsil
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+          ))
+        )}
+      </div>
 
       {/* Pagination Placeholder (if needed in future) */}
       <div className="flex justify-center pt-4">
