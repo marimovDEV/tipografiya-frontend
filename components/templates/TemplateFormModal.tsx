@@ -4,14 +4,7 @@ import { useState } from "react"
 import { updateProductTemplate, createProductTemplate } from "@/lib/api/printery"
 import type { ProductTemplate, ProductCategory } from "@/lib/types"
 
-export const CATEGORY_LABELS: Record<ProductCategory, string> = {
-    medicine_box_1layer: "Dori qutilari (1 qatlam)",
-    pizza_box: "Pizza qutilari",
-    box_2layer: "2 qatlamli karobka",
-    box_3layer: "3 qatlamli karobka",
-    cookie_box: "Pecheniye karobkalari",
-    gift_bag: "Sovg'a sumkalari",
-    food_box: "Oziqa karobkalari",
+export const CATEGORY_LABELS: Partial<Record<ProductCategory, string>> = {
     book: "Kitob",
     magazine: "Jurnal",
     brochure: "Broshyura",
@@ -35,7 +28,7 @@ export function TemplateFormModal({
 }: TemplateFormModalProps) {
     const [formData, setFormData] = useState({
         name: template?.name || "",
-        category: template?.category || "custom",
+        category: template?.category || "book",
         layer_count: template?.layer_count || 1,
         default_waste_percent: template?.default_waste_percent || 5,
         description: template?.description || "",
