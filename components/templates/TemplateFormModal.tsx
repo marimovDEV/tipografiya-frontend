@@ -46,6 +46,13 @@ export function TemplateFormModal({
         cover_weight: template?.cover_weight || 0,
         print_type: template?.print_type || "",
         lamination: template?.lamination || "",
+        bleed_mm: template?.bleed_mm || 3.0,
+        margin_top_mm: template?.margin_top_mm || 15.0,
+        margin_bottom_mm: template?.margin_bottom_mm || 15.0,
+        margin_inner_mm: template?.margin_inner_mm || 20.0,
+        margin_outer_mm: template?.margin_outer_mm || 15.0,
+        column_count: template?.column_count || 1,
+        safe_area_padding_mm: template?.safe_area_padding_mm || 5.0,
     })
     const [saving, setSaving] = useState(false)
 
@@ -126,97 +133,178 @@ export function TemplateFormModal({
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div>                    {/* Book Specific Fields - Only for Book categories */}
+                    {isBook && (
+                        <>
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+                                    <div className="w-2 h-6 bg-emerald-500 rounded-full" />
+                                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Kitob va Jurnal Parametrlari</h3>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                    <div className="space-y-1.5 flex flex-col">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Format (A4/A5)</label>
+                                        <input
+                                            type="text"
+                                            value={formData.format}
+                                            onChange={(e) => setFormData({ ...formData, format: e.target.value })}
+                                            className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
+                                            placeholder="Format"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 flex flex-col">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Sahifalar</label>
+                                        <input
+                                            type="number"
+                                            value={formData.page_count}
+                                            onChange={(e) => setFormData({ ...formData, page_count: parseInt(e.target.value) || 0 })}
+                                            className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 flex flex-col">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Bog&apos;lash</label>
+                                        <input
+                                            type="text"
+                                            value={formData.binding_type}
+                                            onChange={(e) => setFormData({ ...formData, binding_type: e.target.value })}
+                                            className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
+                                            placeholder="Yelim/Skoba"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 flex flex-col">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Qog&apos;oz turi</label>
+                                        <input
+                                            type="text"
+                                            value={formData.paper_type}
+                                            onChange={(e) => setFormData({ ...formData, paper_type: e.target.value })}
+                                            className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
+                                            placeholder="Ofset..."
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 flex flex-col">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Qog&apos;oz gsm</label>
+                                        <input
+                                            type="number"
+                                            value={formData.paper_weight}
+                                            onChange={(e) => setFormData({ ...formData, paper_weight: parseInt(e.target.value) || 0 })}
+                                            className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 flex flex-col">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Muqova gsm</label>
+                                        <input
+                                            type="number"
+                                            value={formData.cover_weight}
+                                            onChange={(e) => setFormData({ ...formData, cover_weight: parseInt(e.target.value) || 0 })}
+                                            className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 flex flex-col">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Chop turi</label>
+                                        <input
+                                            type="text"
+                                            value={formData.print_type}
+                                            onChange={(e) => setFormData({ ...formData, print_type: e.target.value })}
+                                            className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
+                                            placeholder="4+4"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 flex flex-col">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Laminatsiya</label>
+                                        <input
+                                            type="text"
+                                            value={formData.lamination}
+                                            onChange={(e) => setFormData({ ...formData, lamination: e.target.value })}
+                                            className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
+                                            placeholder="Mat..."
+                                        />
+                                    </div>
+                                </div>
+                            </div>
 
-                    {/* Book Specific Fields - Only for Book categories */}
-                    {isBook ? (
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
-                                <div className="w-2 h-6 bg-emerald-500 rounded-full" />
-                                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Kitob va Jurnal Parametrlari</h3>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                                <div className="space-y-1.5 flex flex-col">
-                                    <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Format (A4/A5)</label>
-                                    <input
-                                        type="text"
-                                        value={formData.format}
-                                        onChange={(e) => setFormData({ ...formData, format: e.target.value })}
-                                        className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
-                                        placeholder="Format"
-                                    />
+                            {/* Technical Layout Specs */}
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+                                    <div className="w-2 h-6 bg-purple-500 rounded-full" />
+                                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Texnik Loyiha (Layout)</h3>
                                 </div>
-                                <div className="space-y-1.5 flex flex-col">
-                                    <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Sahifalar</label>
-                                    <input
-                                        type="number"
-                                        value={formData.page_count}
-                                        onChange={(e) => setFormData({ ...formData, page_count: parseInt(e.target.value) || 0 })}
-                                        className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
-                                    />
-                                </div>
-                                <div className="space-y-1.5 flex flex-col">
-                                    <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Bog&apos;lash</label>
-                                    <input
-                                        type="text"
-                                        value={formData.binding_type}
-                                        onChange={(e) => setFormData({ ...formData, binding_type: e.target.value })}
-                                        className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
-                                        placeholder="Yelim/Skoba"
-                                    />
-                                </div>
-                                <div className="space-y-1.5 flex flex-col">
-                                    <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Qog&apos;oz turi</label>
-                                    <input
-                                        type="text"
-                                        value={formData.paper_type}
-                                        onChange={(e) => setFormData({ ...formData, paper_type: e.target.value })}
-                                        className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
-                                        placeholder="Ofset..."
-                                    />
-                                </div>
-                                <div className="space-y-1.5 flex flex-col">
-                                    <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Qog&apos;oz gsm</label>
-                                    <input
-                                        type="number"
-                                        value={formData.paper_weight}
-                                        onChange={(e) => setFormData({ ...formData, paper_weight: parseInt(e.target.value) || 0 })}
-                                        className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
-                                    />
-                                </div>
-                                <div className="space-y-1.5 flex flex-col">
-                                    <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Muqova gsm</label>
-                                    <input
-                                        type="number"
-                                        value={formData.cover_weight}
-                                        onChange={(e) => setFormData({ ...formData, cover_weight: parseInt(e.target.value) || 0 })}
-                                        className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
-                                    />
-                                </div>
-                                <div className="space-y-1.5 flex flex-col">
-                                    <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Chop turi</label>
-                                    <input
-                                        type="text"
-                                        value={formData.print_type}
-                                        onChange={(e) => setFormData({ ...formData, print_type: e.target.value })}
-                                        className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
-                                        placeholder="4+4"
-                                    />
-                                </div>
-                                <div className="space-y-1.5 flex flex-col">
-                                    <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Laminatsiya</label>
-                                    <input
-                                        type="text"
-                                        value={formData.lamination}
-                                        onChange={(e) => setFormData({ ...formData, lamination: e.target.value })}
-                                        className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
-                                        placeholder="Mat..."
-                                    />
+                                
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                    <div className="space-y-1.5 flex flex-col">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Bleed (mm)</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={formData.bleed_mm}
+                                            onChange={(e) => setFormData({ ...formData, bleed_mm: parseFloat(e.target.value) || 0 })}
+                                            className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-purple-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 flex flex-col">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Safe Area (mm)</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={formData.safe_area_padding_mm}
+                                            onChange={(e) => setFormData({ ...formData, safe_area_padding_mm: parseFloat(e.target.value) || 0 })}
+                                            className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-purple-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 flex flex-col">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Ustunlar (Grid)</label>
+                                        <input
+                                            type="number"
+                                            value={formData.column_count}
+                                            onChange={(e) => setFormData({ ...formData, column_count: parseInt(e.target.value) || 1 })}
+                                            className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-purple-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 flex flex-col">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Gutter / Inner (mm)</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={formData.margin_inner_mm}
+                                            onChange={(e) => setFormData({ ...formData, margin_inner_mm: parseFloat(e.target.value) || 0 })}
+                                            className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-purple-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 flex flex-col">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Margin Top (mm)</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={formData.margin_top_mm}
+                                            onChange={(e) => setFormData({ ...formData, margin_top_mm: parseFloat(e.target.value) || 0 })}
+                                            className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-purple-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 flex flex-col">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Margin Bottom (mm)</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={formData.margin_bottom_mm}
+                                            onChange={(e) => setFormData({ ...formData, margin_bottom_mm: parseFloat(e.target.value) || 0 })}
+                                            className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-purple-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 flex flex-col">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Margin Outer (mm)</label>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={formData.margin_outer_mm}
+                                            onChange={(e) => setFormData({ ...formData, margin_outer_mm: parseFloat(e.target.value) || 0 })}
+                                            className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-purple-500 outline-none transition-all"
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ) : (
+                        </>
+                    )}
+ ) : (
                         /* Box Specific Dimensions - Only for NON-Book categories */
                         <div className="space-y-6">
                             <div className="flex items-center gap-3 border-b border-slate-800 pb-3">

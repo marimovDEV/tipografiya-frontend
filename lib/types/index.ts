@@ -307,6 +307,15 @@ export interface ProductTemplate {
   print_type?: string
   lamination?: string
   
+  // Professional Layout Specs
+  bleed_mm?: number
+  margin_top_mm?: number
+  margin_bottom_mm?: number
+  margin_inner_mm?: number
+  margin_outer_mm?: number
+  column_count?: number
+  safe_area_padding_mm?: number
+  
   is_active: boolean
   created_at: string
   updated_at: string
