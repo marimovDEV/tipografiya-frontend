@@ -206,25 +206,25 @@ export default function ProfilePage() {
                     <div className="space-y-2">
                         <div className="flex justify-between text-[10px] font-black text-slate-500 tracking-widest">
                             <span>REJA (Today)</span>
-                            <span className="text-primary">{tasksToday.length > 0 ? Math.round((completedToday / tasksToday.length) * 100) : 0}%</span>
+                            <span className="text-primary">{stats?.plan_progress || 0}%</span>
                         </div>
                         <div className="h-1.5 bg-slate-800/50 rounded-full overflow-hidden border border-slate-800">
                             <div 
                                 className="h-full bg-primary shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all duration-700" 
-                                style={{ width: `${tasksToday.length > 0 ? (completedToday / tasksToday.length) * 100 : 0}%` }}
+                                style={{ width: `${stats?.plan_progress || 0}%` }}
                             />
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2 pt-2">
                         <div className="p-3 bg-slate-800/20 rounded-xl border border-slate-800/50 text-center">
-                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">OAV</p>
-                            <p className="text-lg font-black text-emerald-400">22 <span className="text-[10px] text-slate-600 uppercase">daq</span></p>
+                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">OAV (S)</p>
+                            <p className="text-lg font-black text-emerald-400">{stats?.avg_speed || 0} <span className="text-[10px] text-slate-600 uppercase">d/s</span></p>
                         </div>
                         <div className="p-3 bg-slate-800/20 rounded-xl border border-slate-800/50 text-center">
                             <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Star</p>
                             <div className="flex items-center justify-center gap-1.5">
                                 <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-                                <p className="text-lg font-black text-white italic">4.9</p>
+                                <p className="text-lg font-black text-white italic">{stats?.rating || "5.0"}</p>
                             </div>
                         </div>
                     </div>

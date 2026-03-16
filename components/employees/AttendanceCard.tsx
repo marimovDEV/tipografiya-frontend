@@ -16,6 +16,34 @@ interface AttendanceCardProps {
 export function AttendanceCard({ onStatusChange }: AttendanceCardProps) {
   const [attendance, setAttendance] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [liveStats, setLiveStats] = useState({ workHours: 0, breakMinutes: 0 })
+
+  // Live timer effect
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!attendance) return
+
+      const now = new Date()
+      const clockIn = new Date(attendance.clock_in)
+      
+      // Calculate work hours
+      let hours = (now.getTime() - clockIn.getTime()) / (1000 * 60 * 60)
+      
+      // Calculate active break minutes
+      let currentBreakMins = 0
+      if (attendance.status === 'on_break' && attendance.break_start) {
+        const breakStart = new Date(attendance.break_start)
+        currentBreakMins = Math.floor((now.getTime() - breakStart.getTime()) / (1000 * 60))
+      }
+      
+      setLiveStats({
+        workHours: parseFloat(hours.toFixed(2)),
+        breakMinutes: (attendance.total_break_minutes || 0) + currentBreakMins
+      })
+    }, 10000) // Update every 10 seconds for smoothness
+
+    return () => clearInterval(timer)
+  }, [attendance])
 
   const fetchTodayAttendance = async () => {
     try {
@@ -172,7 +200,10 @@ export function AttendanceCard({ onStatusChange }: AttendanceCardProps) {
                                  {isWorking ? "Ish davomiyligi" : "Tanaffus ketti"}
                              </p>
                              <p className={`text-sm font-black ${isWorking ? "text-emerald-500" : "text-amber-500"}`}>
-                                 {isWorking ? `${attendance.total_hours || "0.0"} soat` : `${attendance.total_break_minutes || 0} daqiqa`}
+                                 {isWorking 
+                                    ? `${liveStats.workHours > 0 ? liveStats.workHours : (attendance.total_hours || "0.0")} soat` 
+                                    : `${liveStats.breakMinutes > 0 ? liveStats.breakMinutes : (attendance.total_break_minutes || 0)} daqiqa`
+                                 }
                              </p>
                         </div>
                     </div>
