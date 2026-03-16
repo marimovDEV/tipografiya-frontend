@@ -8,6 +8,7 @@ import { Clock, Fingerprint, LogOut, ShieldCheck, Timer } from "lucide-react"
 import { fetchWithAuth } from "@/lib/api-client"
 import { toast } from "sonner"
 import { format } from "date-fns"
+import { useRouter } from "next/navigation"
 
 interface AttendanceCardProps {
   onStatusChange?: () => void
@@ -17,6 +18,7 @@ export function AttendanceCard({ onStatusChange }: AttendanceCardProps) {
   const [attendance, setAttendance] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [liveStats, setLiveStats] = useState({ workHours: 0, breakMinutes: 0 })
+  const router = useRouter()
 
   // Live timer effect
   useEffect(() => {
@@ -91,6 +93,7 @@ export function AttendanceCard({ onStatusChange }: AttendanceCardProps) {
         toast.success("Ish kuni yakunlandi. Charchamang!")
         fetchTodayAttendance()
         onStatusChange?.()
+        router.push('/production')
       } else {
         const data = await res.json()
         toast.error(data.error || "Xatolik yuz berdi")

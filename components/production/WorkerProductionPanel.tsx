@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -47,6 +48,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
   const [loading, setLoading] = useState(true)
   const [materials, setMaterials] = useState<any[]>([])
   const [stepStats, setStepStats] = useState<Record<string, { display: string, count: number, total_available: number }>>({})
+  const router = useRouter()
   
   // Reporting state
   const [produced, setProduced] = useState("")
@@ -109,6 +111,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
         setActiveStep(null)
         toast.info("Ishyakunlandi. Yaxshi dam oling!")
         fetchWorkerData()
+        router.push('/tasks')
       }
     } catch (e) {
       toast.error("Xatolik: Smenani yakunlab bo'lmadi")
