@@ -54,7 +54,7 @@ export const MODE_CONFIGS: Record<UserMode, ModeConfig> = {
     },
 
     manager: {
-        theme: 'light',
+        theme: 'dark',
         features: [
             'orders',
             'production',
@@ -68,7 +68,7 @@ export const MODE_CONFIGS: Record<UserMode, ModeConfig> = {
     },
 
     worker: {
-        theme: 'high-contrast',
+        theme: 'dark',
         features: [
             'my-tasks',
             'simple-status-update',
@@ -80,7 +80,7 @@ export const MODE_CONFIGS: Record<UserMode, ModeConfig> = {
     },
 
     client: {
-        theme: 'minimal',
+        theme: 'dark',
         features: [
             'my-orders',
             'order-tracking',
@@ -141,10 +141,10 @@ export function hasFeatureAccess(mode: UserMode, feature: string): boolean {
 export function getThemeClass(mode: UserMode): string {
     const config = getModeConfig(mode)
     const themeClasses = {
-        'dark': 'theme-dark',
+        'dark': 'dark',
         'light': 'theme-light',
         'high-contrast': 'theme-high-contrast',
         'minimal': 'theme-minimal'
     }
-    return themeClasses[config.theme]
+    return themeClasses[config.theme] || 'dark'
 }
