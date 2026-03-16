@@ -87,217 +87,212 @@ export function TemplateFormModal({
                     <button onClick={onClose} className="text-slate-400 hover:text-white">✕</button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                    {/* Basic Info */}
+                <form onSubmit={handleSubmit} className="p-6 space-y-8">
+                    {/* Basic Info - Industrial Style */}
                     <div className="space-y-4">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-primary border-b border-slate-800 pb-2">Asosiy ma&apos;lumotlar</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-[10px] font-black uppercase mb-1 text-slate-400 tracking-widest">
-                                    Shablon nomi *
+                        <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+                            <div className="w-2 h-6 bg-primary rounded-full" />
+                            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Asosiy ma&apos;lumotlar</h3>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-1.5">
+                                <label className="block text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">
+                                    Shablon nomi <span className="text-primary">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     required
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full px-3 py-2 bg-slate-800 border border-slate-600 text-slate-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                                    placeholder="Masalan: Standart Kitob A5"
+                                    className="w-full h-12 px-4 bg-slate-950 border border-slate-800 text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-medium text-sm"
+                                    placeholder="Standart Kitob A5..."
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-[10px] font-black uppercase mb-1 text-slate-400 tracking-widest">
-                                    Kategoriya *
+                            <div className="space-y-1.5">
+                                <label className="block text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">
+                                    Kategoriya <span className="text-primary">*</span>
                                 </label>
-                                <select
-                                    required
-                                    value={formData.category}
-                                    onChange={(e) => setFormData({ ...formData, category: e.target.value as ProductCategory })}
-                                    className="w-full px-3 py-2 bg-slate-800 border border-slate-600 text-slate-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                                >
-                                    {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-                                        <option key={value} value={value} className="bg-slate-800">
-                                            {label}
-                                        </option>
-                                    ))}
-                                </select>
+                                <div className="relative group">
+                                    <select
+                                        required
+                                        value={formData.category}
+                                        onChange={(e) => setFormData({ ...formData, category: e.target.value as ProductCategory })}
+                                        className="w-full h-12 px-4 bg-slate-950 border border-slate-800 text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-medium text-sm appearance-none"
+                                    >
+                                        {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
+                                            <option key={value} value={value} className="bg-slate-900 py-2">
+                                                {label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-600 transition-colors group-hover:text-primary">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" /></svg>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Book Specific Fields */}
-                    {isBook && (
-                        <div className="space-y-4 bg-primary/5 p-4 rounded-xl border border-primary/20">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-primary border-b border-primary/20 pb-2">Kitob/Jurnal parametrlari</h3>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase mb-1 text-slate-400 tracking-widest">
-                                        Format
-                                    </label>
+                    {/* Book Specific Fields - Only for Book categories */}
+                    {isBook ? (
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+                                <div className="w-2 h-6 bg-emerald-500 rounded-full" />
+                                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Kitob va Jurnal Parametrlari</h3>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                <div className="space-y-1.5 flex flex-col">
+                                    <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Format (A4/A5)</label>
                                     <input
                                         type="text"
                                         value={formData.format}
                                         onChange={(e) => setFormData({ ...formData, format: e.target.value })}
-                                        className="w-full px-3 py-2 bg-slate-800 border border-slate-600 text-slate-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                                        placeholder="A5 / A4"
+                                        className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
+                                        placeholder="Format"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase mb-1 text-slate-400 tracking-widest">
-                                        Sahifalar soni
-                                    </label>
+                                <div className="space-y-1.5 flex flex-col">
+                                    <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Sahifalar</label>
                                     <input
                                         type="number"
                                         value={formData.page_count}
                                         onChange={(e) => setFormData({ ...formData, page_count: parseInt(e.target.value) || 0 })}
-                                        className="w-full px-3 py-2 bg-slate-800 border border-slate-600 text-slate-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase mb-1 text-slate-400 tracking-widest">
-                                        Bog&apos;lash turi
-                                    </label>
+                                <div className="space-y-1.5 flex flex-col">
+                                    <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Bog&apos;lash</label>
                                     <input
                                         type="text"
                                         value={formData.binding_type}
                                         onChange={(e) => setFormData({ ...formData, binding_type: e.target.value })}
-                                        className="w-full px-3 py-2 bg-slate-800 border border-slate-600 text-slate-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                                        placeholder="Yelim / Skoba"
+                                        className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
+                                        placeholder="Yelim/Skoba"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase mb-1 text-slate-400 tracking-widest">
-                                        Qog&apos;oz turi
-                                    </label>
+                                <div className="space-y-1.5 flex flex-col">
+                                    <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Qog&apos;oz turi</label>
                                     <input
                                         type="text"
                                         value={formData.paper_type}
                                         onChange={(e) => setFormData({ ...formData, paper_type: e.target.value })}
-                                        className="w-full px-3 py-2 bg-slate-800 border border-slate-600 text-slate-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                                        placeholder="Ofset / Melovka"
+                                        className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
+                                        placeholder="Ofset..."
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase mb-1 text-slate-400 tracking-widest">
-                                        Qog&apos;oz (gsm)
-                                    </label>
+                                <div className="space-y-1.5 flex flex-col">
+                                    <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Qog&apos;oz gsm</label>
                                     <input
                                         type="number"
                                         value={formData.paper_weight}
                                         onChange={(e) => setFormData({ ...formData, paper_weight: parseInt(e.target.value) || 0 })}
-                                        className="w-full px-3 py-2 bg-slate-800 border border-slate-600 text-slate-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase mb-1 text-slate-400 tracking-widest">
-                                        Muqova (gsm)
-                                    </label>
+                                <div className="space-y-1.5 flex flex-col">
+                                    <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Muqova gsm</label>
                                     <input
                                         type="number"
                                         value={formData.cover_weight}
                                         onChange={(e) => setFormData({ ...formData, cover_weight: parseInt(e.target.value) || 0 })}
-                                        className="w-full px-3 py-2 bg-slate-800 border border-slate-600 text-slate-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase mb-1 text-slate-400 tracking-widest">
-                                        Bosma turi
-                                    </label>
+                                <div className="space-y-1.5 flex flex-col">
+                                    <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Chop turi</label>
                                     <input
                                         type="text"
                                         value={formData.print_type}
                                         onChange={(e) => setFormData({ ...formData, print_type: e.target.value })}
-                                        className="w-full px-3 py-2 bg-slate-800 border border-slate-600 text-slate-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                                        placeholder="1+1 / 4+4"
+                                        className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
+                                        placeholder="4+4"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase mb-1 text-slate-400 tracking-widest">
-                                        Laminatsiya
-                                    </label>
+                                <div className="space-y-1.5 flex flex-col">
+                                    <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Laminatsiya</label>
                                     <input
                                         type="text"
                                         value={formData.lamination}
                                         onChange={(e) => setFormData({ ...formData, lamination: e.target.value })}
-                                        className="w-full px-3 py-2 bg-slate-800 border border-slate-600 text-slate-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                                        placeholder="Mat / Gloss"
+                                        className="h-10 px-3 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-all"
+                                        placeholder="Mat..."
                                     />
                                 </div>
                             </div>
                         </div>
-                    )}
-
-                    {/* Box Specific Dimensions */}
-                    {!isBook && (
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-slate-400 border-b border-slate-800 pb-2">Quti o&apos;lchamlari</h3>
-                            <div className="grid grid-cols-3 gap-4">
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase mb-1 text-slate-400 tracking-widest">
-                                        Kenglik (cm)
-                                    </label>
+                    ) : (
+                        /* Box Specific Dimensions - Only for NON-Book categories */
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+                                <div className="w-2 h-6 bg-amber-500 rounded-full" />
+                                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Quti o&apos;lchamlari</h3>
+                            </div>
+                            
+                            <div className="grid grid-cols-3 gap-6">
+                                <div className="space-y-1.5">
+                                    <label className="block text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Kenglik (cm)</label>
                                     <input
                                         type="number"
                                         min="0"
                                         step="0.1"
                                         value={formData.default_width}
                                         onChange={(e) => setFormData({ ...formData, default_width: parseFloat(e.target.value) || 0 })}
-                                        className="w-full px-3 py-2 bg-slate-800 border border-slate-600 text-slate-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="w-full h-11 px-4 bg-slate-950/50 border border-slate-800 text-slate-100 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-all font-mono"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase mb-1 text-slate-400 tracking-widest">
-                                        Balandlik (cm)
-                                    </label>
+                                <div className="space-y-1.5">
+                                    <label className="block text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Balandlik (cm)</label>
                                     <input
                                         type="number"
                                         min="0"
                                         step="0.1"
                                         value={formData.default_height}
                                         onChange={(e) => setFormData({ ...formData, default_height: parseFloat(e.target.value) || 0 })}
-                                        className="w-full px-3 py-2 bg-slate-800 border border-slate-600 text-slate-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="w-full h-11 px-4 bg-slate-950/50 border border-slate-800 text-slate-100 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-all font-mono"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase mb-1 text-slate-400 tracking-widest">
-                                        Chuqurlik (cm)
-                                    </label>
+                                <div className="space-y-1.5">
+                                    <label className="block text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Chuqurlik (cm)</label>
                                     <input
                                         type="number"
                                         min="0"
                                         step="0.1"
                                         value={formData.default_depth}
                                         onChange={(e) => setFormData({ ...formData, default_depth: parseFloat(e.target.value) || 0 })}
-                                        className="w-full px-3 py-2 bg-slate-800 border border-slate-600 text-slate-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                        className="w-full h-11 px-4 bg-slate-950/50 border border-slate-800 text-slate-100 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-all font-mono"
                                     />
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {/* Production Setup */}
-                    <div className="space-y-4">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-slate-400 border-b border-slate-800 pb-2">Ishlab chiqarish sozlamalari</h3>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-[10px] font-black uppercase mb-1 text-slate-400 tracking-widest">
-                                    Qatlamlar soni *
-                                </label>
-                                <input
-                                    type="number"
-                                    required
-                                    min="1"
-                                    max="5"
-                                    value={formData.layer_count}
-                                    onChange={(e) => setFormData({ ...formData, layer_count: parseInt(e.target.value) || 1 })}
-                                    className="w-full px-3 py-2 bg-slate-800 border border-slate-600 text-slate-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-[10px] font-black uppercase mb-1 text-slate-400 tracking-widest">
-                                    Chiqindi % *
-                                </label>
+                    {/* Production Setup - Conditional display of layer count */}
+                    <div className="space-y-6">
+                        <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+                            <div className="w-2 h-6 bg-blue-500 rounded-full" />
+                            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Ishlab chiqarish sozlamalari</h3>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-6">
+                            {!isBook && (
+                                <div className="space-y-1.5">
+                                    <label className="block text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Qatlamlar soni</label>
+                                    <input
+                                        type="number"
+                                        required
+                                        min="1"
+                                        max="5"
+                                        value={formData.layer_count}
+                                        onChange={(e) => setFormData({ ...formData, layer_count: parseInt(e.target.value) || 1 })}
+                                        className="w-full h-11 px-4 bg-slate-950/50 border border-slate-800 text-slate-100 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                    />
+                                </div>
+                            )}
+                            <div className="space-y-1.5">
+                                <label className="block text-[9px] font-black uppercase text-slate-500 tracking-widest ml-1">Chiqindi %</label>
                                 <input
                                     type="number"
                                     required
@@ -306,56 +301,60 @@ export function TemplateFormModal({
                                     step="0.1"
                                     value={formData.default_waste_percent}
                                     onChange={(e) => setFormData({ ...formData, default_waste_percent: parseFloat(e.target.value) || 0 })}
-                                    className="w-full px-3 py-2 bg-slate-800 border border-slate-600 text-slate-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                    className="w-full h-11 px-4 bg-slate-950/50 border border-slate-800 text-slate-100 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
                                 />
                             </div>
                         </div>
                     </div>
 
                     {/* Description & Status */}
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-[10px] font-black uppercase mb-1 text-slate-400 tracking-widest">
-                                Tavsif
-                            </label>
+                    <div className="space-y-6">
+                        <div className="space-y-1.5">
+                            <label className="block text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">Tavsif</label>
                             <textarea
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                rows={2}
-                                className="w-full px-3 py-2 bg-slate-800 border border-slate-600 text-slate-50 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                                placeholder="Qo'shimcha ma'lumot..."
+                                rows={3}
+                                className="w-full p-4 bg-slate-950/50 border border-slate-800 text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm resize-none"
+                                placeholder="Shablon haqida qo'shimcha ma'lumotlar..."
                             />
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="is_active"
-                                checked={formData.is_active}
-                                onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                                className="w-4 h-4 bg-slate-800 border-slate-600 rounded text-primary focus:ring-primary"
-                            />
-                            <label htmlFor="is_active" className="text-[10px] font-black uppercase text-slate-300 tracking-widest">
+                        <div className="flex items-center gap-3 p-4 bg-slate-950/30 rounded-xl border border-slate-800/50 w-fit">
+                            <div className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    id="is_active"
+                                    checked={formData.is_active}
+                                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                                    className="sr-only peer"
+                                />
+                                <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </div>
+                            <label htmlFor="is_active" className="text-[10px] font-black uppercase text-slate-400 tracking-widest cursor-pointer select-none">
                                 Aktiv holatda
                             </label>
                         </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-3 pt-6 border-t border-slate-800">
+                    {/* Actions - Industrial Buttons */}
+                    <div className="flex gap-4 pt-8 border-t border-slate-800">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 px-4 py-3 border border-slate-700 bg-slate-800 text-slate-300 font-black uppercase text-[10px] tracking-widest rounded-xl hover:bg-slate-700 transition-colors"
+                            className="flex-1 h-12 border border-slate-800 bg-slate-950 text-slate-400 font-black uppercase text-[10px] tracking-[0.3em] rounded-xl hover:bg-slate-800 hover:text-slate-200 transition-all"
                         >
                             Bekor qilish
                         </button>
                         <button
                             type="submit"
                             disabled={saving}
-                            className="flex-1 px-4 py-3 bg-primary text-white font-black uppercase text-[10px] tracking-widest rounded-xl hover:opacity-90 disabled:opacity-50 shadow-lg shadow-primary/20 transition-all"
+                            className="flex-1 h-12 bg-primary text-white font-black uppercase text-[10px] tracking-[0.3em] rounded-xl hover:opacity-90 disabled:opacity-50 shadow-xl shadow-primary/20 transition-all flex items-center justify-center gap-2"
                         >
-                            {saving ? "Saqlanmoqda..." : "Shablonni Saqlash"}
+                            {saving ? (
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            ) : null}
+                            {saving ? "Saqlanmoqda..." : "Saqlash"}
                         </button>
                     </div>
                 </form>

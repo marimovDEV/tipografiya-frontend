@@ -129,7 +129,6 @@ export default function ProductTemplatesPage() {
                                     }
                                 }
                             }}
-                            onRefresh={loadTemplates}
                         />
                     ))}
                 </div>
@@ -158,84 +157,101 @@ function TemplateCard({
     template,
     onEdit,
     onDelete,
-    onRefresh,
 }: {
     template: ProductTemplate
     onEdit: () => void
     onDelete: () => void
-    onRefresh: () => void
 }) {
+    const isBook = ["book", "magazine", "brochure", "catalog", "booklet"].includes(template.category)
+
     return (
-        <div className="border rounded-lg p-6 hover:shadow-lg transition-shadow bg-card relative group">
-            <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                    <h3 className="font-semibold text-lg text-card-foreground">{template.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                        {CATEGORY_LABELS[template.category] || template.category}
-                    </p>
+        <div className="group bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-primary/50 transition-all hover:shadow-2xl hover:shadow-primary/5 relative overflow-hidden">
+            {/* Decoration */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-primary/10 transition-colors" />
+
+            <div className="flex items-start justify-between mb-6 relative z-10">
+                <div className="space-y-1">
+                    <h3 className="font-bold text-lg text-slate-100 group-hover:text-primary transition-colors line-clamp-1">{template.name}</h3>
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                            {CATEGORY_LABELS[template.category] || template.category}
+                        </span>
+                    </div>
                 </div>
-                <span
-                    className={`px-2 py-1 text-xs rounded-full ${template.is_active
-                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                        : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
-                        }`}
-                >
+                <div className={`px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-tighter ${template.is_active
+                    ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                    : "bg-slate-800 text-slate-500 border border-slate-700"
+                    }`}>
                     {template.is_active ? "Aktiv" : "Nofaol"}
-                </span>
+                </div>
             </div>
 
             {template.description && (
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                    {template.description}
+                <p className="text-sm text-slate-400 mb-6 line-clamp-2 h-10 leading-relaxed italic">
+                    &quot;{template.description}&quot;
                 </p>
             )}
 
-            <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
-                {template.format && (
-                    <div>
-                        <span className="text-muted-foreground">Format:</span>
-                        <p className="font-medium">{template.format}</p>
-                    </div>
-                )}
-                {template.page_count ? (
-                    <div>
-                        <span className="text-muted-foreground">Sahifalar:</span>
-                        <p className="font-medium">{template.page_count}</p>
-                    </div>
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-2 gap-4 mb-8 pt-4 border-t border-slate-800">
+                {isBook ? (
+                    <>
+                        {template.format && (
+                            <div className="space-y-1">
+                                <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest">Format</span>
+                                <p className="text-sm font-semibold text-slate-200">{template.format}</p>
+                            </div>
+                        )}
+                        {template.page_count && (
+                            <div className="space-y-1">
+                                <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest">Sahifalar</span>
+                                <p className="text-sm font-semibold text-slate-200">{template.page_count}</p>
+                            </div>
+                        )}
+                        {template.binding_type && (
+                            <div className="space-y-1 col-span-2">
+                                <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest">Bog&apos;lash</span>
+                                <p className="text-sm font-semibold text-slate-200">{template.binding_type}</p>
+                            </div>
+                        )}
+                    </>
                 ) : (
-                    <div>
-                        <span className="text-muted-foreground">Qatlamlar:</span>
-                        <p className="font-medium">{template.layer_count}</p>
-                    </div>
+                    <>
+                        {(template.default_width || template.default_height) && (
+                            <div className="space-y-1">
+                                <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest">O&apos;lcham</span>
+                                <p className="text-sm font-semibold text-slate-200 font-mono">
+                                    {template.default_width}x{template.default_height}x{template.default_depth}
+                                </p>
+                            </div>
+                        )}
+                        <div className="space-y-1">
+                            <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest">Qatlamlar</span>
+                            <p className="text-sm font-semibold text-slate-200">{template.layer_count}</p>
+                        </div>
+                    </>
                 )}
-                {template.binding_type && (
-                    <div className="col-span-2">
-                        <span className="text-muted-foreground">Bog&apos;lash:</span>
-                        <p className="font-medium">{template.binding_type}</p>
-                    </div>
-                )}
-                {!template.binding_type && (
-                    <div>
-                        <span className="text-muted-foreground">Chiqindi %:</span>
-                        <p className="font-medium">{template.default_waste_percent}%</p>
-                    </div>
-                )}
+                <div className="space-y-1">
+                    <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest">Chiqindi</span>
+                    <p className="text-sm font-semibold text-slate-200">{template.default_waste_percent}%</p>
+                </div>
             </div>
 
-            <div className="flex gap-2">
+            {/* Actions */}
+            <div className="flex gap-3 relative z-10">
                 <button
                     onClick={onEdit}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border rounded-lg hover:bg-accent transition-colors text-sm"
+                    className="flex-1 h-10 flex items-center justify-center gap-2 bg-slate-800 text-slate-200 rounded-xl hover:bg-primary hover:text-white transition-all text-[10px] font-black uppercase tracking-widest border border-slate-700 hover:border-primary shadow-lg hover:shadow-primary/20"
                 >
-                    <Edit className="w-4 h-4" />
+                    <Edit className="w-3.5 h-3.5" />
                     Tahrirlash
                 </button>
                 <button
                     onClick={onDelete}
-                    className="px-3 py-2 border rounded-lg hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:hover:bg-red-950/30 dark:hover:text-red-400 transition-colors"
+                    className="w-10 h-10 flex items-center justify-center border border-slate-800 rounded-xl hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/50 transition-all group/del"
                     title="O'chirish"
                 >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4 group-hover/del:scale-110 transition-transform" />
                 </button>
             </div>
         </div>
