@@ -11,12 +11,6 @@ import {
 } from "lucide-react"
 import { fetchWithAuth } from "@/lib/api-client"
 import { getProductionAnalytics, getWarehouseStatusReport } from "@/lib/api/printery"
-import {
-    downloadDailyProductionExcel,
-    downloadWorkerEfficiencyExcel,
-    downloadWarehouseStatusExcel,
-    downloadQCStatisticsExcel
-} from "@/lib/api/exports"
 import { toast } from "sonner"
 import { formatCurrency } from "@/lib/data/mock-data"
 
@@ -145,37 +139,6 @@ export default function ReportsPage() {
         }
     }
 
-    async function exportToExcel(reportType: string) {
-        try {
-            toast.info("Excel fayl yuklab olinmoqda...")
-
-            const today = new Date().toISOString().split('T')[0]
-            const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]
-
-            switch (reportType) {
-                case 'daily':
-                    await downloadDailyProductionExcel(today)
-                    break
-                case 'production':
-                    await downloadDailyProductionExcel(today)
-                    break
-                case 'workers':
-                    await downloadWorkerEfficiencyExcel(firstDayOfMonth, today)
-                    break
-                case 'warehouse':
-                    await downloadWarehouseStatusExcel()
-                    break
-                default:
-                    toast.error("Noma'lum hisobot turi")
-                    return
-            }
-
-            toast.success("✅ Excel fayl yuklab olindi!")
-        } catch (error) {
-            console.error("Export error:", error)
-            toast.error("Eksport xatoligi")
-        }
-    }
 
     const formatDuration = (minutes: number) => {
         const hours = Math.floor(minutes / 60)
@@ -281,10 +244,6 @@ export default function ReportsPage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center justify-between">
                                     <span>Kunlik Jadvali</span>
-                                    <Button size="sm" variant="outline" onClick={() => exportToExcel('daily')}>
-                                        <Download className="w-4 h-4 mr-2" />
-                                        Excel
-                                    </Button>
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -367,10 +326,6 @@ export default function ReportsPage() {
                         <CardHeader>
                             <CardTitle className="flex items-center justify-between">
                                 <span>Ishlab Chiqarish Analitikasi</span>
-                                <Button size="sm" variant="outline" onClick={() => exportToExcel('production')}>
-                                    <Download className="w-4 h-4 mr-2" />
-                                    Excel
-                                </Button>
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -404,10 +359,6 @@ export default function ReportsPage() {
                         <CardHeader>
                             <CardTitle className="flex items-center justify-between">
                                 <span>Xodimlar Samaradorligi</span>
-                                <Button size="sm" variant="outline" onClick={() => exportToExcel('workers')}>
-                                    <Download className="w-4 h-4 mr-2" />
-                                    Excel
-                                </Button>
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -457,10 +408,6 @@ export default function ReportsPage() {
                         <CardHeader>
                             <CardTitle className="flex items-center justify-between">
                                 <span>Sklad Hisoboti</span>
-                                <Button size="sm" variant="outline" onClick={() => exportToExcel('warehouse')}>
-                                    <Download className="w-4 h-4 mr-2" />
-                                    Excel
-                                </Button>
                             </CardTitle>
                         </CardHeader>
                         <CardContent>

@@ -10,7 +10,7 @@ import {
   TrendingUp, Users, Package, AlertTriangle,
   DollarSign, Clock, LayoutDashboard, Calendar as CalendarIcon,
   ArrowDown, ArrowUp, Zap, Box, UserCheck,
-  ArrowRight, Download, ChevronRight, Activity, Filter
+  ArrowRight, ChevronRight, Activity, Filter
 } from "lucide-react"
 import { fetchWithAuth } from "@/lib/api-client"
 import { Button } from "@/components/ui/button"
@@ -161,50 +161,6 @@ export default function ReportsPage() {
               </PopoverContent>
             </Popover>
           </div>
-          <Button
-            className="bg-primary hover:bg-primary/90 rounded-xl h-12 px-6 font-bold shadow-lg shadow-primary/20 text-primary-foreground min-w-[140px]"
-            onClick={async () => {
-              try {
-                if (!data) return;
-                const xlsx = await import("xlsx");
-
-                // Sheet 1: Financials
-                const ws_fin = xlsx.utils.json_to_sheet([{
-                  "Jami Tushum": data.financials.total_revenue,
-                  "Sof Foyda": data.financials.net_profit,
-                  "Buyurtmalar": data.financials.order_count,
-                  "O'r. Chek": data.financials.avg_order_value,
-                  "Xarajat": data.financials.total_cost
-                }]);
-
-                // Sheet 2: Top Products
-                const ws_prod = xlsx.utils.json_to_sheet(data.top_products.map((p: any) => ({
-                  "Mahsulot": p.box_type,
-                  "Tushum": p.revenue,
-                  "Buyurtmalar": p.count
-                })));
-
-                // Sheet 3: Material Usage
-                const ws_mat = xlsx.utils.json_to_sheet(data.consumption.map((c: any) => ({
-                  "Material": c.material__name,
-                  "Ishlatildi": c.total_used
-                })));
-
-                const wb = xlsx.utils.book_new();
-                xlsx.utils.book_append_sheet(wb, ws_fin, "Moliya");
-                xlsx.utils.book_append_sheet(wb, ws_prod, "Mahsulotlar");
-                xlsx.utils.book_append_sheet(wb, ws_mat, "Materiallar");
-
-                xlsx.writeFile(wb, "ERP_Hisobot.xlsx");
-                toast.success("Hisobot yuklab olindi");
-              } catch (e) {
-                console.error(e);
-                toast.error("Export xatoligi");
-              }
-            }}
-          >
-            <Download className="h-5 w-5 mr-2" /> EXPORT
-          </Button>
         </div>
       </div>
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import {
-    CheckCircle2, Download, Search, History,
+    CheckCircle2, Search, History,
     Calendar, Package, Layers
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
@@ -56,32 +56,6 @@ export default function ArchivePage() {
                 <div>
                     <h1 className="text-2xl font-bold">Arxiv</h1>
                     <p className="text-xs text-muted-foreground">Tugagan ishlar</p>
-                </div>
-                <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={async () => {
-                        try {
-                            const xlsx = await import("xlsx");
-                            const worksheet = xlsx.utils.json_to_sheet(orders.map(o => ({
-                                "ID": o.order_number,
-                                "Mijoz": o.client?.full_name,
-                                "Mahsulot": o.box_type,
-                                "Material": `${o.paper_type} ${o.paper_density}g`,
-                                "Soni": o.quantity,
-                                "Summa": o.total_price,
-                                "Foyda": o.profit,
-                                "Sana": new Date(o.completed_at).toLocaleDateString()
-                            })));
-                            const workbook = xlsx.utils.book_new();
-                            xlsx.utils.book_append_sheet(workbook, worksheet, "Arxiv");
-                            xlsx.writeFile(workbook, "Tugallangan_Buyurtmalar.xlsx");
-                            toast.success("Excel yuklab olindi");
-                        } catch (e) {
-                            console.error(e);
-                            toast.error("Export qilishda xatolik");
-                        }
-                    }}>
-                        <Download className="h-4 w-4 mr-2" /> Excel
-                    </Button>
                 </div>
             </div>
 
