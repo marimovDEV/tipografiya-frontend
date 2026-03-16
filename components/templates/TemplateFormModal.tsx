@@ -133,6 +133,7 @@ export function TemplateFormModal({
                                 </div>
                             </div>
                         </div>
+                    </div>
                     {/* Book Specific Fields - Only for Book categories */}
                     {isBook ? (
                         <>
