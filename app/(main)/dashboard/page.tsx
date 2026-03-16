@@ -58,6 +58,7 @@ export default function DashboardPage() {
   const { currentRole } = useRole()
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [currentTime, setCurrentTime] = useState(new Date())
   const [monthlyPlan, setMonthlyPlan] = useState<MonthlyPlan | null>(null)
   const [workers, setWorkers] = useState<any[]>([])
   const [clients, setClients] = useState<any[]>([])
@@ -91,6 +92,13 @@ export default function DashboardPage() {
     fetchDashboardData()
     fetchWorkers()
     fetchClients()
+    
+    // Live clock update
+    const timer = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000)
+    
+    return () => clearInterval(timer)
   }, [])
 
   const fetchClients = async () => {
@@ -234,7 +242,7 @@ export default function DashboardPage() {
           </div>
           <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 pl-1">
             <Binary className="w-3.5 h-3.5 text-primary/40" />
-            Terminal: ERP-DASH-X10 • Session: {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+            Terminal: ERP-DASH-X10 • Session: {currentTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </p>
         </div>
         <div className="flex items-center gap-3">

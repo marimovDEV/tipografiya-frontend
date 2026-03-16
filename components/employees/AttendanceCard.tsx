@@ -39,7 +39,7 @@ export function AttendanceCard({ onStatusChange }: AttendanceCardProps) {
       }
       
       setLiveStats({
-        workHours: parseFloat(hours.toFixed(2)),
+        workHours: parseFloat(Math.max(0, hours - (((attendance.total_break_minutes || 0) + currentBreakMins) / 60)).toFixed(2)),
         breakMinutes: (attendance.total_break_minutes || 0) + currentBreakMins
       })
     }, 10000) // Update every 10 seconds for smoothness
