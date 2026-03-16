@@ -25,6 +25,9 @@ import { toast } from "sonner"
 import { format } from "date-fns"
 import { uz } from "date-fns/locale"
 import { AttendanceCard } from "@/components/employees/AttendanceCard"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null)
@@ -33,6 +36,14 @@ export default function ProfilePage() {
   const [stats, setStats] = useState<any>(null)
   const [history, setHistory] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [editFormData, setEditFormData] = useState({
+    first_name: "",
+    last_name: "",
+    phone: "",
+    avatar_url: ""
+  })
+  const [updating, setUpdating] = useState(false)
 
   useEffect(() => {
     fetchProfileData()
@@ -45,6 +56,12 @@ export default function ProfilePage() {
       if (!userRes.ok) throw new Error("Profil ma'lumotlarini yuklab bo'lmadi")
       const userData = await userRes.json()
       setUser(userData)
+      setEditFormData({
+        first_name: userData.first_name || "",
+        last_name: userData.last_name || "",
+        phone: userData.phone || "",
+        avatar_url: userData.avatar_url || ""
+      })
 
       // 2. Production Stats
       const statsRes = await fetchWithAuth("/api/users/production-stats/")
@@ -73,9 +90,33 @@ export default function ProfilePage() {
     }
   }
 
+  const handleUpdateProfile = async () => {
+    try {
+      setUpdating(true)
+      const res = await fetchWithAuth(`/api/users/${user.id}/`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editFormData)
+      })
+      if (res.ok) {
+        toast.success("Profil yangilandi")
+        setIsEditModalOpen(false)
+        fetchProfileData()
+      } else {
+        const data = await res.json()
+        toast.error(data.error || "Yangilashda xatolik")
+      }
+    } catch (e) {
+      toast.error("Server bilan aloqa uzildi")
+    } finally {
+      setUpdating(false)
+    }
+  }
+
   const handleTaskAction = async (taskId: string, action: 'start' | 'complete') => {
     try {
-      const res = await fetchWithAuth(`/api/tasks/${taskId}/${action}_task/`, { method: "POST" })
+      const endpoint = action === 'start' ? 'start_task' : 'complete_task'
+      const res = await fetchWithAuth(`/api/tasks/${taskId}/${endpoint}/`, { method: "POST" })
       if (res.ok) {
         toast.success(action === 'start' ? "Vazifa boshlandi" : "Vazifa yakunlandi")
         fetchProfileData()
@@ -150,9 +191,19 @@ export default function ProfilePage() {
                 </div>
                 <CardContent className="pt-14 pb-6 px-6">
                     <div className="text-center mb-6">
-                        <h2 className="text-xl font-black text-white uppercase tracking-tight italic">
-                            {user.first_name} {user.last_name}
-                        </h2>
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                             <h2 className="text-xl font-black text-white uppercase tracking-tight italic">
+                                {user.first_name} {user.last_name}
+                            </h2>
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-6 w-6 rounded-full bg-white/5 text-slate-500 hover:text-white"
+                                onClick={() => setIsEditModalOpen(true)}
+                            >
+                                <Settings size={12} />
+                            </Button>
+                        </div>
                         <div className="flex items-center justify-center gap-2 mt-1">
                             <Badge variant="secondary" className="font-black border border-slate-700 text-[9px] bg-slate-800/50 text-slate-500 font-mono tracking-tighter">@{user.username}</Badge>
                             <Badge className="bg-primary/20 text-primary border-primary/30 font-black text-[9px] uppercase px-2">{user.role}</Badge>
@@ -221,11 +272,8 @@ export default function ProfilePage() {
                             <p className="text-lg font-black text-emerald-400">{stats?.avg_speed || 0} <span className="text-[10px] text-slate-600 uppercase">d/s</span></p>
                         </div>
                         <div className="p-3 bg-slate-800/20 rounded-xl border border-slate-800/50 text-center">
-                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Star</p>
-                            <div className="flex items-center justify-center gap-1.5">
-                                <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-                                <p className="text-lg font-black text-white italic">{stats?.rating || "5.0"}</p>
-                            </div>
+                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">O'rin (Rank)</p>
+                            <p className="text-lg font-black text-primary italic font-mono">#{stats?.rank || 1}</p>
                         </div>
                     </div>
                 </CardContent>
@@ -361,7 +409,85 @@ export default function ProfilePage() {
                         </div>
                     )}
                 </CardContent>
-            </Card>            {/* Assigned Stages & Work History Grid */}
+            </Card>
+
+            {/* General Tasks Section */}
+            <Card className="border-none shadow-premium bg-slate-900/40 border border-slate-800 overflow-hidden">
+                <CardHeader className="pb-3 border-b border-white/5 px-6 py-4 flex flex-row items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
+                            <ClipboardList size={20} />
+                        </div>
+                        <div>
+                            <CardTitle className="text-lg font-black tracking-tight text-white uppercase italic">UMUMIY VAZIFALAR</CardTitle>
+                            <CardDescription className="text-xs font-bold text-slate-500 uppercase tracking-widest">Admin tomonidan biriktirilgan topshiriqlar</CardDescription>
+                        </div>
+                    </div>
+                    <Badge className="bg-slate-800 text-slate-400 border-slate-700">
+                        {tasks.length} TA
+                    </Badge>
+                </CardHeader>
+                <CardContent className="p-6">
+                    {tasks.length > 0 ? (
+                        <div className="space-y-4">
+                            {tasks.map((task: any) => (
+                                <div key={task.id} className="p-5 bg-slate-950/50 rounded-2xl border border-slate-800 flex items-center justify-between group hover:border-slate-700 transition-all">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center border transition-all ${
+                                            task.status === 'completed' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
+                                            task.status === 'in_progress' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
+                                            'bg-slate-800 border-slate-700 text-slate-500'
+                                        }`}>
+                                            {task.status === 'completed' ? <CheckCircle size={20} /> : <Zap size={20} />}
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-black text-white uppercase tracking-tight">{task.title}</h4>
+                                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5 line-clamp-1">{task.description || "Tavsif berilmagan"}</p>
+                                            <div className="flex items-center gap-3 mt-2">
+                                                <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-800 text-slate-600 px-2 py-0">
+                                                    {task.priority?.toUpperCase()}
+                                                </Badge>
+                                                <span className="text-[8px] font-black text-slate-700 uppercase tracking-widest">
+                                                    Deadline: {task.deadline ? format(new Date(task.deadline), "d-MMM", { locale: uz }) : 'Belgilanmagan'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        {task.status === 'pending' && (
+                                            <Button 
+                                                size="sm" 
+                                                className="h-10 rounded-xl bg-indigo-600 text-white font-black text-[9px] uppercase px-4"
+                                                onClick={() => handleTaskAction(task.id, 'start')}
+                                            >
+                                                BOSHLASH
+                                            </Button>
+                                        )}
+                                        {task.status === 'in_progress' && (
+                                            <Button 
+                                                size="sm" 
+                                                className="h-10 rounded-xl bg-emerald-600 text-white font-black text-[9px] uppercase px-4"
+                                                onClick={() => handleTaskAction(task.id, 'complete')}
+                                            >
+                                                YAKUNLASH
+                                            </Button>
+                                        )}
+                                        {task.status === 'completed' && (
+                                            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-3 py-1.5 h-10 flex items-center rounded-xl font-black text-[9px] uppercase">
+                                                BAJARILDI
+                                            </Badge>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="py-12 text-center bg-slate-950/30 rounded-[2.5rem] border-2 border-dashed border-slate-900">
+                             <p className="text-slate-600 font-black text-[10px] uppercase tracking-widest">Hozirda hech qanday topshiriq biriktirilmagan</p>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
             <div className="grid grid-cols-12 gap-6">
                 {/* Assigned Stages (Section 5) */}
                 <Card className="col-span-4 border-none shadow-premium bg-slate-900/40 border border-slate-800">
@@ -458,6 +584,70 @@ export default function ProfilePage() {
             </div>
         </div>
       </div>
+      </div>
+
+      {/* Edit Profile Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="bg-slate-950 border border-slate-800 text-white rounded-[2.5rem] p-8 max-w-md shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-black italic tracking-tight uppercase">PROFILNI TAHRIRLASH</DialogTitle>
+            <DialogDescription className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Shaxsiy ma'lumotlarni yangilash</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-6">
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Ism</Label>
+                    <Input 
+                        className="h-12 bg-slate-900 border-slate-800 rounded-xl text-xs font-black"
+                        value={editFormData.first_name}
+                        onChange={(e) => setEditFormData({...editFormData, first_name: e.target.value})}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Familiya</Label>
+                    <Input 
+                        className="h-12 bg-slate-900 border-slate-800 rounded-xl text-xs font-black"
+                        value={editFormData.last_name}
+                        onChange={(e) => setEditFormData({...editFormData, last_name: e.target.value})}
+                    />
+                </div>
+            </div>
+            <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Telefon raqami</Label>
+                <Input 
+                    className="h-12 bg-slate-900 border-slate-800 rounded-xl text-xs font-black"
+                    value={editFormData.phone}
+                    onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})}
+                />
+            </div>
+            <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Avatar URL</Label>
+                <Input 
+                    className="h-12 bg-slate-900 border-slate-800 rounded-xl text-[10px] font-mono"
+                    placeholder="https://example.com/photo.jpg"
+                    value={editFormData.avatar_url}
+                    onChange={(e) => setEditFormData({...editFormData, avatar_url: e.target.value})}
+                />
+            </div>
+          </div>
+          <DialogFooter className="gap-3">
+            <Button 
+                variant="ghost" 
+                className="h-12 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500"
+                onClick={() => setIsEditModalOpen(false)}
+            >
+                Bekor qilish
+            </Button>
+            <Button 
+                className="h-12 px-8 rounded-xl bg-primary text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20"
+                onClick={handleUpdateProfile}
+                disabled={updating}
+            >
+                {updating ? "SAQLANMOQDA..." : "SAQLASH"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
