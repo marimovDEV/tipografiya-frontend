@@ -319,6 +319,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
           <div className="px-4 sm:px-8 py-4 sm:py-6 flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto">
               <div className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-500 ${
+                user?.status === 'working'
                 ? "bg-emerald-500 text-white border-emerald-400 shadow-lg shadow-emerald-500/20 animate-pulse"
                 : "bg-slate-800 text-slate-500 border-slate-700"
               }`}>

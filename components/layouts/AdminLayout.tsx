@@ -9,8 +9,19 @@ import { ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
+    LayoutDashboard,
+    FileText,
+    Users,
+    Activity,
+    Package,
+    DollarSign,
+    TrendingUp,
     Users2,
+    CheckSquare,
+    Settings,
     Clock,
+    LogOut,
+    ShieldCheck,
     Menu,
     X
 } from 'lucide-react'
