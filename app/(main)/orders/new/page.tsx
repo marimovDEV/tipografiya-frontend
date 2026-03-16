@@ -341,17 +341,6 @@ function TemplateStep({
     return <div className="text-center py-12">Yuklanmoqda...</div>
   }
 
-  if (!templates || templates.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-slate-400 mb-4">Faol shablonlar topilmadi</p>
-        <p className="text-sm text-slate-500">
-          Shablonlar yaratish uchun <a href="/templates" className="text-blue-400 underline">bu yerga</a> bosing
-        </p>
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -364,33 +353,47 @@ function TemplateStep({
           Yangi Shablon
         </button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {templates.map((template) => (
-          <button
-            key={template.id}
-            onClick={() => {
-              onSelect(template)
-            }}
-            className={`text-left border rounded-lg p-4 transition-all ${selectedTemplate?.id === template.id
-              ? "border-blue-500 bg-blue-950/50 ring-2 ring-blue-500"
-              : "border-slate-700 bg-slate-800 hover:border-blue-500/50 hover:bg-slate-750"
-              }`}
-          >
-            <div className="flex items-start justify-between mb-2">
-              <h4 className="font-semibold text-slate-50">{template.name}</h4>
-              {selectedTemplate?.id === template.id && (
-                <CheckCircle className="w-5 h-5 text-blue-400" />
-              )}</div>
-            <p className="text-sm text-slate-400 mb-2">
-              {template.category_display}
-            </p>
-            <div className="flex gap-4 text-xs text-slate-500">
-              <span>{template.layer_count} qatlam</span>
-              <span>{template.default_waste_percent}% chiqindi</span>
-            </div>
-          </button>
-        ))}
-      </div>
+
+      {!templates || templates.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-slate-400 mb-4">Faol shablonlar topilmadi</p>
+          <p className="text-sm text-slate-500">
+            Shablonlar yaratish uchun <a href="/templates" className="text-blue-400 underline" onClick={(e) => {
+              // Stay on page and open modal instead of navigating away if user prefers
+              e.preventDefault();
+              setShowCreateModal(true);
+            }}>bu yerga</a> bosing
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {templates.map((template) => (
+            <button
+              key={template.id}
+              onClick={() => {
+                onSelect(template)
+              }}
+              className={`text-left border rounded-lg p-4 transition-all ${selectedTemplate?.id === template.id
+                ? "border-blue-500 bg-blue-950/50 ring-2 ring-blue-500"
+                : "border-slate-700 bg-slate-800 hover:border-blue-500/50 hover:bg-slate-750"
+                }`}
+            >
+              <div className="flex items-start justify-between mb-2">
+                <h4 className="font-semibold text-slate-50">{template.name}</h4>
+                {selectedTemplate?.id === template.id && (
+                  <CheckCircle className="w-5 h-5 text-blue-400" />
+                )}</div>
+              <p className="text-sm text-slate-400 mb-2">
+                {template.category_display}
+              </p>
+              <div className="flex gap-4 text-xs text-slate-500">
+                <span>{template.layer_count} qatlam</span>
+                <span>{template.default_waste_percent}% chiqindi</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
 
       {showCreateModal && (
         <TemplateFormModal
@@ -448,21 +451,6 @@ function ClientStep({
     return <div className="text-center py-12">Yuklanmoqda...</div>
   }
 
-  if (!clients || clients.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground mb-4">Mijozlar topilmadi</p>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4 inline-block mr-2" />
-          Birinchi mijozni qo'shing
-        </button>
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -481,32 +469,43 @@ function ClientStep({
         placeholder="Mijoz ismi bo'yicha qidirish..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+        className="w-full px-4 py-2 bg-slate-900 border border-slate-700 text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
       />
 
-      {filteredClients.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
+      {!clients || clients.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-slate-400 mb-4">Mijozlar topilmadi</p>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-4 h-4 inline-block mr-2" />
+            Birinchi mijozni qo'shing
+          </button>
+        </div>
+      ) : filteredClients.length === 0 ? (
+        <div className="text-center py-8 text-slate-500">
           Qidiruv natijasi topilmadi
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[400px] overflow-y-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[400px] overflow-y-auto custom-scrollbar">
           {filteredClients.map((client) => (
             <button
               key={client.id}
               onClick={() => onSelect(client)}
               className={`text-left border rounded-lg p-4 transition-all ${selectedClient?.id === client.id
                 ? "border-primary bg-primary/5 ring-2 ring-primary"
-                : "hover:border-primary/50 hover:bg-gray-50"
+                : "border-slate-700 bg-slate-800 hover:border-primary/50 hover:bg-slate-750"
                 }`}
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <h4 className="font-semibold">{client.full_name}</h4>
+                  <h4 className="font-semibold text-slate-50">{client.full_name}</h4>
                   {client.company && (
-                    <p className="text-sm text-muted-foreground">{client.company}</p>
+                    <p className="text-sm text-slate-400">{client.company}</p>
                   )}
                   {client.phone && (
-                    <p className="text-xs text-muted-foreground mt-1">{client.phone}</p>
+                    <p className="text-xs text-slate-500 mt-1">{client.phone}</p>
                   )}
                   {Number(client.balance || 0) < 0 && (
                     <div className="mt-2 text-[10px] font-black text-red-500 flex items-center gap-1.5 px-2 py-1 bg-red-500/10 rounded-md border border-red-500/20">
