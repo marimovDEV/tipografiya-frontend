@@ -7,10 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import {
-    ArrowLeft, Plus, Edit, Trash2, Phone, Building2,
-    Mail, MapPin, MessageSquare, Wallet, History,
-    Package, CreditCard, ExternalLink, AlertCircle, User,
-    Banknote, Landmark, Smartphone
+    Banknote, Landmark, Smartphone, Phone, Building2, User
 } from "lucide-react"
 import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow
@@ -28,12 +25,6 @@ import { DebtPaymentModal } from "@/components/clients/DebtPaymentModal"
 import { toast } from "sonner"
 import Link from "next/link"
 
-const statusConfig = {
-    new: { label: "Yangi", color: "bg-blue-500" },
-    regular: { label: "Doimiy", color: "bg-green-500" },
-    vip: { label: "VIP", color: "bg-purple-500" },
-    blacklist: { label: "Qora Ro'yxat", color: "bg-red-500" },
-}
 
 const paymentMethods = [
   { id: "cash", label: "Naqd", icon: Banknote, color: "text-emerald-500", bgColor: "bg-emerald-500/10" },
@@ -125,7 +116,6 @@ export default function ClientDetailPage() {
         </div>
     );
 
-    const status = statusConfig[client.status || 'new'] || statusConfig.new;
     const balance = Number(client.balance || 0);
 
     return (
@@ -139,7 +129,6 @@ export default function ClientDetailPage() {
                     <div>
                         <div className="flex items-center gap-3">
                             <h1 className="text-3xl font-bold">{client.full_name}</h1>
-                            <Badge className={`${status.color} text-white border-0`}>{status.label}</Badge>
                         </div>
                         <p className="text-muted-foreground">ID: {client.id} • {client.company || "Shaxsiy"}</p>
                     </div>
@@ -333,23 +322,11 @@ export default function ClientDetailPage() {
                                     <div><p className="text-xs text-muted-foreground italic">Telefon</p><p className="font-medium">{client.phone || "-"}</p></div>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-muted rounded-full"><Mail className="h-4 w-4" /></div>
-                                    <div><p className="text-xs text-muted-foreground italic">Email</p><p className="font-medium">{client.email || "-"}</p></div>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-muted rounded-full"><MessageSquare className="h-4 w-4" /></div>
-                                    <div><p className="text-xs text-muted-foreground italic">Telegram ID</p><p className="font-medium">{client.telegram_id || "-"}</p></div>
-                                </div>
-                            </div>
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3">
                                     <div className="p-2 bg-muted rounded-full"><Building2 className="h-4 w-4" /></div>
                                     <div><p className="text-xs text-muted-foreground italic">Kompaniya</p><p className="font-medium">{client.company || "-"}</p></div>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-muted rounded-full"><MapPin className="h-4 w-4" /></div>
-                                    <div><p className="text-xs text-muted-foreground italic">Manzil</p><p className="font-medium">{client.address || "-"}</p></div>
-                                </div>
+                            </div>
+                            <div className="space-y-4">
                                 <div className="border-t pt-4">
                                     <p className="text-xs text-muted-foreground italic">Ichki izohlar</p>
                                     <p className="text-sm mt-1">{client.notes || "Izoh yo'q"}</p>
@@ -373,25 +350,9 @@ export default function ClientDetailPage() {
                             <Label>Kompaniya</Label>
                             <Input value={editData.company} onChange={e => setEditData({ ...editData, company: e.target.value })} />
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-2 col-span-2">
                             <Label>Telefon</Label>
                             <Input value={editData.phone} onChange={e => setEditData({ ...editData, phone: e.target.value })} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Status</Label>
-                            <Select value={editData.status} onValueChange={v => setEditData({ ...editData, status: v as any })}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="new">Yangi</SelectItem>
-                                    <SelectItem value="regular">Doimiy</SelectItem>
-                                    <SelectItem value="vip">VIP</SelectItem>
-                                    <SelectItem value="blacklist">Qora ro'yxat</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-2 col-span-2">
-                            <Label>Manzil</Label>
-                            <Input value={editData.address} onChange={e => setEditData({ ...editData, address: e.target.value })} />
                         </div>
                         <div className="space-y-2 col-span-2">
                             <Label>Izohlar</Label>

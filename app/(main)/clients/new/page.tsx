@@ -28,11 +28,7 @@ export default function NewClientPage() {
     full_name: "",
     company: "",
     phone: "",
-    email: "",
-    address: "",
     notes: "",
-    telegram_id: "",
-    status: "new",
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -103,8 +99,7 @@ export default function NewClientPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+            <div className="space-y-2">
                 <Label htmlFor="phone">Telefon</Label>
                 <Input
                   id="phone"
@@ -113,53 +108,6 @@ export default function NewClientPage() {
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="email@example.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="telegram_id">Telegram ID / Username</Label>
-                <Input
-                  id="telegram_id"
-                  placeholder="@username yoki ID"
-                  value={formData.telegram_id}
-                  onChange={(e) => setFormData({ ...formData, telegram_id: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="status">Mijoz statusi</Label>
-                <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
-                  <SelectTrigger><SelectValue placeholder="Statusni tanlang" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="new">Yangi</SelectItem>
-                    <SelectItem value="regular">Doimiy</SelectItem>
-                    <SelectItem value="vip">VIP</SelectItem>
-                    <SelectItem value="blacklist">Qora ro'yxat</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="address">Manzil</Label>
-              <Input
-                id="address"
-                placeholder="Mijoz manzilini kiriting"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              />
             </div>
 
             <div className="space-y-2">

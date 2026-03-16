@@ -21,10 +21,7 @@ const formSchema = z.object({
     full_name: z.string().min(2, "Ism kiritilishi shart"),
     company: z.string().optional(),
     phone: z.string().optional(),
-    email: z.string().email("Noto'g'ri email formati").optional().or(z.literal("")),
-    address: z.string().optional(),
     notes: z.string().optional(),
-    status: z.string(),
     pricing_profile: z.string(),
 })
 
@@ -41,10 +38,7 @@ export default function EditClientPage() {
             full_name: "",
             company: "",
             phone: "",
-            email: "",
-            address: "",
             notes: "",
-            status: "new",
             pricing_profile: "Standard",
         },
     })
@@ -63,10 +57,7 @@ export default function EditClientPage() {
                     full_name: data.full_name || "",
                     company: data.company || "",
                     phone: data.phone || "",
-                    email: data.email || "",
-                    address: data.address || "",
                     notes: data.notes || "",
-                    status: data.status || "new",
                     pricing_profile: data.pricing_profile || "Standard",
                 })
             } else {
@@ -166,7 +157,7 @@ export default function EditClientPage() {
                                     control={form.control}
                                     name="phone"
                                     render={({ field }) => (
-                                        <FormItem>
+                                        <FormItem className="col-span-1">
                                             <FormLabel>Telefon</FormLabel>
                                             <FormControl>
                                                 <Input {...field} placeholder="+998 90 123 45 67" />
@@ -178,63 +169,9 @@ export default function EditClientPage() {
 
                                 <FormField
                                     control={form.control}
-                                    name="email"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Email</FormLabel>
-                                            <FormControl>
-                                                <Input {...field} type="email" placeholder="email@example.com" />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-
-                            <FormField
-                                control={form.control}
-                                name="address"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Manzil</FormLabel>
-                                        <FormControl>
-                                            <Textarea {...field} placeholder="Manzil..." rows={2} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name="status"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Status</FormLabel>
-                                            <Select onValueChange={field.onChange} value={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="new">Yangi</SelectItem>
-                                                    <SelectItem value="regular">Doimiy</SelectItem>
-                                                    <SelectItem value="vip">VIP</SelectItem>
-                                                    <SelectItem value="blacklist">Qora ro'yxat</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
                                     name="pricing_profile"
                                     render={({ field }) => (
-                                        <FormItem>
+                                        <FormItem className="col-span-1">
                                             <FormLabel>Narx Profili</FormLabel>
                                             <Select onValueChange={field.onChange} value={field.value}>
                                                 <FormControl>

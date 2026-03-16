@@ -16,12 +16,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { DebtPaymentModal } from "@/components/clients/DebtPaymentModal"
 
-const statusConfig = {
-  new: { label: "Yangi", color: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
-  regular: { label: "Doimiy", color: "bg-green-500/10 text-green-500 border-green-500/20" },
-  vip: { label: "VIP", color: "bg-purple-500/10 text-purple-500 border-purple-500/20" },
-  blacklist: { label: "Qora Ro'yxat", color: "bg-red-500/10 text-red-500 border-red-500/20" },
-}
 
 export default function ClientsPage() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -139,7 +133,6 @@ export default function ClientsPage() {
       ) : viewMode === "grid" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredClients.map((client) => {
-            const status = statusConfig[client.status || 'new'] || statusConfig.new;
             const balance = Number(client.balance || 0);
 
             return (
@@ -182,11 +175,6 @@ export default function ClientsPage() {
                   </DropdownMenu>
                 </CardHeader>
                 <CardContent className="p-4 pt-2">
-                  <div className="flex gap-2 mb-4">
-                    <Badge variant="outline" className={`${status.color} border font-bold h-6 rounded-md`}>
-                      {status.label}
-                    </Badge>
-                  </div>
 
                   <div className="p-3 bg-muted/30 rounded-xl space-y-2">
                     <div className="flex justify-between items-center text-xs text-muted-foreground font-medium">
@@ -240,14 +228,12 @@ export default function ClientsPage() {
                 <TableHead className="w-[50px]"></TableHead>
                 <TableHead className="font-bold">Mijoz</TableHead>
                 <TableHead className="font-bold">Telefon</TableHead>
-                <TableHead className="font-bold">Status</TableHead>
                 <TableHead className="text-right font-bold">Balans</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredClients.map((client) => {
-                const status = statusConfig[client.status || 'new'] || statusConfig.new;
                 const balance = Number(client.balance || 0);
                 return (
                   <TableRow key={client.id} className="hover:bg-muted/30">
@@ -261,9 +247,6 @@ export default function ClientsPage() {
                       {client.company && <div className="text-xs text-muted-foreground">{client.company}</div>}
                     </TableCell>
                     <TableCell className="font-mono text-xs">{client.phone}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={`${status.color} border px-2 py-0 h-5`}>{status.label}</Badge>
-                    </TableCell>
                     <TableCell className={`text-right font-mono font-bold ${balance < 0 ? 'text-red-500' : 'text-emerald-500'}`}>
                       {balance.toLocaleString()}
                     </TableCell>

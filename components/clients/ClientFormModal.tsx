@@ -33,11 +33,7 @@ export function ClientFormModal({
         full_name: client?.full_name || "",
         company: client?.company || "",
         phone: client?.phone || "",
-        email: client?.email || "",
-        address: client?.address || "",
         notes: client?.notes || "",
-        telegram_id: client?.telegram_id || "",
-        status: client?.status || "new",
     })
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -103,67 +99,14 @@ export function ClientFormModal({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="phone" className="text-slate-200">Telefon</Label>
-                            <Input
-                                id="phone"
-                                type="tel"
-                                placeholder="+998 90 123 45 67"
-                                value={formData.phone}
-                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                className="bg-slate-800 border-slate-600 text-slate-50"
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="email" className="text-slate-200">Email</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                placeholder="email@example.com"
-                                value={formData.email}
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                className="bg-slate-800 border-slate-600 text-slate-50"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="telegram_id" className="text-slate-200">Telegram</Label>
-                            <Input
-                                id="telegram_id"
-                                placeholder="@username yoki ID"
-                                value={formData.telegram_id}
-                                onChange={(e) => setFormData({ ...formData, telegram_id: e.target.value })}
-                                className="bg-slate-800 border-slate-600 text-slate-50"
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="status" className="text-slate-200">Mijoz statusi</Label>
-                            <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
-                                <SelectTrigger className="bg-slate-800 border-slate-600 text-slate-50">
-                                    <SelectValue placeholder="Statusni tanlang" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-slate-800 border-slate-700 text-slate-50">
-                                    <SelectItem value="new">Yangi</SelectItem>
-                                    <SelectItem value="regular">Doimiy</SelectItem>
-                                    <SelectItem value="vip">VIP</SelectItem>
-                                    <SelectItem value="blacklist">Qora ro'yxat</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-
                     <div className="space-y-2">
-                        <Label htmlFor="address" className="text-slate-200">Manzil</Label>
+                        <Label htmlFor="phone" className="text-slate-200">Telefon</Label>
                         <Input
-                            id="address"
-                            placeholder="Mijoz manzilini kiriting"
-                            value={formData.address}
-                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                            id="phone"
+                            type="tel"
+                            placeholder="+998 90 123 45 67"
+                            value={formData.phone}
+                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                             className="bg-slate-800 border-slate-600 text-slate-50"
                         />
                     </div>

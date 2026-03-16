@@ -498,25 +498,25 @@ function ClientStep({
                 : "border-slate-700 bg-slate-800 hover:border-primary/50 hover:bg-slate-750"
                 }`}
             >
-              <div className="flex items-start justify-between">
-                <div>
-                  <h4 className="font-semibold text-slate-50">{client.full_name}</h4>
-                  {client.company && (
-                    <p className="text-sm text-slate-400">{client.company}</p>
-                  )}
-                  {client.phone && (
-                    <p className="text-xs text-slate-500 mt-1">{client.phone}</p>
-                  )}
-                  {Number(client.balance || 0) < 0 && (
-                    <div className="mt-2 text-[10px] font-black text-red-500 flex items-center gap-1.5 px-2 py-1 bg-red-500/10 rounded-md border border-red-500/20">
-                        <AlertCircle className="h-3 w-3" /> MIJOZ QARZDOR: {Math.abs(Number(client.balance)).toLocaleString()} so'm
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="font-semibold text-slate-50">{client.full_name}</h4>
+                      {client.company && (
+                        <p className="text-sm text-slate-400">{client.company}</p>
+                      )}
+                      {client.phone && (
+                        <p className="text-xs text-slate-500 mt-1">{client.phone}</p>
+                      )}
+                      {Number(client.balance || 0) < 0 && (
+                        <div className="mt-2 text-[10px] font-black text-red-500 flex items-center gap-1.5 px-2 py-1 bg-red-500/10 rounded-md border border-red-500/20">
+                            <AlertCircle className="h-3 w-3" /> MIJOZ QARZDOR: {Math.abs(Number(client.balance)).toLocaleString()} so'm
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-                {selectedClient?.id === client.id && (
-                  <CheckCircle className="w-5 h-5 text-primary" />
-                )}
-              </div>
+                    {selectedClient?.id === client.id && (
+                      <CheckCircle className="w-5 h-5 text-primary" />
+                    )}
+                  </div>
             </button>
           ))}
         </div>
