@@ -6,7 +6,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { AlertTriangle, CheckCircle, TrendingUp } from 'lucide-react'
+import { AlertTriangle, CheckCircle, TrendingUp, Activity } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { fetchWithAuth } from '@/lib/api-client'

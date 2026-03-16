@@ -133,8 +133,8 @@ export function TemplateFormModal({
                                 </div>
                             </div>
                         </div>
-                    </div>                    {/* Book Specific Fields - Only for Book categories */}
-                    {isBook && (
+                    {/* Book Specific Fields - Only for Book categories */}
+                    {isBook ? (
                         <>
                             <div className="space-y-6">
                                 <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
@@ -303,8 +303,7 @@ export function TemplateFormModal({
                                 </div>
                             </div>
                         </>
-                    )}
- ) : (
+                    ) : (
                         /* Box Specific Dimensions - Only for NON-Book categories */
                         <div className="space-y-6">
                             <div className="flex items-center gap-3 border-b border-slate-800 pb-3">

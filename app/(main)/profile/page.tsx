@@ -15,7 +15,10 @@ import {
   Shield,
   MapPin,
   Trophy,
-  AlertTriangle
+  AlertTriangle,
+  TrendingUp,
+  Star,
+  History
 } from "lucide-react"
 import { fetchWithAuth } from "@/lib/api-client"
 import { toast } from "sonner"
