@@ -249,7 +249,8 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
       toast.error("Smenani boshlamasdan turib material olib bo'lmaydi!")
       return
     }
-    if (!activeStep || !selectedMaterial || !reqQuantity) {
+    if (!activeStep || !selectedMaterial || !reqQuantity) return;
+
     try {
       const material = materials.find(m => m.id === selectedMaterial)
       const qty = parseFloat(reqQuantity)
