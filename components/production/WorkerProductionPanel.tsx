@@ -40,6 +40,33 @@ interface ProductionStep {
   produced_qty?: number
   defect_qty?: number
   available_qty?: number
+  // New Specs
+  dimensions?: any
+  paper_type?: string
+  paper_density?: number
+  print_colors?: string
+  print_type?: string
+  lacquer_type?: string
+  cutting_type?: string
+  mockup_url?: string
+  additional_processing?: string
+  order_notes?: string
+  // Book Specs
+  book_name?: string
+  page_count?: number
+  cover_type?: string
+  binding_type?: string
+  paper_weight?: number
+  cover_weight?: number
+  lamination?: string
+  format?: string
+  all_steps?: Array<{
+    id: string
+    step: string
+    sequence: number
+    status: string
+    step_display: string
+  }>
 }
 
 export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuery?: string }) {
@@ -485,6 +512,94 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                       <p className="text-lg sm:text-xl font-black font-mono text-indigo-400">
                          {Math.max(0, activeStep.input_qty - (activeStep.produced_qty || 0))}
                       </p>
+                    </div>
+                 </div>
+
+                 {/* Specification Section - NEW */}
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-slate-800/50">
+                    <div className="space-y-4">
+                       <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                          <ClipboardList className="w-3 h-3" />
+                          TEXNIK SPETSIFIKATSIYA
+                       </h4>
+                       <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                          {[
+                            { label: "Qog'oz", value: activeStep.paper_type ? `${activeStep.paper_type} ${activeStep.paper_density || ''}gr` : null },
+                            { label: "O'lcham", value: activeStep.dimensions ? (typeof activeStep.dimensions === 'string' ? activeStep.dimensions : `${activeStep.dimensions.length}x${activeStep.dimensions.width}x${activeStep.dimensions.height}`) : null },
+                            { label: "Print", value: activeStep.print_colors },
+                            { label: "Lak", value: activeStep.lacquer_type },
+                            { label: "Kesish", value: activeStep.cutting_type },
+                            { label: "Kitob nomi", value: activeStep.book_name },
+                            { label: "Sahifa", value: activeStep.page_count },
+                            { label: "Muqova", value: activeStep.cover_type },
+                            { label: "Format", value: activeStep.format },
+                          ].filter(item => item.value).map((item, i) => (
+                            <div key={i} className="space-y-0.5">
+                               <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{item.label}</p>
+                               <p className="text-[11px] font-bold text-slate-200">{item.value}</p>
+                            </div>
+                          ))}
+                       </div>
+                       
+                       {activeStep.order_notes && (
+                         <div className="mt-4 p-3 bg-amber-500/5 border border-amber-500/10 rounded-xl">
+                            <p className="text-[8px] font-black text-amber-500/60 uppercase tracking-widest mb-1">BUYURTMA IZOHLARI</p>
+                            <p className="text-[10px] text-slate-300 leading-relaxed italic">{activeStep.order_notes}</p>
+                         </div>
+                       )}
+                    </div>
+
+                    <div className="space-y-4">
+                       <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                          <Zap className="w-3 h-3" />
+                          DIZAYN & JARAYON
+                       </h4>
+                       
+                       {activeStep.mockup_url ? (
+                         <a 
+                           href={activeStep.mockup_url} 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           className="flex items-center gap-4 p-4 bg-indigo-600/10 border border-indigo-500/30 rounded-2xl hover:bg-indigo-600/20 transition-all group"
+                         >
+                            <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform">
+                               <Package size={20} />
+                            </div>
+                            <div className="flex-1">
+                               <p className="text-[10px] font-black text-white uppercase tracking-widest group-hover:text-indigo-400 transition-colors">Dizayn Maketini Ko&apos;rish</p>
+                               <p className="text-[8px] font-black text-indigo-400/60 uppercase tracking-widest mt-0.5">Chizmani ochish uchun bosing</p>
+                            </div>
+                            <ArrowRight className="w-4 h-4 text-indigo-500 animate-pulse" />
+                         </a>
+                       ) : (
+                         <div className="p-4 bg-slate-800/20 border border-slate-800 border-dashed rounded-2xl flex items-center justify-center">
+                            <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest italic">Maket biriktirilmagan</p>
+                         </div>
+                       )}
+
+                       {activeStep.all_steps && activeStep.all_steps.length > 0 && (
+                         <div className="space-y-2 mt-4">
+                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest ml-1">BOSHQICHALR NAVBATI</p>
+                            <div className="flex flex-wrap gap-1.5">
+                               {activeStep.all_steps.map((s, i) => (
+                                 <div key={i} className="flex items-center gap-1.5">
+                                    <Badge 
+                                      className={`${
+                                        s.status === 'completed' ? 'bg-emerald-500/20 text-emerald-500' :
+                                        s.id === activeStep.id ? 'bg-indigo-600 text-white animate-pulse' :
+                                        'bg-slate-800/50 text-slate-600'
+                                      } border-none text-[8px] font-black px-2 py-0.5 rounded-md`}
+                                    >
+                                      {s.sequence}. {s.step_display}
+                                    </Badge>
+                                    {i < (activeStep.all_steps?.length || 0) - 1 && (
+                                      <ArrowRight className="w-2.5 h-2.5 text-slate-800" />
+                                    )}
+                                 </div>
+                               ))}
+                            </div>
+                         </div>
+                       )}
                     </div>
                  </div>
 
