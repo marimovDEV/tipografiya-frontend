@@ -23,7 +23,8 @@ import {
     LogOut,
     ShieldCheck,
     Menu,
-    X
+    X,
+    Layers
 } from 'lucide-react'
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
@@ -53,6 +54,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         { name: '📊 Analitika & Hisobotlar', href: '/reports-dashboard', icon: TrendingUp },
         { name: 'Xodimlar', href: '/employees', icon: Users2 },
         { name: 'Vazifalar', href: '/tasks', icon: CheckSquare },
+        { name: 'Shablonlar', href: '/templates', icon: Layers },
         { name: 'Sozlamalar', href: '/settings', icon: Settings },
     ]
 

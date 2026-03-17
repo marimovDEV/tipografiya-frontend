@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { ArrowLeft, Plus, Edit, Trash2, Save, X, Calculator } from "lucide-react"
+import { ArrowLeft, Plus, Edit, Trash2, Save, X, Calculator, GripVertical } from "lucide-react"
 import { getProductTemplate, calculateMaterials } from "@/lib/api/printery"
+import { fetchWithAuth } from "@/lib/api-client"
+import { toast } from "sonner"
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"
 import type { ProductTemplate, ProductTemplateLayer, ProductTemplateRouting, MaterialNormative, MaterialConsumption } from "@/lib/types"
 
 export default function TemplateDetailPage() {
@@ -222,7 +225,50 @@ function LayersTab({ template, onRefresh }: { template: ProductTemplate; onRefre
 
 function RoutingTab({ template, onRefresh }: { template: ProductTemplate; onRefresh: () => void }) {
     const routing = template.routing_steps || []
-    const sortedRouting = [...routing].sort((a, b) => a.sequence - b.sequence)
+    const [steps, setSteps] = useState(
+        [...routing].sort((a, b) => a.sequence - b.sequence)
+    )
+
+    useEffect(() => {
+        setSteps([...routing].sort((a, b) => a.sequence - b.sequence))
+    }, [routing])
+
+    const handleDragEnd = async (result: DropResult) => {
+        if (!result.destination) return
+
+        const startIndex = result.source.index
+        const endIndex = result.destination.index
+
+        if (startIndex === endIndex) return
+
+        // Optimistic UI update
+        const newSteps = Array.from(steps)
+        const [reorderedItem] = newSteps.splice(startIndex, 1)
+        newSteps.splice(endIndex, 0, reorderedItem)
+
+        // Update sequence numbers locally
+        const updatedSteps = newSteps.map((step, index) => ({
+            ...step,
+            sequence: index + 1
+        }))
+
+        setSteps(updatedSteps)
+
+        try {
+            const orderedIds = updatedSteps.map(s => s.id)
+            const res = await fetchWithAuth(`/api/template-stages/reorder/`, {
+                method: "POST",
+                body: JSON.stringify({ ordered_ids: orderedIds })
+            })
+            if (!res.ok) throw new Error("Nimadir xato ketdi")
+            toast.success("Ketma-ketlik saqlandi")
+            onRefresh()
+        } catch (e: any) {
+            toast.error("Xatolik: " + e.message)
+            // Revert on failure
+            setSteps([...routing].sort((a, b) => a.sequence - b.sequence))
+        }
+    }
 
     return (
         <div className="space-y-4">
@@ -234,7 +280,7 @@ function RoutingTab({ template, onRefresh }: { template: ProductTemplate; onRefr
                 </button>
             </div>
 
-            {sortedRouting.length === 0 ? (
+            {steps.length === 0 ? (
                 <div className="text-center py-12 border-2 border-dashed rounded-lg">
                     <p className="text-muted-foreground">Yo'nalish belgilanmagan</p>
                     <button className="mt-4 text-primary hover:underline">
@@ -244,67 +290,93 @@ function RoutingTab({ template, onRefresh }: { template: ProductTemplate; onRefr
             ) : (
                 <div className="relative">
                     {/* Timeline line */}
-                    <div className="absolute left-5 top-8 bottom-8 w-0.5 bg-gray-200" />
+                    <div className="absolute left-7 top-4 bottom-4 w-0.5 bg-gray-200" />
 
-                    <div className="space-y-4">
-                        {sortedRouting.map((step, index) => (
-                            <div key={step.id} className="relative flex gap-4">
-                                {/* Sequence number */}
-                                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-semibold z-10">
-                                    {step.sequence}
+                    <DragDropContext onDragEnd={handleDragEnd}>
+                        <Droppable droppableId="template-stages-droppable">
+                            {(provided) => (
+                                <div
+                                    {...provided.droppableProps}
+                                    ref={provided.innerRef}
+                                    className="space-y-4"
+                                >
+                                    {steps.map((step, index) => (
+                                        <Draggable key={String(step.id)} draggableId={String(step.id)} index={index}>
+                                            {(provided, snapshot) => (
+                                                <div
+                                                    ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                    className={`relative flex gap-4 transition-colors ${snapshot.isDragging ? 'opacity-90 z-50' : ''}`}
+                                                >
+                                                    {/* Sequence number with drag handle */}
+                                                    <div 
+                                                        className="flex-shrink-0 w-14 h-14 bg-white border flex items-center justify-center rounded-lg shadow-sm z-10 hover:border-primary/50 transition-colors"
+                                                    >
+                                                        <div {...provided.dragHandleProps} className="p-2 -ml-2 cursor-grab active:cursor-grabbing hover:bg-slate-50 rounded-lg text-slate-400">
+                                                            <GripVertical className="h-5 w-5" />
+                                                        </div>
+                                                        <span className="font-bold text-lg text-primary mr-2.5">
+                                                            {step.sequence}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Step content */}
+                                                    <div className="flex-1 border rounded-xl p-4 bg-white shadow-sm">
+                                                        <div className="flex items-start justify-between mb-2">
+                                                            <div>
+                                                                <h4 className="font-bold text-lg">{step.step_name}</h4>
+                                                                {step.required_machine_type && (
+                                                                    <p className="text-sm text-muted-foreground font-medium">
+                                                                        Stanok: {step.required_machine_type}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+
+                                                            <div className="flex items-center gap-2">
+                                                                {step.qc_checkpoint && (
+                                                                    <span className="px-2 py-1 bg-yellow-100/50 text-yellow-700 text-xs font-bold rounded-md">
+                                                                        Sifat nazorati (QC)
+                                                                    </span>
+                                                                )}
+                                                                {step.is_optional && (
+                                                                    <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-md">
+                                                                        Ixtiyoriy
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="grid grid-cols-2 gap-4 text-sm mt-4 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                                            <div>
+                                                                <span className="text-slate-500 font-medium">Birlik vaqti:</span>
+                                                                <span className="ml-2 font-bold text-slate-900">{step.estimated_time_per_unit || 0} min</span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-slate-500 font-medium">Sozlash tsikli:</span>
+                                                                <span className="ml-2 font-bold text-slate-900">{step.setup_time_minutes || 0} min</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex gap-2 mt-4">
+                                                            <button className="px-3 py-1.5 text-sm font-semibold border rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2">
+                                                                <Edit className="w-4 h-4" />
+                                                                Tahrirlash
+                                                            </button>
+                                                            <button className="px-3 py-1.5 text-sm font-semibold border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-2">
+                                                                <Trash2 className="w-4 h-4" />
+                                                                O'chirish
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </Draggable>
+                                    ))}
+                                    {provided.placeholder}
                                 </div>
-
-                                {/* Step content */}
-                                <div className="flex-1 border rounded-lg p-4">
-                                    <div className="flex items-start justify-between mb-2">
-                                        <div>
-                                            <h4 className="font-semibold">{step.step_name}</h4>
-                                            {step.required_machine_type && (
-                                                <p className="text-sm text-muted-foreground">
-                                                    Stanok: {step.required_machine_type}
-                                                </p>
-                                            )}
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            {step.qc_checkpoint && (
-                                                <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">
-                                                    QC
-                                                </span>
-                                            )}
-                                            {step.is_optional && (
-                                                <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                                                    Ixtiyoriy
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4 text-sm">
-                                        <div>
-                                            <span className="text-muted-foreground">Birlik vaqti:</span>
-                                            <span className="ml-2 font-medium">{step.estimated_time_per_unit} min</span>
-                                        </div>
-                                        <div>
-                                            <span className="text-muted-foreground">Sozlash:</span>
-                                            <span className="ml-2 font-medium">{step.setup_time_minutes} min</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex gap-2 mt-3">
-                                        <button className="px-3 py-1 text-sm border rounded hover:bg-gray-50">
-                                            <Edit className="w-3 h-3 inline mr-1" />
-                                            Tahrirlash
-                                        </button>
-                                        <button className="px-3 py-1 text-sm border border-red-200 text-red-600 rounded hover:bg-red-50">
-                                            <Trash2 className="w-3 h-3 inline mr-1" />
-                                            O'chirish
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                            )}
+                        </Droppable>
+                    </DragDropContext>
                 </div>
             )}
         </div>
