@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { 
   Play, 
   CheckCircle, 
+  CheckCircle2,
   AlertCircle, 
   Package, 
   Zap, 
