@@ -7,7 +7,42 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, UserPlus, Phone, ClipboardList, TrendingUp, Users, Activity, Layers } from "lucide-react"
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter,
+  DialogDescription,
+  DialogTrigger
+} from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { 
+  Search, 
+  UserPlus, 
+  Phone, 
+  ClipboardList, 
+  TrendingUp, 
+  Users, 
+  Activity, 
+  Layers,
+  Pencil,
+  Trash2,
+  KeyRound,
+  Eye,
+  EyeOff
+} from "lucide-react"
 import { fetchWithAuth } from "@/lib/api-client"
 import { toast } from "sonner"
 import Link from "next/link"
@@ -16,6 +51,33 @@ export default function EmployeesPage() {
   const [employees, setEmployees] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const [actionLoading, setActionLoading] = useState(false)
+
+  // Modal States
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<any>(null)
+  
+  // Visibility toggles
+  const [showAddPassword, setShowAddPassword] = useState(false)
+  const [showEditPassword, setShowEditPassword] = useState(false)
+
+  // Form States
+  const [addForm, setAddForm] = useState({
+    username: "",
+    password: "",
+    first_name: "",
+    last_name: "",
+    role: "worker"
+  })
+
+  const [editForm, setEditForm] = useState({
+    first_name: "",
+    last_name: "",
+    role: "worker",
+    password: ""
+  })
 
   useEffect(() => {
     fetchEmployees()
@@ -35,6 +97,97 @@ export default function EmployeesPage() {
       toast.error("Xatolik yuz berdi")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleCreateUser = async () => {
+    if (!addForm.username || !addForm.password || !addForm.first_name || !addForm.last_name) {
+      toast.error("Barcha majburiy maydonlarni to'ldiring")
+      return
+    }
+    setActionLoading(true)
+    try {
+      const res = await fetchWithAuth("/api/users/", {
+        method: "POST",
+        body: JSON.stringify(addForm)
+      })
+      if (res.ok) {
+        toast.success("Yangi xodim qo'shildi")
+        setIsAddModalOpen(false)
+        setAddForm({ username: "", password: "", first_name: "", last_name: "", role: "worker" })
+        fetchEmployees()
+      } else {
+        const err = await res.json()
+        toast.error(err.detail || err.username?.[0] || "Xatolik yuz berdi")
+      }
+    } catch (error) {
+      toast.error("Tizimda xatolik")
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleEditClick = (user: any) => {
+    setSelectedUser(user)
+    setEditForm({
+      first_name: user.first_name || "",
+      last_name: user.last_name || "",
+      role: user.role || "worker",
+      password: ""
+    })
+    setIsEditModalOpen(true)
+  }
+
+  const handleUpdateUser = async () => {
+    if (!editForm.first_name || !editForm.last_name) {
+      toast.error("Ism va familiya majburiy")
+      return
+    }
+    setActionLoading(true)
+    try {
+      const payload: any = { ...editForm }
+      if (!payload.password) delete payload.password
+
+      const res = await fetchWithAuth(`/api/users/${selectedUser.id}/`, {
+        method: "PATCH",
+        body: JSON.stringify(payload)
+      })
+      if (res.ok) {
+        toast.success("Ma'lumotlar yangilandi")
+        setIsEditModalOpen(false)
+        fetchEmployees()
+      } else {
+        toast.error("Xatolik yuz berdi")
+      }
+    } catch (error) {
+      toast.error("Tizimda xatolik")
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleDeleteClick = (user: any) => {
+    setSelectedUser(user)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleDeleteUser = async () => {
+    setActionLoading(true)
+    try {
+      const res = await fetchWithAuth(`/api/users/${selectedUser.id}/`, {
+        method: "DELETE"
+      })
+      if (res.ok) {
+        toast.success("Xodim o'chirildi")
+        setIsDeleteModalOpen(false)
+        fetchEmployees()
+      } else {
+        toast.error("Xatolik yuz berdi")
+      }
+    } catch (error) {
+      toast.error("Tizimda xatolik")
+    } finally {
+      setActionLoading(false)
     }
   }
 
@@ -93,12 +246,13 @@ export default function EmployeesPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
             </div>
-            <Link href="/settings">
-                <Button className="rounded-xl bg-primary hover:bg-primary/90 text-white font-black gap-2 border border-primary/20 shadow-lg shadow-primary/20 px-6">
-                    <UserPlus className="w-4 h-4" />
-                    YANGI XODIM
-                </Button>
-            </Link>
+            <Button 
+                className="rounded-xl bg-primary hover:bg-primary/90 text-white font-black gap-2 border border-primary/20 shadow-lg shadow-primary/20 px-6"
+                onClick={() => setIsAddModalOpen(true)}
+            >
+                <UserPlus className="w-4 h-4" />
+                YANGI XODIM
+            </Button>
         </div>
       </div>
 
@@ -214,11 +368,31 @@ export default function EmployeesPage() {
                     {getStatusBadge(worker.status)}
                   </TableCell>
                   <TableCell className="px-6 py-4 text-right">
-                    <Link href={`/employees/${worker.id}`}>
-                      <Button variant="ghost" size="sm" className="rounded-xl bg-slate-800 hover:bg-primary hover:text-white text-slate-400 font-black text-[10px] px-4 gap-2 transition-all group-hover:shadow-lg group-hover:shadow-primary/20">
-                        PROFILNI KO'RISH
-                      </Button>
-                    </Link>
+                    <div className="flex items-center justify-end gap-2">
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 rounded-lg bg-slate-800 hover:bg-primary hover:text-white text-slate-400"
+                            onClick={() => handleEditClick(worker)}
+                        >
+                            <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                        {worker.role !== 'admin' && (
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8 rounded-lg bg-slate-800 hover:bg-rose-500 hover:text-white text-slate-400"
+                                onClick={() => handleDeleteClick(worker)}
+                            >
+                                <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                        )}
+                        <Link href={`/employees/${worker.id}`}>
+                          <Button variant="ghost" size="sm" className="rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 font-black text-[10px] px-3 gap-2 border border-slate-700/50">
+                            PROFIL
+                          </Button>
+                        </Link>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -234,6 +408,183 @@ export default function EmployeesPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* MODALS */}
+      {/* Add Employee Modal */}
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-slate-100 sm:max-w-[500px] rounded-3xl p-0 overflow-hidden shadow-2xl">
+          <DialogHeader className="bg-slate-800/50 px-8 py-6 border-b border-slate-800">
+            <DialogTitle className="text-xl font-black uppercase italic tracking-tight">Yangi Xodim Qo'shish</DialogTitle>
+            <DialogDescription className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Tizim uchun yangi operator protokoli yaratish</DialogDescription>
+          </DialogHeader>
+          <div className="p-8 space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Ism *</Label>
+                <Input 
+                  value={addForm.first_name} 
+                  onChange={e => setAddForm({...addForm, first_name: e.target.value})}
+                  className="bg-slate-950 border-slate-800 h-12 rounded-xl focus:ring-primary text-sm font-bold"
+                  placeholder="Ismni kiriting"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Familiya *</Label>
+                <Input 
+                  value={addForm.last_name} 
+                  onChange={e => setAddForm({...addForm, last_name: e.target.value})}
+                  className="bg-slate-950 border-slate-800 h-12 rounded-xl focus:ring-primary text-sm font-bold"
+                  placeholder="Familiyani kiriting"
+                />
+              </div>
+            </div>
+            <div className="space-y-4">
+               <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Login (Username) *</Label>
+                <Input 
+                  value={addForm.username} 
+                  onChange={e => setAddForm({...addForm, username: e.target.value})}
+                  className="bg-slate-950 border-slate-800 h-12 rounded-xl focus:ring-primary text-sm font-bold"
+                  placeholder="tizim_logini"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Parol *</Label>
+                <div className="relative">
+                  <Input 
+                    type={showAddPassword ? "text" : "password"}
+                    value={addForm.password} 
+                    onChange={e => setAddForm({...addForm, password: e.target.value})}
+                    className="bg-slate-950 border-slate-800 h-12 rounded-xl focus:ring-primary text-sm font-bold pr-10"
+                    placeholder="••••••••"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowAddPassword(!showAddPassword)}
+                  >
+                    {showAddPassword ? <EyeOff className="h-4 w-4 text-slate-500" /> : <Eye className="h-4 w-4 text-slate-500" />}
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Rol / Lavozim</Label>
+                <Select value={addForm.role} onValueChange={v => setAddForm({...addForm, role: v})}>
+                    <SelectTrigger className="bg-slate-950 border-slate-800 h-12 rounded-xl text-sm font-bold">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                        <SelectItem value="worker" className="font-bold text-xs uppercase">Ishchi / Operator</SelectItem>
+                        <SelectItem value="admin" className="font-bold text-xs uppercase">Administrator</SelectItem>
+                        <SelectItem value="warehouse" className="font-bold text-xs uppercase">Omborchi</SelectItem>
+                        <SelectItem value="accountant" className="font-bold text-xs uppercase">Buxgalter</SelectItem>
+                    </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="bg-slate-800/30 px-8 py-6 border-t border-slate-800">
+            <Button variant="ghost" className="text-slate-500 font-black text-[10px] uppercase h-11" onClick={() => setIsAddModalOpen(false)}>Bekor qilish</Button>
+            <Button className="bg-primary text-white font-black text-[10px] uppercase h-11 px-8 rounded-xl" onClick={handleCreateUser} disabled={actionLoading}>
+                {actionLoading ? "Yaratilmoqda..." : "Yaratish"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="bg-slate-900 border-slate-800 text-slate-100 sm:max-w-[500px] rounded-3xl p-0 overflow-hidden shadow-2xl">
+          <DialogHeader className="bg-slate-800/50 px-8 py-6 border-b border-slate-800">
+            <DialogTitle className="text-xl font-black uppercase italic tracking-tight">Xodimni Tahrirlash</DialogTitle>
+            <DialogDescription className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Mavjud xodim ma'lumotlarini yangilash</DialogDescription>
+          </DialogHeader>
+          <div className="p-8 space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Ism</Label>
+                <Input 
+                  value={editForm.first_name} 
+                  onChange={e => setEditForm({...editForm, first_name: e.target.value})}
+                  className="bg-slate-950 border-slate-800 h-12 rounded-xl focus:ring-primary text-sm font-bold"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Familiya</Label>
+                <Input 
+                  value={editForm.last_name} 
+                  onChange={e => setEditForm({...editForm, last_name: e.target.value})}
+                  className="bg-slate-950 border-slate-800 h-12 rounded-xl focus:ring-primary text-sm font-bold"
+                />
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Yangi Parol (Ixtiyoriy)</Label>
+                <div className="relative">
+                  <Input 
+                    type={showEditPassword ? "text" : "password"}
+                    value={editForm.password} 
+                    onChange={e => setEditForm({...editForm, password: e.target.value})}
+                    placeholder="O'zgartirish uchun kiriting..."
+                    className="bg-slate-950 border-slate-800 h-12 rounded-xl focus:ring-primary text-sm font-bold pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowEditPassword(!showEditPassword)}
+                  >
+                    {showEditPassword ? <EyeOff className="h-4 w-4 text-slate-500" /> : <Eye className="h-4 w-4 text-slate-500" />}
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Rol / Lavozim</Label>
+                <Select value={editForm.role} onValueChange={v => setEditForm({...editForm, role: v})}>
+                    <SelectTrigger className="bg-slate-950 border-slate-800 h-12 rounded-xl text-sm font-bold">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                        <SelectItem value="worker" className="font-bold text-xs uppercase">Ishchi / Operator</SelectItem>
+                        <SelectItem value="admin" className="font-bold text-xs uppercase">Administrator</SelectItem>
+                        <SelectItem value="warehouse" className="font-bold text-xs uppercase">Omborchi</SelectItem>
+                        <SelectItem value="accountant" className="font-bold text-xs uppercase">Buxgalter</SelectItem>
+                    </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="bg-slate-800/30 px-8 py-6 border-t border-slate-800">
+            <Button variant="ghost" className="text-slate-500 font-black text-[10px] uppercase h-11" onClick={() => setIsEditModalOpen(false)}>Bekor qilish</Button>
+            <Button className="bg-primary text-white font-black text-[10px] uppercase h-11 px-8 rounded-xl" onClick={handleUpdateUser} disabled={actionLoading}>
+                {actionLoading ? "Saqlanmoqda..." : "Saqlash"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <AlertDialogContent className="bg-slate-950 border-slate-800 rounded-3xl max-w-[400px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white font-black uppercase italic tracking-tight">Xodimni o&apos;chirish?</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-400 text-xs font-medium">Bu amalni ortga qaytarib bo&apos;lmaydi. Xodim <b>{selectedUser?.username}</b> tizimdan butunlay o&apos;chiriladi.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6">
+            <AlertDialogCancel className="bg-slate-900 border-slate-800 text-slate-400 font-black text-[10px] uppercase h-11">BEKOR QILISH</AlertDialogCancel>
+            <AlertDialogAction 
+                onClick={handleDeleteUser}
+                className="bg-rose-600 hover:bg-rose-700 text-white font-black text-[10px] uppercase h-11 px-8 rounded-xl"
+            >
+                O&apos;CHIRISH
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

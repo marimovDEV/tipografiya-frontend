@@ -34,7 +34,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Pencil, Trash2, KeyRound } from "lucide-react"
+import { Pencil, Trash2, KeyRound, Eye, EyeOff } from "lucide-react"
 import { fetchWithAuth } from "@/lib/api-client"
 import { toast } from "sonner"
 
@@ -67,8 +67,11 @@ export function EmployeesTab({ settings, setSettings, users }: EmployeesTabProps
         first_name: "",
         last_name: "",
         role: "",
-        password: "" // Optional: leave empty to keep unchanged
+        password: ""
     })
+
+    const [showPassword, setShowPassword] = useState(false)
+    const [showCreatePassword, setShowCreatePassword] = useState(false)
 
     const handleEditClick = (user: any) => {
         setEditingUser(user)
@@ -283,12 +286,25 @@ export function EmployeesTab({ settings, setSettings, users }: EmployeesTabProps
                                 <KeyRound className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     id="edit-password"
-                                    type="password"
-                                    className="pl-9"
+                                    type={showPassword ? "text" : "password"}
+                                    className="pl-9 pr-10"
                                     placeholder="Faqat o'zgartirish uchun kiriting"
                                     value={editForm.password}
                                     onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
                                 />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? (
+                                        <EyeOff className="h-4 w-4 text-slate-500" />
+                                    ) : (
+                                        <Eye className="h-4 w-4 text-slate-500" />
+                                    )}
+                                </Button>
                             </div>
                         </div>
                         <div className="space-y-2">
@@ -358,12 +374,25 @@ export function EmployeesTab({ settings, setSettings, users }: EmployeesTabProps
                                 <KeyRound className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     id="create-password"
-                                    type="password"
-                                    className="pl-9"
+                                    type={showCreatePassword ? "text" : "password"}
+                                    className="pl-9 pr-10"
                                     placeholder="Yangi parol"
                                     value={createForm.password}
                                     onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
                                 />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                    onClick={() => setShowCreatePassword(!showCreatePassword)}
+                                >
+                                    {showCreatePassword ? (
+                                        <EyeOff className="h-4 w-4 text-slate-500" />
+                                    ) : (
+                                        <Eye className="h-4 w-4 text-slate-500" />
+                                    )}
+                                </Button>
                             </div>
                         </div>
                         <div className="space-y-2">

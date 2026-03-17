@@ -44,7 +44,10 @@ import {
   ClipboardList,
   Calendar,
   CheckCircle2,
-  XCircle
+  XCircle,
+  Trash2,
+  Eye,
+  EyeOff
 } from "lucide-react"
 import { fetchWithAuth } from "@/lib/api-client"
 import { toast } from "sonner"
@@ -65,7 +68,9 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
   // Dialog States
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   // Form States
   const [editForm, setEditForm] = useState({
@@ -74,6 +79,7 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
     phone: "",
     role: "",
     department: "",
+    password: "",
     daily_target: 1000,
     quality_rating: 5.0
   })
@@ -104,6 +110,7 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
           phone: userData.phone || "",
           role: userData.role || "worker",
           department: userData.department || "Ishlab chiqarish",
+          password: "",
           daily_target: userData.daily_target || 1000,
           quality_rating: userData.quality_rating || 5.0
         })
@@ -130,14 +137,36 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
     }
     setActionLoading(true)
     try {
+      const payload: any = { ...editForm }
+      if (!payload.password) delete payload.password
+
       const res = await fetchWithAuth(`/api/users/${id}/`, {
         method: "PATCH",
-        body: JSON.stringify(editForm)
+        body: JSON.stringify(payload)
       })
       if (res.ok) {
         toast.success("Ma'lumotlar yangilandi")
         setIsEditModalOpen(false)
         fetchWorkerData()
+      } else {
+        toast.error("Xatolik yuz berdi")
+      }
+    } catch (error) {
+      toast.error("Tizimda xatolik")
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleDeleteUser = async () => {
+    setActionLoading(true)
+    try {
+      const res = await fetchWithAuth(`/api/users/${id}/`, {
+        method: "DELETE"
+      })
+      if (res.ok) {
+        toast.success("Xodim o'chirildi")
+        router.push("/employees")
       } else {
         toast.error("Xatolik yuz berdi")
       }
@@ -239,6 +268,12 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
                 {worker.is_active ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
                 {worker.is_active ? "BLOKLASH" : "BLOKDAN CHIQARISH"}
             </Button>
+            {worker.role !== 'admin' && (
+                <Button size="sm" variant="destructive" className="rounded-xl font-bold gap-2 bg-red-600 hover:bg-red-700 text-white border-none shadow-lg shadow-red-500/20" onClick={() => setIsDeleteModalOpen(true)}>
+                    <Trash2 className="w-4 h-4" />
+                    O'CHIRISH
+                </Button>
+            )}
         </div>
       </div>
 
@@ -285,6 +320,31 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
                     onChange={e => setEditForm({...editForm, department: e.target.value})}
                     className="bg-slate-950 border-slate-800 h-12 rounded-xl focus:ring-primary text-sm font-bold"
                   />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Yangi Parol (Ixtiyoriy)</Label>
+                <div className="relative">
+                  <Input 
+                    type={showPassword ? "text" : "password"}
+                    value={editForm.password} 
+                    onChange={e => setEditForm({...editForm, password: e.target.value})}
+                    placeholder="O'zgartirish uchun kiriting..."
+                    className="bg-slate-950 border-slate-800 h-12 rounded-xl focus:ring-primary text-sm font-bold pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-slate-500" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-slate-500" />
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
             
@@ -355,6 +415,29 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
                 className={`text-white font-black text-[10px] uppercase h-11 px-8 rounded-xl ${worker.is_active ? "bg-rose-600 hover:bg-rose-700" : "bg-emerald-600 hover:bg-emerald-700"}`}
             >
                 {worker.is_active ? "BLOKLASH" : "FAOLASHTIRISH"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <AlertDialogContent className="bg-slate-950 border-slate-800 rounded-3xl max-w-[400px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white font-black uppercase italic tracking-tight">
+                Xodimni o'chirish?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-400 text-xs font-medium">
+                Diqqat! Bu amalni ortga qaytarib bo'lmaydi. Xodim tizimdan butunlay o'chiriladi.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6">
+            <AlertDialogCancel className="bg-slate-900 border-slate-800 text-slate-400 font-black text-[10px] uppercase h-11">BEKOR QILISH</AlertDialogCancel>
+            <AlertDialogAction 
+                onClick={handleDeleteUser}
+                className="bg-rose-600 hover:bg-rose-700 text-white font-black text-[10px] uppercase h-11 px-8 rounded-xl"
+            >
+                O'CHIRISH
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
