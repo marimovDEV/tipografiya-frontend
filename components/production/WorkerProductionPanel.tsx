@@ -464,9 +464,17 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                 </div>
               </div>
               {activeStep && (
-                <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-black text-[9px] uppercase px-3 py-1 rounded-lg">
-                  JARAYONDA
-                </Badge>
+                <div className="flex items-center gap-3">
+                  <div className="text-right hidden sm:block">
+                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Progress</p>
+                    <p className="text-xs font-black text-indigo-400">
+                      {Math.round((((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0)) / activeStep.input_qty) * 100)}%
+                    </p>
+                  </div>
+                  <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-black text-[9px] uppercase px-3 py-1 rounded-lg">
+                    JARAYONDA
+                  </Badge>
+                </div>
               )}
             </div>
           </CardHeader>
@@ -489,30 +497,38 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
 
                 {/* Progress Stats */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                   <div className="p-3 sm:p-4 bg-slate-950/50 border border-slate-800 rounded-2xl sm:rounded-3xl text-center">
-                     <p className="text-[7px] sm:text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">JAMI</p>
-                     <p className="text-lg sm:text-xl font-black font-mono text-white">{activeStep.input_qty}</p>
-                   </div>
-                   <div className="p-3 sm:p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl sm:rounded-3xl text-center">
-                     <p className="text-[7px] sm:text-[8px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">BAJARILDI</p>
-                     <p className="text-lg sm:text-xl font-black font-mono text-emerald-400">{activeStep.produced_qty || 0}</p>
-                   </div>
-                   <div className="p-3 sm:p-4 bg-rose-500/5 border border-rose-500/20 rounded-2xl sm:rounded-3xl text-center">
-                     <p className="text-[7px] sm:text-[8px] font-black text-rose-500/60 uppercase tracking-widest mb-1">BRAK</p>
-                     <p className="text-lg sm:text-xl font-black font-mono text-rose-500">{activeStep.defect_qty || 0}</p>
-                   </div>
-                   <div className="p-3 sm:p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl sm:rounded-3xl text-center">
-                     <p className="text-[7px] sm:text-[8px] font-black text-amber-500/60 uppercase tracking-widest mb-1">MAVJUD</p>
-                     <p className="text-lg sm:text-xl font-black font-mono text-amber-400">
-                        {activeStep.available_qty || 0}
-                     </p>
-                   </div>
-                    <div className="p-3 sm:p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-2xl sm:rounded-3xl text-center col-span-2 sm:col-span-1">
-                      <p className="text-[7px] sm:text-[8px] font-black text-indigo-400/60 uppercase tracking-widest mb-1">QOLGAN</p>
-                      <p className="text-lg sm:text-xl font-black font-mono text-indigo-400">
-                         {Math.max(0, activeStep.input_qty - (activeStep.produced_qty || 0))}
+                    <div className="p-3 sm:p-4 bg-slate-950/50 border border-slate-800 rounded-2xl sm:rounded-3xl text-center">
+                      <p className="text-[7px] sm:text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">JAMI</p>
+                      <p className="text-lg sm:text-xl font-black font-mono text-white">{activeStep.input_qty}</p>
+                    </div>
+                    <div className="p-3 sm:p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl sm:rounded-3xl text-center">
+                      <p className="text-[7px] sm:text-[8px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">BAJARILDI</p>
+                      <p className="text-lg sm:text-xl font-black font-mono text-emerald-400">{activeStep.produced_qty || 0}</p>
+                    </div>
+                    <div className="p-3 sm:p-4 bg-rose-500/5 border border-rose-500/20 rounded-2xl sm:rounded-3xl text-center">
+                      <p className="text-[7px] sm:text-[8px] font-black text-rose-500/60 uppercase tracking-widest mb-1">BRAK</p>
+                      <p className="text-lg sm:text-xl font-black font-mono text-rose-500">{activeStep.defect_qty || 0}</p>
+                    </div>
+                    <div className="p-3 sm:p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl sm:rounded-3xl text-center col-span-2 sm:col-span-1">
+                      <p className="text-[7px] sm:text-[8px] font-black text-amber-500/60 uppercase tracking-widest mb-1">QOLGAN</p>
+                      <p className="text-lg sm:text-xl font-black font-mono text-amber-400">
+                         {Math.max(0, activeStep.input_qty - ((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0)))}
                       </p>
                     </div>
+                    <div className="p-3 sm:p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-2xl sm:rounded-3xl text-center col-span-2 sm:col-span-1">
+                      <p className="text-[7px] sm:text-[8px] font-black text-indigo-400/60 uppercase tracking-widest mb-1">PROGRESS</p>
+                      <p className="text-lg sm:text-xl font-black font-mono text-indigo-400">
+                         {Math.round((((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0)) / activeStep.input_qty) * 100)}%
+                      </p>
+                    </div>
+                 </div>
+
+                 {/* VISUAL PROGRESS BAR - NEW */}
+                 <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                    <div 
+                      className="h-full bg-gradient-to-r from-indigo-600 to-emerald-400 transition-all duration-500"
+                      style={{ width: `${Math.min(100, (((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0)) / activeStep.input_qty) * 100)}%` }}
+                    />
                  </div>
 
                  {/* Specification Section - NEW */}
@@ -643,14 +659,18 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                           onClick={handleReport}
                           disabled={submitting}
                         >
-                          {submitting ? "..." : "SAQLASH"}
+                          {submitting ? "..." : "MIQDORNI SAQLASH"}
                         </Button>
                         <Button 
-                          className="flex-1 h-12 sm:h-14 rounded-xl sm:rounded-2xl bg-emerald-600 text-white font-black text-[10px] sm:text-[11px] uppercase tracking-[0.15em] shadow-lg shadow-emerald-500/30 hover:bg-emerald-500 transition-all border-none"
+                          className={`${
+                            (Math.max(0, activeStep.input_qty - ((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0)))) > 0
+                            ? 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'
+                            : 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-500'
+                          } flex-1 h-12 sm:h-14 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.15em] transition-all border-none`}
                           onClick={handleComplete}
-                          disabled={submitting}
+                          disabled={submitting || (Math.max(0, activeStep.input_qty - ((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0)))) > 0}
                         >
-                          {submitting ? "..." : "TAMOMLASH"}
+                          {submitting ? "..." : "ETAPNI TUGATISH"}
                         </Button>
                        </div>
                    </div>

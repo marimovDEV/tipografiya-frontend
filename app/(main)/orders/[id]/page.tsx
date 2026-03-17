@@ -84,10 +84,23 @@ export default function OrderDetailPage() {
         }
     }
 
-    // Progress calculation
-    const totalSteps = order?.production_steps?.length || 0;
-    const completedSteps = order?.production_steps?.filter(s => s.status === 'completed').length || 0;
-    const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+    // Granular Progress calculation
+    const calculateProgress = () => {
+        if (!order?.production_steps?.length) return 0;
+        
+        let totalProgress = 0;
+        order.production_steps.forEach(step => {
+            if (step.status === 'completed') {
+                totalProgress += 1;
+            } else if (step.status === 'in_progress' && (step.input_qty || 0) > 0) {
+                const currentStepProgress = ((step.produced_qty || 0) + (step.defect_qty || 0)) / (step.input_qty || 1);
+                totalProgress += Math.min(1, currentStepProgress);
+            }
+        });
+        
+        return Math.round((totalProgress / order.production_steps.length) * 100);
+    };
+    const progressPercent = calculateProgress();
 
     const renderAdditionalProcessing = (raw: string | null) => {
         if (!raw) return null
@@ -363,6 +376,20 @@ export default function OrderDetailPage() {
                                                     </div>
                                                 ) : (
                                                     <span className="text-[10px] font-bold text-slate-700 uppercase">Kutilmoqda</span>
+                                                )}
+
+                                                {(step.produced_qty > 0 || step.defect_qty > 0) && (
+                                                    <div className="mt-3 flex items-center gap-4 p-2 bg-slate-950/30 rounded-lg border border-slate-800/50 w-fit">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[8px] text-slate-500 font-black uppercase tracking-tighter">Bajarildi</span>
+                                                            <span className="text-[10px] font-black text-emerald-500">{step.produced_qty}</span>
+                                                        </div>
+                                                        <div className="w-px h-4 bg-slate-800" />
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[8px] text-slate-500 font-black uppercase tracking-tighter">Brak</span>
+                                                            <span className="text-[10px] font-black text-rose-500">{step.defect_qty}</span>
+                                                        </div>
+                                                    </div>
                                                 )}
 
                                                 {step.notes && (
