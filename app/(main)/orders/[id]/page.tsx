@@ -295,9 +295,6 @@ export default function OrderDetailPage() {
                                 <FileText className="h-6 w-6 text-cyan-500" />
                                 Maket Fayllari
                             </CardTitle>
-                            <Button variant="ghost" className="text-[10px] font-black uppercase tracking-widest text-cyan-500 hover:text-cyan-400">
-                                <Play className="h-3 w-3 mr-1" /> Hammasini yuklab olish
-                            </Button>
                         </CardHeader>
                         <CardContent className="p-8">
                             {order.mockup_url ? (
