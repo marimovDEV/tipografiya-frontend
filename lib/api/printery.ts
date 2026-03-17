@@ -435,6 +435,8 @@ export async function reportStepProgress(params: {
     production_step_id: string
     produced_qty: number
     defect_qty: number
+    produced_pages?: number
+    defect_pages?: number
     notes?: string
 }): Promise<any> {
     const response = await fetchWithAuth(`${API_BASE}/production/report-progress/`, {

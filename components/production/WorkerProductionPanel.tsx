@@ -84,6 +84,8 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
   // Reporting state
   const [produced, setProduced] = useState("")
   const [defects, setDefects] = useState("")
+  const [producedPages, setProducedPages] = useState("")
+  const [defectPages, setDefectPages] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [user, setUser] = useState<any>(null)
 
@@ -263,12 +265,16 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
       setSubmitting(true)
       await reportStepProgress({
         production_step_id: activeStep.id,
-        produced_qty: parseInt(produced),
-        defect_qty: parseInt(defects || "0")
+        produced_qty: parseFloat(produced || "0"),
+        defect_qty: parseFloat(defects || "0"),
+        produced_pages: producedPages ? parseInt(producedPages) : undefined,
+        defect_pages: defectPages ? parseInt(defectPages) : undefined
       })
       toast.success("Hisobot saqlandi")
       setProduced("")
       setDefects("")
+      setProducedPages("")
+      setDefectPages("")
       fetchWorkerData()
       fetchDailyStats()
     } catch (error) {
@@ -507,16 +513,16 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                     </div>
                     <div className="p-3 sm:p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl sm:rounded-3xl text-center">
                       <p className="text-[7px] sm:text-[8px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">BAJARILDI</p>
-                      <p className="text-lg sm:text-xl font-black font-mono text-emerald-400">{activeStep.produced_qty || 0}</p>
+                      <p className="text-lg sm:text-xl font-black font-mono text-emerald-400">{Number(activeStep.produced_qty || 0).toFixed(2)}</p>
                     </div>
                     <div className="p-3 sm:p-4 bg-rose-500/5 border border-rose-500/20 rounded-2xl sm:rounded-3xl text-center">
                       <p className="text-[7px] sm:text-[8px] font-black text-rose-500/60 uppercase tracking-widest mb-1">BRAK</p>
-                      <p className="text-lg sm:text-xl font-black font-mono text-rose-500">{activeStep.defect_qty || 0}</p>
+                      <p className="text-lg sm:text-xl font-black font-mono text-rose-500">{Number(activeStep.defect_qty || 0).toFixed(2)}</p>
                     </div>
                     <div className="p-3 sm:p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl sm:rounded-3xl text-center col-span-2 sm:col-span-1">
                       <p className="text-[7px] sm:text-[8px] font-black text-amber-500/60 uppercase tracking-widest mb-1">QOLGAN</p>
                       <p className="text-lg sm:text-xl font-black font-mono text-amber-400">
-                         {Math.max(0, activeStep.input_qty - ((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0)))}
+                         {Math.max(0, activeStep.input_qty - ((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0))).toFixed(2)}
                       </p>
                     </div>
                     <div className="p-3 sm:p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-2xl sm:rounded-3xl text-center col-span-2 sm:col-span-1">
@@ -657,22 +663,80 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
 
                 {/* Input Controls */}
                 <div className="space-y-6 pt-4 border-t border-slate-800/50">
+                   {/* Page-based reporting if applicable */}
+                   {activeStep.page_count && activeStep.page_count > 0 && (
+                     <div className="p-6 bg-indigo-500/5 border border-indigo-500/20 rounded-[2rem] space-y-4">
+                        <div className="flex items-center justify-between">
+                           <div>
+                              <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Sahifa kalkulyatori</h4>
+                              <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-0.5">Bajargan sahifangizni kiriting, tizim kitobga hisoblaydi</p>
+                           </div>
+                           <Badge className="bg-indigo-500/20 text-indigo-400 font-black text-[9px] uppercase">
+                              1 kitob = {activeStep.page_count} bet
+                           </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                           <div className="space-y-2">
+                              <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Bitgan sahifa</Label>
+                              <Input 
+                                type="number" 
+                                placeholder="0"
+                                className="h-12 bg-slate-950 border-slate-800 rounded-xl text-lg font-black font-mono focus:ring-indigo-500/20 text-white"
+                                value={producedPages}
+                                onChange={e => {
+                                  setProducedPages(e.target.value)
+                                  if (e.target.value && activeStep.page_count) {
+                                    setProduced((parseFloat(e.target.value) / activeStep.page_count).toFixed(4))
+                                  }
+                                }}
+                              />
+                           </div>
+                           <div className="space-y-2">
+                              <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Brak sahifa</Label>
+                              <Input 
+                                type="number" 
+                                placeholder="0"
+                                className="h-12 bg-slate-950 border-slate-800 rounded-xl text-lg font-black font-mono focus:ring-rose-500/20 text-rose-500"
+                                value={defectPages}
+                                onChange={e => {
+                                  setDefectPages(e.target.value)
+                                  if (e.target.value && activeStep.page_count) {
+                                    setDefects((parseFloat(e.target.value) / activeStep.page_count).toFixed(4))
+                                  }
+                                }}
+                              />
+                           </div>
+                        </div>
+                        {producedPages && (
+                           <p className="text-[9px] font-black text-emerald-400/60 uppercase tracking-widest text-center italic">
+                              Hisoblangan: {(parseFloat(producedPages) / activeStep.page_count).toFixed(4)} kitob
+                           </p>
+                        )}
+                     </div>
+                   )}
+
                    <div className="grid grid-cols-2 gap-4 sm:gap-6">
                       <div className="space-y-2">
-                         <Label className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Bajarildi (dona)</Label>
+                         <Label className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                            {activeStep.page_count ? "Hisoblangan kitob (dona)" : "Bajarildi (dona)"}
+                         </Label>
                          <Input 
                            type="number" 
-                           placeholder="0"
+                           step="0.0001"
+                           placeholder="0.00"
                            className="h-12 sm:h-14 bg-slate-950 border-slate-800 rounded-xl sm:rounded-2xl text-lg sm:text-xl font-black font-mono focus:ring-indigo-500/20 text-white"
                            value={produced}
                            onChange={e => setProduced(e.target.value)}
                          />
                       </div>
                       <div className="space-y-2">
-                         <Label className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Brak (nuqson)</Label>
+                         <Label className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                            {activeStep.page_count ? "Hisoblangan brak (dona)" : "Brak (nuqson)"}
+                         </Label>
                          <Input 
                            type="number" 
-                           placeholder="0"
+                           step="0.0001"
+                           placeholder="0.00"
                            className="h-12 sm:h-14 bg-slate-950 border-slate-800 rounded-xl sm:rounded-2xl text-lg sm:text-xl font-black font-mono focus:ring-rose-500/20 text-rose-500"
                            value={defects}
                            onChange={e => setDefects(e.target.value)}
@@ -699,12 +763,12 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                         </Button>
                         <Button 
                           className={`${
-                            (Math.max(0, activeStep.input_qty - ((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0)))) > 0
+                            (Math.max(0, activeStep.input_qty - ((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0)))) > 0.0001
                             ? 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'
                             : 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-500'
                           } flex-1 h-12 sm:h-14 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.15em] transition-all border-none`}
                           onClick={handleComplete}
-                          disabled={submitting || (Math.max(0, activeStep.input_qty - ((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0)))) > 0}
+                          disabled={submitting || (Math.max(0, activeStep.input_qty - ((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0)))) > 0.0001}
                         >
                           {submitting ? "..." : "ETAPNI TUGATISH"}
                         </Button>
