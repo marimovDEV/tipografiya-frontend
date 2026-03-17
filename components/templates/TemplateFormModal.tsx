@@ -1,8 +1,8 @@
-"use client"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { updateProductTemplate, createProductTemplate } from "@/lib/api/printery"
-import type { ProductTemplate, ProductCategory } from "@/lib/types"
+import type { ProductTemplate, ProductCategory, ProductTemplateRouting } from "@/lib/types"
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"
+import { GripVertical, Plus, Trash2, Settings2, Clock, Factory, UserCheck, Zap } from "lucide-react"
 
 export const CATEGORY_LABELS: Partial<Record<ProductCategory, string>> = {
     book: "Kitob",
@@ -54,17 +54,36 @@ export function TemplateFormModal({
         column_count: template?.column_count || 1,
         safe_area_padding_mm: template?.safe_area_padding_mm || 5.0,
     })
+    
+    // Workflow Stages State
+    const [stages, setStages] = useState<Partial<ProductTemplateRouting>[]>(
+        template?.stages || [
+            { stage_name: "Sklad", sequence: 1, department: "Omborxona", requires_operator: true },
+            { stage_name: "Tayyor (Sklad)", sequence: 2, department: "Omborxona", requires_operator: true }
+        ]
+    )
+
     const [saving, setSaving] = useState(false)
+
+    // Sync sequences when stages change
+    useEffect(() => {
+        setStages(prev => prev.map((s, i) => ({ ...s, sequence: i + 1 })))
+    }, [stages.length])
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
 
         try {
             setSaving(true)
+            const payload = {
+                ...formData,
+                stages: stages.map((s, i) => ({ ...s, sequence: i + 1 }))
+            }
+
             if (template) {
-                await updateProductTemplate(template.id, formData)
+                await updateProductTemplate(template.id, payload)
             } else {
-                await createProductTemplate(formData)
+                await createProductTemplate(payload)
             }
             onSave()
         } catch (error) {
@@ -73,6 +92,44 @@ export function TemplateFormModal({
         } finally {
             setSaving(false)
         }
+    }
+
+    const onDragEnd = (result: DropResult) => {
+        if (!result.destination) return
+
+        const items = Array.from(stages)
+        const [reorderedItem] = items.splice(result.source.index, 1)
+        items.splice(result.destination.index, 0, reorderedItem)
+
+        // Update sequences immediately for better UX
+        const updatedItems = items.map((item, index) => ({
+            ...item,
+            sequence: index + 1
+        }))
+
+        setStages(updatedItems)
+    }
+
+    const addStage = () => {
+        const newStage: Partial<ProductTemplateRouting> = {
+            stage_name: "Yangi bosqich",
+            sequence: stages.length + 1,
+            department: "",
+            requires_operator: true,
+            auto_start: false
+        }
+        setStages([...stages, newStage])
+    }
+
+    const removeStage = (index: number) => {
+        const newStages = stages.filter((_, i) => i !== index)
+        setStages(newStages)
+    }
+
+    const updateStage = (index: number, field: keyof ProductTemplateRouting, value: any) => {
+        const newStages = [...stages]
+        newStages[index] = { ...newStages[index], [field]: value }
+        setStages(newStages)
     }
 
     const isBook = BOOK_CATEGORIES.includes(formData.category as ProductCategory);
@@ -386,6 +443,157 @@ export function TemplateFormModal({
                                 />
                             </div>
                         </div>
+                    </div>
+
+                    {/* Workflow Stages Builder - Drag & Drop */}
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <div className="flex items-center gap-3">
+                                <div className="w-2 h-6 bg-rose-500 rounded-full" />
+                                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Ishlab chiqarish etaplari (Workflow)</h3>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={addStage}
+                                className="px-3 py-1.5 bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all flex items-center gap-2"
+                            >
+                                <Plus className="w-3.5 h-3.5" />
+                                Etap qo&apos;shish
+                            </button>
+                        </div>
+
+                        <DragDropContext onDragEnd={onDragEnd}>
+                            <Droppable droppableId="stages">
+                                {(provided) => (
+                                    <div
+                                        {...provided.droppableProps}
+                                        ref={provided.innerRef}
+                                        className="space-y-3"
+                                    >
+                                        {stages.map((stage, index) => (
+                                            <Draggable key={`stage-${index}`} draggableId={`stage-${index}`} index={index}>
+                                                {(provided, snapshot) => (
+                                                    <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        className={`
+                                                            group bg-slate-950/50 border border-slate-800 rounded-xl p-4 transition-all
+                                                            ${snapshot.isDragging ? "border-rose-500/50 shadow-2xl shadow-rose-500/10 scale-[1.02] z-[110]" : "hover:border-slate-700"}
+                                                        `}
+                                                    >
+                                                        <div className="flex items-start gap-4">
+                                                            {/* Drag Handle */}
+                                                            <div {...provided.dragHandleProps} className="mt-2 text-slate-600 hover:text-slate-400 cursor-grab active:cursor-grabbing">
+                                                                <GripVertical className="w-5 h-5" />
+                                                            </div>
+
+                                                            {/* Stage Number */}
+                                                            <div className="mt-1.5 w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-black text-slate-400">
+                                                                {index + 1}
+                                                            </div>
+
+                                                            {/* Stage Form fields */}
+                                                            <div className="flex-1 space-y-4">
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                    <div className="space-y-1">
+                                                                        <label className="text-[9px] font-black uppercase text-slate-600 tracking-widest ml-1">Etap nomi</label>
+                                                                        <input
+                                                                            type="text"
+                                                                            value={stage.stage_name}
+                                                                            onChange={(e) => updateStage(index, "stage_name", e.target.value)}
+                                                                            className="w-full h-9 px-3 bg-slate-900 border border-slate-800 rounded-lg text-sm text-slate-200 focus:border-rose-500 outline-none transition-all"
+                                                                            placeholder="Masalan: Bosma"
+                                                                        />
+                                                                    </div>
+                                                                    <div className="space-y-1">
+                                                                        <label className="text-[9px] font-black uppercase text-slate-600 tracking-widest ml-1">Bo&apos;lim</label>
+                                                                        <input
+                                                                            type="text"
+                                                                            value={stage.department || ""}
+                                                                            onChange={(e) => updateStage(index, "department", e.target.value)}
+                                                                            className="w-full h-9 px-3 bg-slate-900 border border-slate-800 rounded-lg text-sm text-slate-200 focus:border-rose-500 outline-none transition-all"
+                                                                            placeholder="Masalan: Bosmaxona"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+                                                                    <div className="flex items-center gap-2 px-2 py-1.5 bg-slate-900/50 rounded-lg border border-slate-800/50">
+                                                                        <Clock className="w-3.5 h-3.5 text-slate-500" />
+                                                                        <input
+                                                                            type="number"
+                                                                            value={stage.estimated_time_minutes || ""}
+                                                                            onChange={(e) => updateStage(index, "estimated_time_minutes", parseInt(e.target.value) || 0)}
+                                                                            className="w-full bg-transparent text-[11px] outline-none text-slate-300 font-bold"
+                                                                            placeholder="Min"
+                                                                        />
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2 px-2 py-1.5 bg-slate-900/50 rounded-lg border border-slate-800/50">
+                                                                        <Factory className="w-3.5 h-3.5 text-slate-500" />
+                                                                        <input
+                                                                            type="text"
+                                                                            value={stage.machine || ""}
+                                                                            onChange={(e) => updateStage(index, "machine", e.target.value)}
+                                                                            className="w-full bg-transparent text-[11px] outline-none text-slate-300 font-bold"
+                                                                            placeholder="Stanok"
+                                                                        />
+                                                                    </div>
+                                                                    
+                                                                    <div className="flex items-center gap-4 col-span-2">
+                                                                        <label className="flex items-center gap-2 cursor-pointer group/check">
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                checked={stage.requires_operator}
+                                                                                onChange={(e) => updateStage(index, "requires_operator", e.target.checked)}
+                                                                                className="w-4 h-4 rounded border-slate-800 bg-slate-900 text-rose-500 focus:ring-rose-500/20"
+                                                                            />
+                                                                            <span className="text-[10px] font-black uppercase text-slate-500 group-hover/check:text-slate-300 transition-colors">Operator</span>
+                                                                        </label>
+                                                                        <label className="flex items-center gap-2 cursor-pointer group/check">
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                checked={stage.auto_start}
+                                                                                onChange={(e) => updateStage(index, "auto_start", e.target.checked)}
+                                                                                className="w-4 h-4 rounded border-slate-800 bg-slate-900 text-rose-500 focus:ring-rose-500/20"
+                                                                            />
+                                                                            <span className="text-[10px] font-black uppercase text-slate-500 group-hover/check:text-slate-300 transition-colors">Auto</span>
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Actions */}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeStage(index)}
+                                                                className="mt-2 p-2 text-slate-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </Draggable>
+                                        ))}
+                                        {provided.placeholder}
+                                    </div>
+                                )}
+                            </Droppable>
+                        </DragDropContext>
+
+                        {stages.length === 0 && (
+                            <div className="text-center py-10 border-2 border-dashed border-slate-800 rounded-2xl">
+                                <Settings2 className="w-8 h-8 text-slate-700 mx-auto mb-3" />
+                                <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Hozircha etaplar yo&apos;q</p>
+                                <button
+                                    type="button"
+                                    onClick={addStage}
+                                    className="mt-3 text-rose-500 text-[10px] font-black uppercase tracking-widest hover:underline"
+                                >
+                                    Birinchi bosqichni qo&apos;shish
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* Description & Status */}

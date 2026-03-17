@@ -322,6 +322,7 @@ export interface ProductTemplate {
 
   // Relations
   layers?: ProductTemplateLayer[]
+  stages?: ProductTemplateRouting[]
   routing_steps?: ProductTemplateRouting[]
   normatives?: MaterialNormative[]
 }
@@ -343,11 +344,16 @@ export interface ProductTemplateRouting {
   template: string
   sequence: number
   step_name: string
+  department?: string
+  auto_start?: boolean
+  requires_operator?: boolean
+  machine?: string
+  estimated_time_minutes?: number
   required_machine_type?: string
-  estimated_time_per_unit: number
-  setup_time_minutes: number
-  qc_checkpoint: boolean
-  is_optional: boolean
+  estimated_time_per_unit?: number
+  setup_time_minutes?: number
+  qc_checkpoint?: boolean
+  is_optional?: boolean
   created_at: string
 }
 
