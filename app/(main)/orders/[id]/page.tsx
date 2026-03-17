@@ -406,7 +406,7 @@ export default function OrderDetailPage() {
                             </div>
                             {(order.client?.id || order.client_id) && (
                                 <div className="pt-2 border-t border-slate-700">
-                                    <Link href={`/customers/${order.client?.id || order.client_id}`}>
+                                    <Link href={`/clients/${order.client?.id || order.client_id}`}>
                                         <Button variant="link" size="sm" className="p-0 h-auto text-blue-400 hover:text-blue-300">Mijoz profiliga o'tish</Button>
                                     </Link>
                                 </div>
