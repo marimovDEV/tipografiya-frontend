@@ -493,72 +493,16 @@ export function TemplateFormModal({
                                                             </div>
 
                                                             {/* Stage Form fields */}
-                                                            <div className="flex-1 space-y-4">
-                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                                    <div className="space-y-1">
-                                                                        <label className="text-[9px] font-black uppercase text-slate-600 tracking-widest ml-1">Etap nomi</label>
-                                                                        <input
-                                                                            type="text"
-                                                                            value={stage.stage_name}
-                                                                            onChange={(e) => updateStage(index, "stage_name", e.target.value)}
-                                                                            className="w-full h-9 px-3 bg-slate-900 border border-slate-800 rounded-lg text-sm text-slate-200 focus:border-rose-500 outline-none transition-all"
-                                                                            placeholder="Masalan: Bosma"
-                                                                        />
-                                                                    </div>
-                                                                    <div className="space-y-1">
-                                                                        <label className="text-[9px] font-black uppercase text-slate-600 tracking-widest ml-1">Bo&apos;lim</label>
-                                                                        <input
-                                                                            type="text"
-                                                                            value={stage.department || ""}
-                                                                            onChange={(e) => updateStage(index, "department", e.target.value)}
-                                                                            className="w-full h-9 px-3 bg-slate-900 border border-slate-800 rounded-lg text-sm text-slate-200 focus:border-rose-500 outline-none transition-all"
-                                                                            placeholder="Masalan: Bosmaxona"
-                                                                        />
-                                                                    </div>
-                                                                </div>
-
-                                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
-                                                                    <div className="flex items-center gap-2 px-2 py-1.5 bg-slate-900/50 rounded-lg border border-slate-800/50">
-                                                                        <Clock className="w-3.5 h-3.5 text-slate-500" />
-                                                                        <input
-                                                                            type="number"
-                                                                            value={stage.estimated_time_minutes || ""}
-                                                                            onChange={(e) => updateStage(index, "estimated_time_minutes", parseInt(e.target.value) || 0)}
-                                                                            className="w-full bg-transparent text-[11px] outline-none text-slate-300 font-bold"
-                                                                            placeholder="Min"
-                                                                        />
-                                                                    </div>
-                                                                    <div className="flex items-center gap-2 px-2 py-1.5 bg-slate-900/50 rounded-lg border border-slate-800/50">
-                                                                        <Factory className="w-3.5 h-3.5 text-slate-500" />
-                                                                        <input
-                                                                            type="text"
-                                                                            value={stage.machine || ""}
-                                                                            onChange={(e) => updateStage(index, "machine", e.target.value)}
-                                                                            className="w-full bg-transparent text-[11px] outline-none text-slate-300 font-bold"
-                                                                            placeholder="Stanok"
-                                                                        />
-                                                                    </div>
-                                                                    
-                                                                    <div className="flex items-center gap-4 col-span-2">
-                                                                        <label className="flex items-center gap-2 cursor-pointer group/check">
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                checked={stage.requires_operator}
-                                                                                onChange={(e) => updateStage(index, "requires_operator", e.target.checked)}
-                                                                                className="w-4 h-4 rounded border-slate-800 bg-slate-900 text-rose-500 focus:ring-rose-500/20"
-                                                                            />
-                                                                            <span className="text-[10px] font-black uppercase text-slate-500 group-hover/check:text-slate-300 transition-colors">Operator</span>
-                                                                        </label>
-                                                                        <label className="flex items-center gap-2 cursor-pointer group/check">
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                checked={stage.auto_start}
-                                                                                onChange={(e) => updateStage(index, "auto_start", e.target.checked)}
-                                                                                className="w-4 h-4 rounded border-slate-800 bg-slate-900 text-rose-500 focus:ring-rose-500/20"
-                                                                            />
-                                                                            <span className="text-[10px] font-black uppercase text-slate-500 group-hover/check:text-slate-300 transition-colors">Auto</span>
-                                                                        </label>
-                                                                    </div>
+                                                            <div className="flex-1">
+                                                                <div className="space-y-1">
+                                                                    <label className="text-[9px] font-black uppercase text-slate-600 tracking-widest ml-1">Etap nomi</label>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={stage.stage_name}
+                                                                        onChange={(e) => updateStage(index, "stage_name", e.target.value)}
+                                                                        className="w-full h-10 px-4 bg-slate-900 border border-slate-800 rounded-xl text-sm text-slate-200 focus:border-rose-500 outline-none transition-all shadow-inner"
+                                                                        placeholder="Masalan: Bosma"
+                                                                    />
                                                                 </div>
                                                             </div>
 
@@ -566,9 +510,10 @@ export function TemplateFormModal({
                                                             <button
                                                                 type="button"
                                                                 onClick={() => removeStage(index)}
-                                                                className="mt-2 p-2 text-slate-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                                                                className="mt-6 p-2 text-slate-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                                                                title="O'chirish"
                                                             >
-                                                                <Trash2 className="w-4 h-4" />
+                                                                <Trash2 className="w-5 h-5" />
                                                             </button>
                                                         </div>
                                                     </div>
