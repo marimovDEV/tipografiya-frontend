@@ -10,7 +10,8 @@ import {
     ArrowLeft, Package,
     User, Calendar, Clock, FileText, ExternalLink,
     Settings, DollarSign, TrendingUp, CheckCircle2,
-    Truck, Box, XCircle, ChevronRight, AlertCircle, Play, Book, Edit
+    Truck, Box, XCircle, ChevronRight, AlertCircle, Play, Book, Edit,
+    Download, Trash2, Layers, MoreHorizontal, UploadCloud
 } from "lucide-react"
 import { getStatusLabel, getStatusBadgeColor, formatCurrency } from "@/lib/data/mock-data"
 import { fetchWithAuth } from "@/lib/api-client"
@@ -69,7 +70,6 @@ export default function OrderDetailPage() {
         }
     }
 
-
     const handleApprove = async () => {
         setUpdating(true)
         try {
@@ -84,11 +84,15 @@ export default function OrderDetailPage() {
         }
     }
 
+    // Progress calculation
+    const totalSteps = order?.production_steps?.length || 0;
+    const completedSteps = order?.production_steps?.filter(s => s.status === 'completed').length || 0;
+    const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+
     const renderAdditionalProcessing = (raw: string | null) => {
         if (!raw) return null
         
         try {
-            // Check if it's a JSON string
             if (raw.startsWith('{')) {
                 const data = JSON.parse(raw)
                 
@@ -115,18 +119,18 @@ export default function OrderDetailPage() {
                 }
 
                 return (
-                    <div className="md:col-span-2 mt-4 space-y-2 p-4 bg-slate-900/50 rounded-xl border border-slate-800">
-                        <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Qo'shimcha ishlov</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                    <div className="space-y-3">
+                        <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Texnik ishlov</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-4">
                             {Object.entries(data).map(([key, value]) => {
                                 const label = labels[key] || key
                                 const displayValue = value === true ? 'Ha' : value === false ? 'Yo\'q' : (valueMap[String(value)] || String(value))
-                                if (value === 'none' || value === false) return null // Skip 'none' to keep it clean
+                                if (value === 'none' || value === false) return null
                                 
                                 return (
-                                    <div key={key} className="flex justify-between border-b border-slate-800/50 pb-1">
-                                        <span className="text-sm text-slate-400">{label}:</span>
-                                        <span className="text-sm font-medium text-slate-200">{displayValue}</span>
+                                    <div key={key} className="flex flex-col border-l-2 border-slate-800 pl-3">
+                                        <span className="text-[10px] text-slate-500 font-bold uppercase">{label}</span>
+                                        <span className="text-sm font-semibold text-slate-200">{displayValue}</span>
                                     </div>
                                 )
                             })}
@@ -135,137 +139,147 @@ export default function OrderDetailPage() {
                 )
             }
         } catch (e) {
-            console.error("JSON parse error for additional_processing", e)
+            console.error("JSON parse error", e)
         }
 
         return (
-            <div className="md:col-span-2 mt-2 p-3 bg-muted rounded-md text-sm italic">
-                <strong>Qo'shimcha ishlov:</strong> {raw}
+            <div className="p-4 bg-slate-900/50 rounded-xl border border-slate-800 text-sm">
+                <span className="text-slate-500 mr-2">Qo'shimcha ishlov:</span>
+                <span className="text-slate-200">{raw}</span>
             </div>
         )
     }
 
-    if (loading) return <div className="p-8 text-center">Yuklanmoqda...</div>
-    if (!order) return <div className="p-8 text-center">Buyurtma topilmadi</div>
+    if (loading) return <div className="p-8 text-center text-slate-400 font-medium">Baza bilan aloqa o'rnatilmoqda...</div>
+    if (!order) return <div className="p-8 text-center text-red-400">Malumotlar topilmadi</div>
 
     return (
-        <div className="space-y-6 pb-20">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={() => router.back()}>
-                        <ArrowLeft className="h-5 w-5" />
-                    </Button>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-2xl font-bold">Buyurtma #{order.order_number?.split('-').pop()}</h1>
-                            <Badge className={getStatusBadgeColor(order.status)}>
-                                {getStatusLabel(order.status)}
-                            </Badge>
+        <div className="max-w-[1600px] mx-auto text-slate-200">
+            {/* STICKY HEADER - Industrial ERP Style */}
+            <div className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800 -mx-6 px-6 py-4 mb-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-center gap-5">
+                        <Button 
+                            variant="outline" 
+                            size="icon" 
+                            onClick={() => router.back()}
+                            className="bg-slate-900 border-slate-800 hover:bg-slate-800 hover:border-slate-700 rounded-xl"
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                        <div>
+                            <div className="flex items-center gap-3">
+                                <h1 className="text-2xl font-black tracking-tight text-white uppercase italic">
+                                    #{order.order_number?.split('-').pop()}
+                                </h1>
+                                <Badge className={`${getStatusBadgeColor(order.status)} px-3 py-1 font-black text-[10px] tracking-tighter uppercase italic rounded-lg`}>
+                                    {getStatusLabel(order.status)}
+                                </Badge>
+                            </div>
+                            <div className="flex items-center gap-4 mt-1">
+                                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-bold uppercase">
+                                    <Calendar className="h-3 w-3" />
+                                    <span>Deadline: {order.deadline ? new Date(order.deadline).toLocaleDateString("uz-UZ", { day: 'numeric', month: 'long' }) : "Belgilanmagan"}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-bold uppercase">
+                                    <Package className="h-3 w-3" />
+                                    <span>{order.quantity.toLocaleString()} ta</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-xs text-cyan-500 font-bold uppercase bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                                    <TrendingUp className="h-3 w-3" />
+                                    <span>Progress: {progressPercent}%</span>
+                                </div>
+                            </div>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                            Yaratilgan sana: {new Date(order.created_at).toLocaleString("uz-UZ")}
-                        </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                        {order.status === 'pending' && (
+                            <Button onClick={handleApprove} disabled={updating} className="h-10 px-6 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/20">
+                                <Play className="h-4 w-4 mr-2" /> Ishni boshlash
+                            </Button>
+                        )}
+                        <Button variant="outline" className="h-10 bg-slate-900 border-slate-800 hover:bg-slate-800 text-slate-400 font-bold text-xs uppercase rounded-xl">
+                            <Edit className="h-4 w-4 mr-2" /> Tahrirlash
+                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className="h-10 w-10 p-0 bg-slate-900 border-slate-800 hover:bg-slate-800 rounded-xl">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56 bg-slate-900 border-slate-800 text-slate-200">
+                                <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-slate-500">Amallar</DropdownMenuLabel>
+                                <DropdownMenuItem className="hover:bg-slate-800 cursor-pointer">
+                                    <FileText className="h-4 w-4 mr-2" /> Invoys yaratish
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="hover:bg-slate-800 cursor-pointer">
+                                    <Layers className="h-4 w-4 mr-2" /> Shablondan nusxa olish
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator className="bg-slate-800" />
+                                <DropdownMenuItem className="text-red-400 hover:bg-red-500/10 hover:text-red-400 cursor-pointer">
+                                    <Trash2 className="h-4 w-4 mr-2" /> O'chirish
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                    {order.status === 'pending' && (
-                        <Button onClick={handleApprove} disabled={updating} size="sm" className="gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold">
-                            <Play className="h-4 w-4" /> Ishlab chiqarishga yuborish
-                        </Button>
-                    )}
+                {/* VISUAL PROGRESS BAR */}
+                <div className="mt-6 w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                    <div 
+                        className="h-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-all duration-1000 ease-out"
+                        style={{ width: `${progressPercent}%` }}
+                    />
                 </div>
             </div>
 
             {/* Advance Payment Warning */}
             {order.advance_payment === 0 && (order.status === 'pending' || order.status === 'approved') && (
-                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 flex items-start gap-4 animate-in fade-in slide-in-from-top-2 duration-500">
-                    <div className="p-2 bg-yellow-500/20 rounded-lg text-yellow-500">
-                        <AlertCircle className="h-5 w-5" />
+                <div className="mb-8 p-4 bg-orange-500/5 border border-orange-500/20 rounded-2xl flex items-center gap-4 animate-pulse">
+                    <div className="p-3 bg-orange-500/10 rounded-xl text-orange-500">
+                        <AlertCircle className="h-6 w-6" />
                     </div>
-                    <div className="flex-1">
-                        <h4 className="text-sm font-bold text-yellow-500 uppercase tracking-wider">⚠ Avans kutilmoqda</h4>
-                        <p className="text-xs text-slate-400 mt-1">
-                            Ushbu buyurtma uchun hali avans to'lovi kiritilmagan. Ishlab chiqarishni boshlashdan oldin avans olish tavsiya etiladi.
-                        </p>
+                    <div>
+                        <h4 className="text-sm font-black text-orange-400 uppercase tracking-widest italic">Avans kutilmoqda!</h4>
+                        <p className="text-xs text-slate-500 font-medium">Ushbu buyurtma uchun hali to'lov kiritilmagan. Ishni boshlash xavfli bo'lishi mumkin.</p>
                     </div>
                 </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left column: Main Info & Specs */}
-                <div className="lg:col-span-2 space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg flex items-center gap-2">
-                                <Package className="h-5 w-5 text-primary" />
-                                Mahsulot Tafsiloti
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                {/* LEFT COLUMN: SPECS & DETAILS (8 cols) */}
+                <div className="lg:col-span-8 space-y-8">
+                    {/* PRODUCT CARD */}
+                    <Card className="bg-slate-900/40 border-slate-800/60 rounded-[2rem] overflow-hidden shadow-2xl backdrop-blur-sm">
+                        <CardHeader className="p-8 border-b border-slate-800/50">
+                            <CardTitle className="text-xl font-black uppercase tracking-tighter italic flex items-center gap-3">
+                                <Box className="h-6 w-6 text-blue-500" />
+                                Mahsulot Xarakteristikasi
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-4">
-                                <div className="flex justify-between border-b pb-2">
-                                    <span className="text-muted-foreground">Mahsulot nomi:</span>
-                                    <span className="font-semibold">{order.box_type}</span>
-                                </div>
-                                <div className="flex justify-between border-b pb-2">
-                                    <span className="text-muted-foreground">Miqdori:</span>
-                                    <span className="font-semibold">{order.quantity.toLocaleString()} dona</span>
-                                </div>
-                                <div className="flex justify-between border-b pb-2">
-                                    <span className="text-muted-foreground">O'lchamlari:</span>
-                                    <span className="font-semibold">
-                                        {order.paper_width || '-'} x {order.paper_height || '-'} sm
-                                    </span>
-                                </div>
-                                <div className="flex justify-between border-b pb-2">
-                                    <span className="text-muted-foreground">Qog'oz:</span>
-                                    <span className="font-semibold">{order.paper_type} ({order.paper_density} gr/m²)</span>
-                                </div>
+                        <CardContent className="p-8 space-y-10">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                                <DetailItem label="Nomi" value={order.box_type} icon={<Package className="h-4 w-4" />} />
+                                <DetailItem label="O'lcham" value={`${order.paper_width || '-'} x ${order.paper_height || '-'} sm`} icon={<Settings className="h-4 w-4" />} />
+                                <DetailItem label="Qog'oz" value={`${order.paper_type} (${order.paper_density} gr)`} icon={<FileText className="h-4 w-4" />} />
+                                <DetailItem label="Pechat" value={order.print_type} icon={<TrendingUp className="h-4 w-4" />} />
                             </div>
 
-                            <div className="space-y-4">
-                                <div className="flex justify-between border-b pb-2">
-                                    <span className="text-muted-foreground">Pechat turi:</span>
-                                    <span className="font-semibold">{order.print_type}</span>
-                                </div>
-                                <div className="flex justify-between border-b pb-2">
-                                    <span className="text-muted-foreground">Ranglar:</span>
-                                    <span className="font-semibold">{order.print_colors}</span>
-                                </div>
-                                <div className="flex justify-between border-b pb-2">
-                                    <span className="text-muted-foreground">Laklash:</span>
-                                    <span className="font-semibold">{order.lacquer_type || "Yo'q"}</span>
-                                </div>
-                                <div className="flex justify-between border-b pb-2">
-                                    <span className="text-muted-foreground">Kesish:</span>
-                                    <span className="font-semibold">{order.cutting_type}</span>
-                                </div>
-                            </div>
-
+                            {/* Book specific specs inside a themed sub-section */}
                             {order.book_name && (
-                                <div className="md:col-span-2 space-y-4 pt-4 border-t">
-                                    <h4 className="text-sm font-bold text-primary uppercase tracking-widest flex items-center gap-2">
-                                        <Book className="h-4 w-4" /> Kitob Tafsilotlari
+                                <div className="p-6 bg-blue-600/5 border border-blue-600/10 rounded-3xl relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-4 opacity-5">
+                                        <Book className="h-24 w-24" />
+                                    </div>
+                                    <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping" />
+                                        Kitob Loyihasi
                                     </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-primary/5 p-4 rounded-xl border border-primary/10">
-                                        <div className="flex justify-between border-b border-primary/10 pb-2">
-                                            <span className="text-muted-foreground">Kitob Nomi:</span>
-                                            <span className="font-bold text-slate-100">{order.book_name}</span>
-                                        </div>
-                                        <div className="flex justify-between border-b border-primary/10 pb-2">
-                                            <span className="text-muted-foreground">Betlar Soni:</span>
-                                            <span className="font-bold text-slate-100">{order.page_count} bet</span>
-                                        </div>
-                                        <div className="flex justify-between border-b border-primary/10 pb-2">
-                                            <span className="text-muted-foreground">Muqova Turi:</span>
-                                            <span className="font-bold text-slate-100">
-                                                {order.cover_type === 'hard' ? 'Qattiq' :
-                                                    order.cover_type === 'soft' ? 'Yumshoq' :
-                                                        order.cover_type === 'integral' ? 'Integral' : order.cover_type}
-                                            </span>
-                                        </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                        <DetailItem label="Nomi" value={order.book_name} light />
+                                        <DetailItem label="Betlar" value={`${order.page_count} bet`} light />
+                                        <DetailItem label="Muqova" value={order.cover_type === 'hard' ? 'Qattiq' : order.cover_type === 'soft' ? 'Yumshoq' : 'Standart'} light />
                                     </div>
                                 </div>
                             )}
@@ -274,229 +288,233 @@ export default function OrderDetailPage() {
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg flex items-center gap-2">
-                                <FileText className="h-5 w-5 text-primary" />
-                                Maket va Fayllar
+                    {/* FILES & MOCKUP CARD */}
+                    <Card className="bg-slate-900/40 border-slate-800/60 rounded-[2rem] overflow-hidden shadow-xl">
+                        <CardHeader className="p-8 border-b border-slate-800/50 flex flex-row items-center justify-between">
+                            <CardTitle className="text-xl font-black uppercase tracking-tighter italic flex items-center gap-3">
+                                <FileText className="h-6 w-6 text-cyan-500" />
+                                Maket Fayllari
                             </CardTitle>
+                            <Button variant="ghost" className="text-[10px] font-black uppercase tracking-widest text-cyan-500 hover:text-cyan-400">
+                                <Play className="h-3 w-3 mr-1" /> Hammasini yuklab olish
+                            </Button>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="p-8">
                             {order.mockup_url ? (
-                                <div className="flex items-center justify-between p-4 border rounded-lg bg-blue-50/50">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-blue-100 rounded text-blue-600">
-                                            <FileText className="h-6 w-6" />
-                                        </div>
-                                        <div>
-                                            <p className="font-medium text-blue-900">Dizayn maketi</p>
-                                            <p className="text-xs text-blue-600">PDF / Raster formatda</p>
-                                        </div>
-                                    </div>
-                                    <a href={order.mockup_url} target="_blank" rel="noreferrer">
-                                        <Button variant="outline" size="sm" className="gap-2">
-                                            <ExternalLink className="h-4 w-4" /> Ochish
-                                        </Button>
-                                    </a>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <FileCard name="Dizayn maketi.pdf" size="24 MB" url={order.mockup_url} type="pdf" />
+                                    <FileCard name="Pechat varianti.ai" size="115 MB" url="#" type="ai" />
                                 </div>
                             ) : (
-                                <div className="text-center py-6 border-2 border-dashed rounded-lg text-muted-foreground">
-                                    <p>Maket yuklanmagan</p>
-                                    <Button variant="link" size="sm">Hozir yuklash</Button>
+                                <div className="group cursor-pointer border-2 border-dashed border-slate-800 rounded-[2rem] p-12 text-center hover:border-blue-500/50 hover:bg-blue-500/5 transition-all">
+                                    <div className="w-16 h-16 bg-slate-800 rounded-3xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-500/20 group-hover:text-blue-500 transition-all">
+                                        <UploadCloud className="h-8 w-8" />
+                                    </div>
+                                    <p className="text-slate-200 font-black text-sm uppercase tracking-widest">Maket yuklanmagan</p>
+                                    <p className="text-slate-500 text-xs mt-1 font-bold">Fayllarni bu yerga tashlang yoki bosing</p>
                                 </div>
                             )}
                         </CardContent>
                     </Card>
 
-                    {/* Timeline / Production Steps */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg">Ishlab chiqarish jarayoni</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="relative space-y-0 pb-4">
-                                {order.production_steps && order.production_steps.length > 0 ? (
-                                    order.production_steps.map((step, idx) => (
-                                        <div key={step.id} className="flex gap-4 group">
-                                            <div className="flex flex-col items-center">
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 z-10 bg-white ${step.status === 'completed' ? 'border-green-500 text-green-500' :
-                                                    step.status === 'in_progress' ? 'border-blue-500 text-blue-500 animate-pulse' :
-                                                        'border-gray-200 text-gray-300'
-                                                    }`}>
-                                                    {step.status === 'completed' ? <CheckCircle2 className="h-5 w-5" /> : idx + 1}
-                                                </div>
-                                                {idx < (order.production_steps?.length || 0) - 1 && (
-                                                    <div className={`w-0.5 flex-1 bg-gray-200 ${step.status === 'completed' ? 'bg-green-200' : ''}`} />
-                                                )}
-                                            </div>
-                                            <div className="flex-1 pb-8">
-                                                <div className="flex items-center justify-between">
-                                                    <h4 className={`font-semibold ${step.status === 'completed' ? 'text-green-700' : ''}`}>
-                                                        {(() => {
-                                                            const map: Record<string, string> = {
-                                                                'queue': 'Navbatda',
-                                                                'prepress': 'Prepress (maket)',
-                                                                'printing_internal': 'Bosma (ichki)',
-                                                                'printing_cover': 'Bosma (muqova)',
-                                                                'folding': 'Faltsovka',
-                                                                'assembly': "Yig'ish",
-                                                                'binding': 'Termokley / Tikish',
-                                                                'trimming': 'Uch tomondan kesish',
-                                                                'printing': 'Chop etish',
-                                                                'gluing': 'Yelimlash',
-                                                                'drying': 'Quritish',
-                                                                'packaging': 'Qadoqlash',
-                                                                'packing': 'Qadoqlash',
-                                                                'ready': 'Tayyor'
-                                                            }
-                                                            const key = step.step.toLowerCase()
-                                                            return map[key] || step.step.charAt(0).toUpperCase() + step.step.slice(1)
-                                                        })()}
-                                                    </h4>
-                                                    <Badge variant="secondary" className="text-[10px] h-5">
-                                                        {(() => {
-                                                            const statusMap: Record<string, string> = {
-                                                                'pending': 'Kutilmoqda',
-                                                                'in_progress': 'Jarayonda',
-                                                                'completed': 'Bajarildi',
-                                                                'failed': 'Xatolik',
-                                                                'cancelled': 'Bekor qilindi'
-                                                            }
-                                                            return statusMap[step.status] || step.status
-                                                        })()}
-                                                    </Badge>
-                                                </div>
-                                                {step.completed_at && (
-                                                    <p className="text-xs text-muted-foreground mt-1">
-                                                        Bajarildi: {new Date(step.completed_at).toLocaleString("uz-UZ")}
-                                                    </p>
-                                                )}
-                                                {step.notes && <p className="text-sm text-muted-foreground mt-2 px-2 border-l-2">{step.notes}</p>}
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="text-muted-foreground text-center py-4 italic">
-                                        <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-20" />
-                                        Jarayonlar hali boshlanmagan
+                    {/* CLIENT & NOTES (Integrated Bottom) */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <Card className="bg-slate-900/40 border-slate-800/60 rounded-[2rem]">
+                            <CardContent className="p-8">
+                                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6 border-b border-slate-800 pb-4">Buyurtmachi</h4>
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center font-black text-lg text-white">
+                                        {order.client?.full_name?.charAt(0)}
                                     </div>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Right column: Sidebar Cards */}
-                <div className="space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg flex items-center gap-2">
-                                <User className="h-5 w-5 text-primary" />
-                                Mijoz Ma'lumoti
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div>
-                                <p className="text-sm font-semibold text-slate-50">{order.client?.full_name}</p>
-                                <p className="text-xs text-slate-400">{order.client?.company}</p>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-slate-300">
-                                <Calendar className="h-4 w-4 text-slate-400" />
-                                <span>Topshirish: {order.deadline ? new Date(order.deadline).toLocaleDateString("uz-UZ") : "Noma'lum"}</span>
-                            </div>
-                            {(order.client?.id || order.client_id) && (
-                                <div className="pt-2 border-t border-slate-700">
-                                    <Link href={`/clients/${order.client?.id || order.client_id}`}>
-                                        <Button variant="link" size="sm" className="p-0 h-auto text-blue-400 hover:text-blue-300">Mijoz profiliga o'tish</Button>
+                                    <div>
+                                        <p className="font-black text-white">{order.client?.full_name}</p>
+                                        <p className="text-xs font-bold text-slate-500 uppercase">{order.client?.company}</p>
+                                    </div>
+                                </div>
+                                <div className="mt-8 flex gap-3">
+                                    <Link href={`/clients/${order.client?.id}`} className="flex-1">
+                                        <Button className="w-full bg-slate-800 hover:bg-slate-700 text-[10px] font-black uppercase tracking-widest rounded-xl">Profilni ko'rish</Button>
                                     </Link>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    {/* FINANCIAL CARD - ADMIN ONLY */}
-                    {isAdmin && (
-                        <Card className="border-blue-700/50 bg-blue-950/20 overflow-hidden">
-                            <CardHeader className="border-b border-blue-700/30 bg-blue-900/10">
-                                <CardTitle className="text-lg flex items-center gap-2 text-slate-50 font-outfit">
-                                    <DollarSign className="h-5 w-5 text-blue-400" />
-                                    Moliyaviy Xulosa
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-0">
-                                <div className="p-5 space-y-4">
-                                    {/* Order Price */}
-                                    <div className="flex justify-between items-center group">
-                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Buyurtma narxi:</span>
-                                        <span className="font-black text-xl text-slate-100 italic">{formatCurrency(order.total_price || 0)}</span>
-                                    </div>
-
-                                    {/* Advance & Balance Block */}
-                                    <div className="bg-slate-900/60 rounded-xl border border-slate-800 p-4 space-y-3">
-                                        <div className="flex justify-between items-center border-b border-slate-800 pb-2">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
-                                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Olingan Avans:</span>
-                                            </div>
-                                            <span className="font-bold text-sm text-yellow-500">{formatCurrency(order.advance_payment || 0)}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center pb-1">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Qolgan Summa (Qoldiq):</span>
-                                            </div>
-                                            <span className="font-black text-base text-red-100">
-                                                {formatCurrency(Math.max(0, (order.total_price || 0) - (order.advance_payment || 0)))}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    {/* Payment Details Pill */}
-                                    <div className="flex items-center justify-between pt-2">
-                                        <div className="flex flex-col gap-1">
-                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">To'lov holati:</span>
-                                            <Badge className={`text-[10px] font-black italic rounded-full px-3 h-5 ${
-                                                order.payment_status === 'fully_paid' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
-                                                order.payment_status === 'partially_paid' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' :
-                                                'bg-red-500/20 text-red-400 border-red-500/30'
-                                            }`}>
-                                                {order.payment_status === 'fully_paid' ? 'TO\'LIQ TO\'LANGAN' :
-                                                 order.payment_status === 'partially_paid' ? 'AVANS OLINGAN' : 'TO\'LANMAGAN'}
-                                            </Badge>
-                                        </div>
-                                        {order.initial_payment_method && (
-                                            <div className="flex flex-col items-end gap-1">
-                                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest text-right">To'lov turi:</span>
-                                                <span className="text-[11px] font-bold text-blue-300 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20 uppercase">
-                                                    {order.initial_payment_method === 'cash' ? '💸 Naqd' : 
-                                                     order.initial_payment_method === 'card' ? '💳 Plastik' : 
-                                                     order.initial_payment_method === 'transfer' ? '🏛 O\'tkazma' : order.initial_payment_method}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
+                                    <Button variant="outline" className="flex-1 border-slate-800 text-[10px] font-black uppercase tracking-widest rounded-xl">Muloqot</Button>
                                 </div>
                             </CardContent>
                         </Card>
-                    )}
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg">Ichki Izohlar</CardTitle>
+                        <Card className="bg-slate-900/40 border-slate-800/60 rounded-[2rem]">
+                            <CardContent className="p-8">
+                                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6 border-b border-slate-800 pb-4">Ichki izohlar</h4>
+                                <p className="text-sm font-medium text-slate-400 italic leading-relaxed">
+                                    {order.notes || "Hech qanday maxsus izoh yo'q."}
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
+
+                {/* RIGHT COLUMN: PRODUCTION TIMELINE (4 cols) */}
+                <div className="lg:col-span-4 space-y-8 h-full">
+                    <Card className="bg-slate-900/40 border-slate-800/60 rounded-[2rem] overflow-hidden sticky top-32 shadow-2xl backdrop-blur-sm h-fit">
+                        <CardHeader className="p-8 border-b border-slate-800/50">
+                            <CardTitle className="text-xl font-black uppercase tracking-tighter italic flex items-center gap-3">
+                                <TrendingUp className="h-6 w-6 text-green-500" />
+                                Jarayon Timeline
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                <div className="p-3 bg-muted/30 rounded text-sm text-muted-foreground min-h-[100px]">
-                                    {order.notes || "Hozircha hech qanday ichki izoh yo'q."}
+                        <CardContent className="p-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                            <div className="relative">
+                                {/* The vertical central line */}
+                                <div className="absolute left-6 top-2 bottom-2 w-0.5 bg-slate-800" />
+                                
+                                <div className="space-y-12">
+                                    {order.production_steps?.map((step, idx) => (
+                                        <div key={step.id} className="relative pl-16 group">
+                                            {/* Status Icon Pillar */}
+                                            <div className={`absolute left-0 top-0 w-12 h-12 rounded-2xl flex items-center justify-center border-2 transition-all duration-500 z-10 ${
+                                                step.status === 'completed' ? 'bg-green-500/10 border-green-500 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)]' :
+                                                step.status === 'in_progress' ? 'bg-blue-600 border-blue-600 text-white animate-pulse shadow-[0_0_20px_rgba(37,99,235,0.4)]' :
+                                                'bg-slate-900 border-slate-800 text-slate-600'
+                                            }`}>
+                                                {step.status === 'completed' ? <CheckCircle2 className="h-6 w-6" /> : 
+                                                 step.status === 'in_progress' ? <Play className="h-5 w-5 fill-current" /> : (idx + 1)}
+                                            </div>
+
+                                            <div>
+                                                <h4 className={`text-sm font-black uppercase tracking-widest transition-colors ${
+                                                    step.status === 'completed' ? 'text-green-400' : 
+                                                    step.status === 'in_progress' ? 'text-blue-400' : 'text-slate-500'
+                                                }`}>
+                                                    {getStepLabelUz(step.step)}
+                                                </h4>
+                                                
+                                                {step.status === 'completed' ? (
+                                                    <div className="mt-1 flex items-center gap-2 text-[10px] text-slate-500 font-bold uppercase">
+                                                        <Clock className="h-3 w-3" />
+                                                        <span>{new Date(step.completed_at || '').toLocaleDateString("uz-UZ")} • {new Date(step.completed_at || '').toLocaleTimeString("uz-UZ", { hour: '2-digit', minute: '2-digit' })}</span>
+                                                    </div>
+                                                ) : step.status === 'in_progress' ? (
+                                                    <div className="mt-1 flex items-center gap-2 text-[10px] text-orange-400 font-black uppercase animate-pulse italic">
+                                                        <Clock className="h-3 w-3" />
+                                                        <span>Hozir bajarilmoqda...</span>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-[10px] font-bold text-slate-700 uppercase">Kutilmoqda</span>
+                                                )}
+
+                                                {step.notes && (
+                                                    <p className="mt-3 p-3 bg-slate-950/50 rounded-xl border border-slate-800 text-xs text-slate-400 leading-relaxed font-medium">
+                                                        {step.notes}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {!order.production_steps?.length && (
+                                        <div className="text-center py-20 text-slate-700 italic font-black uppercase text-xs tracking-[0.2em]">
+                                            <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                                            Jarayonlar topilmadi
+                                        </div>
+                                    )}
                                 </div>
-                                <Button variant="outline" size="sm" className="w-full gap-2">
-                                    <Edit className="h-3 w-3" /> Tahrirlash
-                                </Button>
                             </div>
                         </CardContent>
                     </Card>
+
+                    {/* RECENT FINANCE (Sub-sidebar) */}
+                    {isAdmin && (
+                        <Card className="bg-slate-900/40 border-slate-800/60 rounded-[2rem] overflow-hidden border-l-4 border-l-blue-600">
+                             <CardContent className="p-8">
+                                <div className="flex justify-between items-end mb-6">
+                                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">To'lov Holati</h4>
+                                    <Badge className="bg-blue-600/10 text-blue-400 border-blue-600/20 text-[10px] font-black italic">
+                                        {formatCurrency(order.total_price)}
+                                    </Badge>
+                                </div>
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-slate-500 font-bold uppercase text-[10px]">To'landi</span>
+                                        <span className="font-black text-green-400">{formatCurrency(order.advance_payment)}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-slate-500 font-bold uppercase text-[10px]">Qarz</span>
+                                        <span className="font-black text-red-400">
+                                            {formatCurrency(Math.max(0, (order.total_price || 0) - (order.advance_payment || 0)))}
+                                        </span>
+                                    </div>
+                                </div>
+                             </CardContent>
+                        </Card>
+                    )}
                 </div>
             </div>
         </div>
     )
 }
+
+// ============= HELPER COMPONENTS =============
+
+function DetailItem({ label, value, icon, light = false }: { label: string, value: any, icon?: React.ReactNode, light?: boolean }) {
+    return (
+        <div className={`p-4 rounded-2xl transition-all ${light ? 'bg-slate-950/40' : 'bg-slate-950/20'} border border-slate-800/40 hover:border-slate-700 group cursor-default`}>
+            <div className="flex items-center gap-2 mb-2">
+                <div className="text-slate-600 group-hover:text-blue-500 transition-colors">
+                    {icon}
+                </div>
+                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{label}</span>
+            </div>
+            <p className="text-sm font-black text-slate-200 tracking-tight">{value || '-'}</p>
+        </div>
+    )
+}
+
+function FileCard({ name, size, url, type }: { name: string, size: string, url: string, type: string }) {
+    return (
+        <div className="flex items-center justify-between p-4 bg-slate-950/30 border border-slate-800 rounded-2xl hover:bg-slate-800/50 transition-all group">
+            <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-[10px] ${
+                    type === 'pdf' ? 'bg-red-500/10 text-red-500' : 'bg-orange-500/10 text-orange-500'
+                }`}>
+                    {type.toUpperCase()}
+                </div>
+                <div>
+                    <p className="text-xs font-black text-slate-200">{name}</p>
+                    <p className="text-[10px] font-bold text-slate-600">{size}</p>
+                </div>
+            </div>
+            <div className="flex gap-2">
+                <a href={url} target="_blank" rel="noreferrer">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-slate-700">
+                        <ExternalLink className="h-3 w-3" />
+                    </Button>
+                </a>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-slate-700">
+                    <Download className="h-3 w-3" />
+                </Button>
+            </div>
+        </div>
+    )
+}
+
+function getStepLabelUz(step: string) {
+    const map: Record<string, string> = {
+        'sklad': 'Omborxona (Kirim)',
+        'queue': 'Navbatda',
+        'prepress': 'Pre-press (Dizayn)',
+        'printing_internal': 'Bosma (Vkladka)',
+        'printing_cover': 'Bosma (Muqova)',
+        'folding': 'Taxlash (Faltsovka)',
+        'assembly': "Yig'ish (Sbor)",
+        'binding': 'Bog\'lash (Termokley/Sim)',
+        'trimming': 'Kesish (Obrezka)',
+        'printing': 'Chop etish',
+        'gluing': 'Yelimlash',
+        'drying': 'Quritish',
+        'packaging': 'Sifat nazorati',
+        'packing': 'Qadoqlash',
+        'ready': 'Tayyor (Ombor)',
+        'tayyor_sklad': 'Tayyor (Sklad)'
+    }
+    const key = step.toLowerCase()
+    return map[key] || step.charAt(0).toUpperCase() + step.slice(1)
+}
+
