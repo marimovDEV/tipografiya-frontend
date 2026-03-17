@@ -19,6 +19,7 @@ import { Order, OrderStatus } from "@/lib/types"
 import { useRole } from "@/lib/context/role-context"
 import Link from "next/link"
 import { toast } from "sonner"
+import { getStepLabelUz } from "@/lib/utils"
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select"
@@ -41,6 +42,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+
+
 
 export default function OrderDetailPage() {
     const { id } = useParams()
@@ -487,26 +490,5 @@ function FileCard({ name, size, url, type }: { name: string, size: string, url: 
     )
 }
 
-function getStepLabelUz(step: string) {
-    const map: Record<string, string> = {
-        'sklad': 'Omborxona (Kirim)',
-        'queue': 'Navbatda',
-        'prepress': 'Pre-press (Dizayn)',
-        'printing_internal': 'Bosma (Vkladka)',
-        'printing_cover': 'Bosma (Muqova)',
-        'folding': 'Taxlash (Faltsovka)',
-        'assembly': "Yig'ish (Sbor)",
-        'binding': 'Bog\'lash (Termokley/Sim)',
-        'trimming': 'Kesish (Obrezka)',
-        'printing': 'Chop etish',
-        'gluing': 'Yelimlash',
-        'drying': 'Quritish',
-        'packaging': 'Sifat nazorati',
-        'packing': 'Qadoqlash',
-        'ready': 'Tayyor (Ombor)',
-        'tayyor_sklad': 'Tayyor (Sklad)'
-    }
-    const key = step.toLowerCase()
-    return map[key] || step.charAt(0).toUpperCase() + step.slice(1)
-}
+
 

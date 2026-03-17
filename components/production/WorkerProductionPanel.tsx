@@ -24,6 +24,7 @@ import {
   Activity
 } from "lucide-react"
 import { toast } from "sonner"
+import { getStepLabelUz } from "@/lib/utils"
 import { claimProductionStep, reportStepProgress, requestMaterialFromWarehouse, completeProductionStep } from "@/lib/api/printery"
 import { fetchWithAuth } from "@/lib/api-client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
@@ -69,6 +70,8 @@ interface ProductionStep {
     step_display: string
   }>
 }
+
+
 
 export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuery?: string }) {
   const [availableOrders, setAvailableOrders] = useState<ProductionStep[]>([])
@@ -913,29 +916,4 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
       </Dialog>
     </div>
   )
-}
-
-// ============= HELPER COMPONENTS =============
-
-function getStepLabelUz(step: string) {
-    const map: Record<string, string> = {
-        'sklad': 'Omborxona (Kirim)',
-        'queue': 'Navbatda',
-        'prepress': 'Pre-press (Dizayn)',
-        'printing_internal': 'Bosma (Vkladka)',
-        'printing_cover': 'Bosma (Muqova)',
-        'folding': 'Taxlash (Faltsovka)',
-        'assembly': "Yig'ish (Sbor)",
-        'binding': 'Bog\'lash (Termokley/Sim)',
-        'trimming': 'Kesish (Obrezka)',
-        'printing': 'Chop etish',
-        'gluing': 'Yelimlash',
-        'drying': 'Quritish',
-        'packaging': 'Sifat nazorati',
-        'packing': 'Qadoqlash',
-        'ready': 'Tayyor (Ombor)',
-        'tayyor_sklad': 'Tayyor (Sklad)'
-    }
-    const key = step.toLowerCase()
-    return map[key] || step.charAt(0).toUpperCase() + step.slice(1)
 }
