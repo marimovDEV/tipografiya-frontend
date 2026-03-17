@@ -706,9 +706,11 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                                 className="h-12 bg-slate-950 border-slate-800 rounded-xl text-lg font-black font-mono focus:ring-indigo-500/20 text-white"
                                 value={producedPages}
                                 onChange={e => {
-                                  setProducedPages(e.target.value)
-                                  if (e.target.value && activeStep.page_count) {
-                                    setProduced((parseFloat(e.target.value) / activeStep.page_count).toFixed(4))
+                                  const val = e.target.value
+                                  setProducedPages(val)
+                                  if (activeStep.page_count) {
+                                    const numVal = parseFloat(val) || 0
+                                    setProduced((numVal / activeStep.page_count).toFixed(4))
                                   }
                                 }}
                               />
@@ -726,9 +728,11 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                                 className="h-12 bg-slate-950 border-slate-800 rounded-xl text-lg font-black font-mono focus:ring-rose-500/20 text-rose-500"
                                 value={defectPages}
                                 onChange={e => {
-                                  setDefectPages(e.target.value)
-                                  if (e.target.value && activeStep.page_count) {
-                                    setDefects((parseFloat(e.target.value) / activeStep.page_count).toFixed(4))
+                                  const val = e.target.value
+                                  setDefectPages(val)
+                                  if (activeStep.page_count) {
+                                    const numVal = parseFloat(val) || 0
+                                    setDefects((numVal / activeStep.page_count).toFixed(4))
                                   }
                                 }}
                               />
