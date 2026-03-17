@@ -288,32 +288,6 @@ export default function OrderDetailPage() {
                         </CardContent>
                     </Card>
 
-                    {/* FILES & MOCKUP CARD */}
-                    <Card className="bg-slate-900/40 border-slate-800/60 rounded-[2rem] overflow-hidden shadow-xl">
-                        <CardHeader className="p-8 border-b border-slate-800/50 flex flex-row items-center justify-between">
-                            <CardTitle className="text-xl font-black uppercase tracking-tighter italic flex items-center gap-3">
-                                <FileText className="h-6 w-6 text-cyan-500" />
-                                Maket Fayllari
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-8">
-                            {order.mockup_url ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <FileCard name="Dizayn maketi.pdf" size="24 MB" url={order.mockup_url} type="pdf" />
-                                    <FileCard name="Pechat varianti.ai" size="115 MB" url="#" type="ai" />
-                                </div>
-                            ) : (
-                                <div className="group cursor-pointer border-2 border-dashed border-slate-800 rounded-[2rem] p-12 text-center hover:border-blue-500/50 hover:bg-blue-500/5 transition-all">
-                                    <div className="w-16 h-16 bg-slate-800 rounded-3xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-500/20 group-hover:text-blue-500 transition-all">
-                                        <UploadCloud className="h-8 w-8" />
-                                    </div>
-                                    <p className="text-slate-200 font-black text-sm uppercase tracking-widest">Maket yuklanmagan</p>
-                                    <p className="text-slate-500 text-xs mt-1 font-bold">Fayllarni bu yerga tashlang yoki bosing</p>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-
                     {/* CLIENT & NOTES (Integrated Bottom) */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <Card className="bg-slate-900/40 border-slate-800/60 rounded-[2rem]">
