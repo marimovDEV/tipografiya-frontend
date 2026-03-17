@@ -478,7 +478,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                   <div className="text-right hidden sm:block">
                     <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Progress</p>
                     <p className="text-xs font-black text-indigo-400">
-                      {Math.round((((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0)) / activeStep.input_qty) * 100)}%
+                      {(Number(activeStep.input_qty) || 0) > 0 ? Math.round((( (Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)) / (Number(activeStep.input_qty) || 0)) * 100) : 0}%
                     </p>
                   </div>
                   <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-black text-[9px] uppercase px-3 py-1 rounded-lg">
@@ -508,27 +508,49 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                 {/* Progress Stats */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                     <div className="p-3 sm:p-4 bg-slate-950/50 border border-slate-800 rounded-2xl sm:rounded-3xl text-center">
-                      <p className="text-[7px] sm:text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">JAMI</p>
-                      <p className="text-lg sm:text-xl font-black font-mono text-white">{activeStep.input_qty}</p>
+                      <p className="text-[7px] sm:text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">JAMI KITOB</p>
+                      <p className="text-lg sm:text-xl font-black font-mono text-white">{Number(activeStep.input_qty || 0).toFixed(2)}</p>
+                      {activeStep.page_count && (
+                        <p className="text-[7px] font-black text-slate-600 uppercase mt-1">
+                          {Number(activeStep.input_qty * activeStep.page_count).toLocaleString()} bet
+                        </p>
+                      )}
                     </div>
                     <div className="p-3 sm:p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl sm:rounded-3xl text-center">
                       <p className="text-[7px] sm:text-[8px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">BAJARILDI</p>
                       <p className="text-lg sm:text-xl font-black font-mono text-emerald-400">{Number(activeStep.produced_qty || 0).toFixed(2)}</p>
+                      {activeStep.page_count && (
+                        <p className="text-[7px] font-black text-emerald-500/40 uppercase mt-1">
+                          {Math.round(Number(activeStep.produced_qty || 0) * activeStep.page_count).toLocaleString()} bet
+                        </p>
+                      )}
                     </div>
                     <div className="p-3 sm:p-4 bg-rose-500/5 border border-rose-500/20 rounded-2xl sm:rounded-3xl text-center">
                       <p className="text-[7px] sm:text-[8px] font-black text-rose-500/60 uppercase tracking-widest mb-1">BRAK</p>
                       <p className="text-lg sm:text-xl font-black font-mono text-rose-500">{Number(activeStep.defect_qty || 0).toFixed(2)}</p>
+                      {activeStep.page_count && (
+                        <p className="text-[7px] font-black text-rose-500/40 uppercase mt-1">
+                          {Math.round(Number(activeStep.defect_qty || 0) * activeStep.page_count).toLocaleString()} bet
+                        </p>
+                      )}
                     </div>
                     <div className="p-3 sm:p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl sm:rounded-3xl text-center col-span-2 sm:col-span-1">
                       <p className="text-[7px] sm:text-[8px] font-black text-amber-500/60 uppercase tracking-widest mb-1">QOLGAN</p>
                       <p className="text-lg sm:text-xl font-black font-mono text-amber-400">
-                         {Math.max(0, activeStep.input_qty - ((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0))).toFixed(2)}
+                         {Math.max(0, Number(activeStep.input_qty || 0) - (Number(activeStep.produced_qty || 0) + Number(activeStep.defect_qty || 0))).toFixed(2)}
                       </p>
+                      {activeStep.page_count && (
+                        <p className="text-[7px] font-black text-amber-500/40 uppercase mt-1">
+                          {Math.max(0, Math.round((Number(activeStep.input_qty || 0) - (Number(activeStep.produced_qty || 0) + Number(activeStep.defect_qty || 0))) * activeStep.page_count)).toLocaleString()} bet
+                        </p>
+                      )}
                     </div>
                     <div className="p-3 sm:p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-2xl sm:rounded-3xl text-center col-span-2 sm:col-span-1">
                       <p className="text-[7px] sm:text-[8px] font-black text-indigo-400/60 uppercase tracking-widest mb-1">PROGRESS</p>
                       <p className="text-lg sm:text-xl font-black font-mono text-indigo-400">
-                         {Math.round((((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0)) / activeStep.input_qty) * 100)}%
+                         {(Number(activeStep.input_qty) || 0) > 0 
+                           ? Math.round((( (Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)) / (Number(activeStep.input_qty) || 0)) * 100) 
+                           : 0}%
                       </p>
                     </div>
                  </div>
@@ -537,7 +559,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                  <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
                     <div 
                       className="h-full bg-gradient-to-r from-indigo-600 to-emerald-400 transition-all duration-500"
-                      style={{ width: `${Math.min(100, (((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0)) / activeStep.input_qty) * 100)}%` }}
+                      style={{ width: `${Math.min(100, (Number(activeStep.input_qty) || 0) > 0 ? ((( (Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)) / (Number(activeStep.input_qty) || 0)) * 100) : 0)}%` }}
                     />
                  </div>
 
@@ -668,16 +690,16 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                      <div className="p-6 bg-indigo-500/5 border border-indigo-500/20 rounded-[2rem] space-y-4">
                         <div className="flex items-center justify-between">
                            <div>
-                              <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Sahifa kalkulyatori</h4>
-                              <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-0.5">Bajargan sahifangizni kiriting, tizim kitobga hisoblaydi</p>
+                              <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Sahifa & List kalkulyatori</h4>
+                              <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-0.5 italic">Tizim 1 bosma listni 16 sahifa deb hisoblaydi</p>
                            </div>
-                           <Badge className="bg-indigo-500/20 text-indigo-400 font-black text-[9px] uppercase">
+                           <Badge className="bg-indigo-500/20 text-indigo-400 font-black text-[9px] uppercase px-3 py-1.5 rounded-xl">
                               1 kitob = {activeStep.page_count} bet
                            </Badge>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                            <div className="space-y-2">
-                              <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Bitgan sahifa</Label>
+                              <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Bitgan sahifa (bet)</Label>
                               <Input 
                                 type="number" 
                                 placeholder="0"
@@ -690,9 +712,14 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                                   }
                                 }}
                               />
+                              {producedPages && (
+                                <p className="text-[8px] font-black text-indigo-500/60 uppercase ml-1">
+                                  ≈ {(parseFloat(producedPages) / 16).toFixed(1)} bosma list
+                                </p>
+                              )}
                            </div>
                            <div className="space-y-2">
-                              <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Brak sahifa</Label>
+                              <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Brak sahifa (bet)</Label>
                               <Input 
                                 type="number" 
                                 placeholder="0"
@@ -708,9 +735,14 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                            </div>
                         </div>
                         {producedPages && (
-                           <p className="text-[9px] font-black text-emerald-400/60 uppercase tracking-widest text-center italic">
-                              Hisoblangan: {(parseFloat(producedPages) / activeStep.page_count).toFixed(4)} kitob
-                           </p>
+                           <div className="p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-xl flex items-center justify-between">
+                              <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">
+                                 HISOBLANGAN KITOB:
+                              </p>
+                              <p className="text-xs font-black text-emerald-400 font-mono">
+                                {(parseFloat(producedPages) / activeStep.page_count).toFixed(4)} dona
+                              </p>
+                           </div>
                         )}
                      </div>
                    )}
@@ -763,12 +795,12 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                         </Button>
                         <Button 
                           className={`${
-                            (Math.max(0, activeStep.input_qty - ((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0)))) > 0.0001
+                            (Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)))) > 0.0001
                             ? 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'
                             : 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-500'
                           } flex-1 h-12 sm:h-14 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.15em] transition-all border-none`}
                           onClick={handleComplete}
-                          disabled={submitting || (Math.max(0, activeStep.input_qty - ((activeStep.produced_qty || 0) + (activeStep.defect_qty || 0)))) > 0.0001}
+                          disabled={submitting || (Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)))) > 0.0001}
                         >
                           {submitting ? "..." : "ETAPNI TUGATISH"}
                         </Button>
