@@ -619,6 +619,38 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                     </div>
                  </div>
 
+                 {/* STAGE SEQUENCE - NEW (Strict Sequential Model) */}
+                 <div className="pt-6 border-t border-slate-800/50">
+                    <h4 className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6">Bosqichlar Navbati</h4>
+                    <div className="relative flex items-center justify-between px-2 sm:px-6">
+                        {/* Connecting Line behind */}
+                        <div className="absolute left-[30px] right-[30px] top-[14px] h-[2px] bg-slate-800" />
+                        
+                        {activeStep.all_steps?.map((s: any, idx: number) => (
+                           <div key={s.id} className="relative flex flex-col items-center group">
+                               {/* Dot indicator */}
+                               <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 z-10 transition-all duration-500 ${
+                                  s.status === 'completed' 
+                                  ? "bg-emerald-500/20 border-emerald-500 text-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]" 
+                                  : s.id === activeStep.id.toString()
+                                  ? "bg-indigo-600 border-indigo-600 text-white animate-pulse"
+                                  : "bg-slate-900 border-slate-800 text-slate-600"
+                               }`}>
+                                  {s.status === 'completed' ? <CheckCircle2 size={12} /> : <span className="text-[10px] font-black">{s.sequence}</span>}
+                               </div>
+                               {/* Label */}
+                               <div className={`absolute top-9 whitespace-nowrap text-center transition-colors duration-300 ${
+                                  s.id === activeStep.id.toString() ? "text-indigo-400 font-black" : "text-slate-600 font-bold"
+                               }`}>
+                                  <p className="text-[8px] uppercase tracking-tighter">
+                                     {getStepLabelUz(s.step)}
+                                  </p>
+                               </div>
+                           </div>
+                        ))}
+                    </div>
+                 </div>
+
                 {/* Input Controls */}
                 <div className="space-y-6 pt-4 border-t border-slate-800/50">
                    <div className="grid grid-cols-2 gap-4 sm:gap-6">
