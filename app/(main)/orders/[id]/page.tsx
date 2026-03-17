@@ -210,12 +210,6 @@ export default function OrderDetailPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56 bg-slate-900 border-slate-800 text-slate-200">
                                 <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-slate-500">Amallar</DropdownMenuLabel>
-                                <DropdownMenuItem className="hover:bg-slate-800 cursor-pointer">
-                                    <FileText className="h-4 w-4 mr-2" /> Invoys yaratish
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="hover:bg-slate-800 cursor-pointer">
-                                    <Layers className="h-4 w-4 mr-2" /> Shablondan nusxa olish
-                                </DropdownMenuItem>
                                 <DropdownMenuSeparator className="bg-slate-800" />
                                 <DropdownMenuItem className="text-red-400 hover:bg-red-500/10 hover:text-red-400 cursor-pointer">
                                     <Trash2 className="h-4 w-4 mr-2" /> O'chirish
