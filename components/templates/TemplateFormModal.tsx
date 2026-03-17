@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { updateProductTemplate, createProductTemplate } from "@/lib/api/printery"
 import type { ProductTemplate, ProductCategory, ProductTemplateRouting } from "@/lib/types"
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"
-import { GripVertical, Plus, Trash2, Settings2, Clock, Factory, UserCheck, Zap } from "lucide-react"
+import { GripVertical, Plus, Trash2, Settings2 } from "lucide-react"
 
 export const CATEGORY_LABELS: Partial<Record<ProductCategory, string>> = {
     book: "Kitob",

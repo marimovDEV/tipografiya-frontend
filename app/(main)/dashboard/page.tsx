@@ -955,35 +955,38 @@ export default function DashboardPage() {
 
                                 <div className="space-y-4">
                                     {active_workers.map((w: any, i: number) => (
-                                        <div key={i} className="p-5 flex items-center justify-between rounded-2xl bg-slate-800/30 border border-slate-800 hover:border-primary/40 transition-all group shadow-sm">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-slate-950 border-4 border-slate-800 shadow-xl flex items-center justify-center text-white font-black text-sm group-hover:scale-110 transition-transform overflow-hidden">
-                                                    <img src={`https://i.pravatar.cc/150?u=${w.assigned_to__first_name}`} alt="avatar" className="w-full h-full object-cover" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-[13px] font-black text-slate-100 uppercase tracking-tight leading-none mb-1.5">{w.assigned_to__first_name}</p>
-                                                    <div className="flex items-center gap-2">
-                                                        <Badge className="bg-primary/20 text-primary border border-primary/30 font-black text-[8px] px-2 py-0.5 rounded-full">{w.step}</Badge>
-                                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-tighter">ORD #{w.order__order_number}</span>
-                                                    </div>
+                                        <div key={i} className="p-5 flex items-center gap-4 rounded-2xl bg-slate-800/30 border border-slate-800 hover:border-primary/40 transition-all group shadow-sm overflow-hidden">
+                                            {/* Avatar Section */}
+                                            <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-slate-950 border-4 border-slate-800 shadow-xl flex items-center justify-center text-white font-black text-sm group-hover:scale-110 transition-transform overflow-hidden">
+                                                <img src={`https://i.pravatar.cc/150?u=${w.assigned_to__first_name}`} alt="avatar" className="w-full h-full object-cover" />
+                                            </div>
+
+                                            {/* Worker Info - Flexible but Truncated */}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-[13px] font-black text-slate-100 uppercase tracking-tight leading-none mb-1.5 truncate" title={w.assigned_to__first_name}>
+                                                    {w.assigned_to__first_name}
+                                                </p>
+                                                <div className="flex items-center gap-2 overflow-hidden">
+                                                    <Badge className="bg-primary/20 text-primary border border-primary/30 font-black text-[8px] px-2 py-0.5 rounded-full flex-shrink-0">{w.step}</Badge>
+                                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-tighter truncate">ORD #{w.order__order_number}</span>
                                                 </div>
                                             </div>
-                                            <div className="text-right">
-                                                <div className="flex flex-col items-end gap-1">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="text-right">
-                                                            <p className="text-[8px] font-black text-slate-500 uppercase">BAJARILDI</p>
-                                                            <p className="text-sm font-black font-mono text-emerald-400 leading-none">{(w.produced_qty || 0).toLocaleString()}</p>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <p className="text-[8px] font-black text-slate-500 uppercase">BRAK</p>
-                                                            <p className="text-sm font-black font-mono text-rose-500 leading-none">{(w.defect_qty || 0).toLocaleString()}</p>
-                                                        </div>
+
+                                            {/* Stats Section - Fixed Width to avoid overlap */}
+                                            <div className="flex-shrink-0 text-right space-y-1">
+                                                <div className="flex items-center gap-3 justify-end">
+                                                    <div className="text-right">
+                                                        <p className="text-[8px] font-black text-slate-500 uppercase">BAJARILDI</p>
+                                                        <p className="text-sm font-black font-mono text-emerald-400 leading-none">{(w.produced_qty || 0).toLocaleString()}</p>
                                                     </div>
-                                                    <div className="flex items-center gap-1.5 justify-end mt-1">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                                        <span className="text-[8px] font-black text-emerald-400 uppercase tracking-widest italic">ONLAYN</span>
+                                                    <div className="text-right">
+                                                        <p className="text-[8px] font-black text-slate-500 uppercase">BRAK</p>
+                                                        <p className="text-sm font-black font-mono text-rose-500 leading-none">{(w.defect_qty || 0).toLocaleString()}</p>
                                                     </div>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 justify-end">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                                    <span className="text-[8px] font-black text-emerald-400 uppercase tracking-widest italic">ONLAYN</span>
                                                 </div>
                                             </div>
                                         </div>
