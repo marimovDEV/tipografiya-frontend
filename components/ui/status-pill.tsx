@@ -32,16 +32,29 @@ const statusStyles: Record<string, string> = {
     default: "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20",
 };
 
+const statusLabels: Record<string, string> = {
+    pending: "Kutilmoqda",
+    approved: "Tasdiqlandi",
+    in_production: "Ishlab chiqarishda",
+    ready: "Tayyor",
+    delivered: "Yetkazildi",
+    completed: "Tugallandi",
+    canceled: "Bekor qilindi",
+    problem: "Muammo",
+    active: "Faol",
+};
+
 export const StatusPill: React.FC<StatusPillProps> = ({ status, className, children }) => {
     const normalizedStatus = status.toLowerCase().replace(" ", "_");
     const style = statusStyles[normalizedStatus] || statusStyles.default;
+    const label = statusLabels[normalizedStatus] || status;
 
     return (
         <Badge
             variant="outline"
             className={cn("px-3 py-1 text-[10px] uppercase font-black tracking-wider border rounded-full shadow-none", style, className)}
         >
-            {children || status}
+            {children || label}
         </Badge>
     )
 }
