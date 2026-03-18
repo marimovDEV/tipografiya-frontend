@@ -651,11 +651,11 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12">
             <div className="space-y-1">
               <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest"><span className="hidden sm:inline">Bugungi </span>Ishlab chiqarish</p>
-              <h4 className="text-4xl font-black text-white italic tracking-tighter">{stats.today_produced_qty?.toLocaleString()} <span className="text-[10px] opacity-30 not-italic">DONA</span></h4>
+              <h4 className="text-4xl font-black text-white italic tracking-tighter">{Math.max(0, Math.round(stats.today_produced_qty || 0)).toLocaleString()} <span className="text-[10px] opacity-30 not-italic">ta</span></h4>
             </div>
             <div className="space-y-1">
               <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Brak <span className="hidden sm:inline">(Zarar)</span></p>
-              <h4 className="text-4xl font-black text-rose-500 italic tracking-tighter">{stats.today_defect_qty?.toLocaleString()} <span className="text-[10px] opacity-30 not-italic">DONA</span></h4>
+              <h4 className="text-4xl font-black text-rose-500 italic tracking-tighter">{Math.max(0, Math.round(stats.today_defect_qty || 0)).toLocaleString()} <span className="text-[10px] opacity-30 not-italic">dona</span></h4>
             </div>
             <div className="space-y-1">
               <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Samaradorlik</p>

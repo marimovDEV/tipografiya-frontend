@@ -509,16 +509,16 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                     <div className="p-3 sm:p-4 bg-slate-950/50 border border-slate-800 rounded-2xl sm:rounded-3xl text-center">
                       <p className="text-[7px] sm:text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">JAMI KITOB</p>
-                      <p className="text-lg sm:text-xl font-black font-mono text-white">{Number(activeStep.input_qty || 0).toFixed(2)}</p>
+                      <p className="text-lg sm:text-xl font-black font-mono text-white">{Math.round(Number(activeStep.input_qty || 0))} ta</p>
                       {activeStep.page_count && (
                         <p className="text-[7px] font-black text-slate-600 uppercase mt-1">
-                          {Number(activeStep.input_qty * activeStep.page_count).toLocaleString()} bet
+                          {Math.round(Number(activeStep.input_qty * activeStep.page_count)).toLocaleString()} bet
                         </p>
                       )}
                     </div>
                     <div className="p-3 sm:p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl sm:rounded-3xl text-center">
                       <p className="text-[7px] sm:text-[8px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">BAJARILDI</p>
-                      <p className="text-lg sm:text-xl font-black font-mono text-emerald-400">{Number(activeStep.produced_qty || 0).toFixed(2)}</p>
+                      <p className="text-lg sm:text-xl font-black font-mono text-emerald-400">{Math.round(Number(activeStep.produced_qty || 0))} ta</p>
                       {activeStep.page_count && (
                         <p className="text-[7px] font-black text-emerald-500/40 uppercase mt-1">
                           {Math.round(Number(activeStep.produced_qty || 0) * activeStep.page_count).toLocaleString()} bet
@@ -527,7 +527,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                     </div>
                     <div className="p-3 sm:p-4 bg-rose-500/5 border border-rose-500/20 rounded-2xl sm:rounded-3xl text-center">
                       <p className="text-[7px] sm:text-[8px] font-black text-rose-500/60 uppercase tracking-widest mb-1">BRAK</p>
-                      <p className="text-lg sm:text-xl font-black font-mono text-rose-500">{Number(activeStep.defect_qty || 0).toFixed(2)}</p>
+                      <p className="text-lg sm:text-xl font-black font-mono text-rose-500">{Math.round(Number(activeStep.defect_qty || 0))} dona</p>
                       {activeStep.page_count && (
                         <p className="text-[7px] font-black text-rose-500/40 uppercase mt-1">
                           {Math.round(Number(activeStep.defect_qty || 0) * activeStep.page_count).toLocaleString()} bet
@@ -537,7 +537,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                     <div className="p-3 sm:p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl sm:rounded-3xl text-center col-span-2 sm:col-span-1">
                       <p className="text-[7px] sm:text-[8px] font-black text-amber-500/60 uppercase tracking-widest mb-1">QOLGAN</p>
                       <p className="text-lg sm:text-xl font-black font-mono text-amber-400">
-                         {Math.max(0, Number(activeStep.input_qty || 0) - (Number(activeStep.produced_qty || 0) + Number(activeStep.defect_qty || 0))).toFixed(2)}
+                         {Math.max(0, Math.round(Number(activeStep.input_qty || 0) - (Number(activeStep.produced_qty || 0) + Number(activeStep.defect_qty || 0))))} ta
                       </p>
                       {activeStep.page_count && (
                         <p className="text-[7px] font-black text-amber-500/40 uppercase mt-1">
