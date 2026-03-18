@@ -271,6 +271,14 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
       return
     }
 
+    const producedVal = parseFloat(produced || "0")
+    const remainingQty = (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0))
+    
+    if (producedVal > remainingQty + 0.001) {
+      toast.error(`Siz ko'p miqdor kiritdingiz. Qolgan: ${Math.round(remainingQty)} dona`)
+      return
+    }
+
     try {
       setSubmitting(true)
       await reportStepProgress({
@@ -771,7 +779,10 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                                   setProducedPages(val)
                                   if (activeStep.page_count) {
                                     const numVal = parseFloat(val) || 0
-                                    setProduced((numVal / activeStep.page_count).toFixed(4))
+                                    const calcBooks = numVal / activeStep.page_count
+                                    const remainingQty = (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0))
+                                    // Cap it at remaining and fix precision
+                                    setProduced(Math.min(calcBooks, remainingQty).toFixed(2))
                                   }
                                 }}
                               />
@@ -793,7 +804,10 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                                   setDefectPages(val)
                                   if (activeStep.page_count) {
                                     const numVal = parseFloat(val) || 0
-                                    setDefects((numVal / activeStep.page_count).toFixed(4))
+                                    const calcBooks = numVal / activeStep.page_count
+                                    const remainingQty = (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0))
+                                    // Cap it at remaining and fix precision
+                                    setDefects(Math.min(calcBooks, remainingQty).toFixed(2))
                                   }
                                 }}
                               />
@@ -805,7 +819,10 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                                  HISOBLANGAN KITOB:
                               </p>
                               <p className="text-xs font-black text-emerald-400 font-mono">
-                                {(parseFloat(producedPages) / activeStep.page_count).toFixed(4)} dona
+                                {Math.min(
+                                  parseFloat(producedPages || "0") / activeStep.page_count, 
+                                  (Number(activeStep.input_qty || 0) - (Number(activeStep.produced_qty || 0) + Number(activeStep.defect_qty || 0)))
+                                ).toFixed(2)} dona
                               </p>
                            </div>
                         )}
