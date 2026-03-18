@@ -11,7 +11,7 @@ import {
     User, Calendar, Clock, FileText, ExternalLink,
     Settings, DollarSign, TrendingUp, CheckCircle2,
     Truck, Box, XCircle, ChevronRight, AlertCircle, Play, Book, Edit,
-    Download, Trash2, Layers, MoreHorizontal, UploadCloud, Save
+    Download, Trash2, Layers, MoreHorizontal, UploadCloud, Save, History, Info
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { getStatusLabel, getStatusBadgeColor, formatCurrency } from "@/lib/data/mock-data"
@@ -33,14 +33,14 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -540,16 +540,56 @@ export default function OrderDetailPage() {
                                                 )}
 
                                                 {(step.produced_qty > 0 || step.defect_qty > 0) && (
-                                                    <div className="mt-3 flex items-center gap-4 p-2 bg-slate-950/30 rounded-lg border border-slate-800/50 w-fit">
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[8px] text-slate-500 font-black uppercase tracking-tighter">Bajarildi</span>
-                                                            <span className="text-[10px] font-black text-emerald-500">{Math.round(step.produced_qty)} ta</span>
-                                                        </div>
-                                                        <div className="w-px h-4 bg-slate-800" />
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[8px] text-slate-500 font-black uppercase tracking-tighter">Brak</span>
-                                                            <span className="text-[10px] font-black text-rose-500">{Math.round(step.defect_qty)} dona</span>
-                                                        </div>
+                                                    <div className="mt-3 flex items-center gap-3">
+                                                       <div className="flex items-center gap-4 p-2 bg-slate-950/30 rounded-lg border border-slate-800/50 w-fit">
+                                                          <div className="flex flex-col">
+                                                              <span className="text-[8px] text-slate-500 font-black uppercase tracking-tighter">Bajarildi</span>
+                                                              <span className="text-[10px] font-black text-emerald-500">{Math.round(step.produced_qty)} ta</span>
+                                                          </div>
+                                                          <div className="w-px h-4 bg-slate-800" />
+                                                          <div className="flex flex-col">
+                                                              <span className="text-[8px] text-slate-500 font-black uppercase tracking-tighter">Brak</span>
+                                                              <span className="text-[10px] font-black text-rose-500">{Math.round(step.defect_qty)} dona</span>
+                                                          </div>
+                                                       </div>
+
+                                                       {step.production_logs && step.production_logs.length > 0 && (
+                                                         <Popover>
+                                                            <PopoverTrigger asChild>
+                                                               <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-slate-800 text-slate-400">
+                                                                  <History className="h-4 w-4" />
+                                                               </Button>
+                                                            </PopoverTrigger>
+                                                            <PopoverContent className="w-80 bg-slate-900 border-slate-800 p-0 shadow-2xl" side="left">
+                                                               <div className="p-4 border-b border-slate-800 bg-slate-950/50">
+                                                                  <h4 className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+                                                                     <History className="h-3 w-3 text-blue-500" />
+                                                                     ISHLAB CHIQARISH TARIXI
+                                                                  </h4>
+                                                               </div>
+                                                               <div className="max-h-[300px] overflow-y-auto p-2 space-y-1">
+                                                                  {step.production_logs.map((log) => (
+                                                                     <div key={log.id} className="p-3 bg-slate-950/40 rounded-xl border border-transparent hover:border-slate-800 transition-all">
+                                                                        <div className="flex items-center justify-between mb-1">
+                                                                           <p className="text-[11px] font-black text-emerald-400">+{Math.round(log.produced_qty)} ta</p>
+                                                                           <p className="text-[9px] font-bold text-slate-600">
+                                                                              {new Date(log.created_at).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                                                                           </p>
+                                                                        </div>
+                                                                        <div className="flex items-center justify-between">
+                                                                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">
+                                                                              {log.worker_name}
+                                                                           </p>
+                                                                           {log.defect_qty > 0 && (
+                                                                             <span className="text-[9px] font-bold text-rose-500/70">-{Math.round(log.defect_qty)} brak</span>
+                                                                           )}
+                                                                        </div>
+                                                                     </div>
+                                                                  ))}
+                                                               </div>
+                                                            </PopoverContent>
+                                                         </Popover>
+                                                       )}
                                                     </div>
                                                 )}
 

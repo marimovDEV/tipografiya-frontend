@@ -194,6 +194,16 @@ export interface ProductionStepItem {
   produced_qty?: number
   defect_qty?: number
   input_qty?: number
+  production_logs?: Array<{
+    id: number
+    worker_name: string
+    produced_qty: number
+    defect_qty: number
+    produced_pages: number
+    defect_pages: number
+    notes: string
+    created_at: string
+  }>
 }
 
 export interface Invoice {
