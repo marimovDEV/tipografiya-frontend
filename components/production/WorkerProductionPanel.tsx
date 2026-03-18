@@ -661,9 +661,6 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                        )}
                     </div>
                  </div>
-
-                  </div>
-                  </div>
                   
                   {/* HISTORY SECTION - NEW (Worker Transparency) */}
                   <div className="pt-6 border-t border-slate-800/50">
