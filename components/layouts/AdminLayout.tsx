@@ -91,7 +91,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <div className="px-4 py-6 flex-1 space-y-1 overflow-y-auto no-scrollbar font-sans">
                     {navigation.map((item) => {
                         const Icon = item.icon
-                        const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
+                        const isActive = pathname === item.href || (
+                            item.href !== '/' && 
+                            pathname?.startsWith(item.href + '/') && 
+                            !navigation.some(nav => 
+                                nav.href !== item.href && 
+                                nav.href.startsWith(item.href + '/') && 
+                                (pathname === nav.href || pathname?.startsWith(nav.href + '/'))
+                            )
+                        )
 
                         return (
                             <Link
