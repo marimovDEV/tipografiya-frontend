@@ -47,6 +47,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     const navigation = [
         { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { name: 'Buyurtmalar', href: '/orders', icon: FileText },
+        { name: 'Tugagan ishlar', href: '/orders/completed', icon: CheckSquare },
         { name: 'Mijozlar', href: '/clients', icon: Users },
         { name: 'Ishlab chiqarish', href: '/production', icon: Activity },
         { name: 'Omborxona', href: '/warehouse', icon: Package },

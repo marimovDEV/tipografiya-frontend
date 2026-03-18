@@ -37,7 +37,7 @@ const statusLabels: Record<string, string> = {
     approved: "Tasdiqlandi",
     in_production: "Ishlab chiqarishda",
     ready: "Tayyor",
-    delivered: "Yetkazildi",
+    delivered: "Topshirildi",
     completed: "Tugallandi",
     canceled: "Bekor qilindi",
     problem: "Muammo",

@@ -154,9 +154,9 @@ export function getStatusLabel(status: OrderStatus | string) {
     case "ready":
       return "Tayyor (Sklad)"
     case "delivered":
-      return "Yetkazildi"
+      return "Topshirildi"
     case "completed":
-      return "Yakunlandi"
+      return "Tugallandi"
     case "canceled":
       return "Bekor qilindi"
     case "problem":
