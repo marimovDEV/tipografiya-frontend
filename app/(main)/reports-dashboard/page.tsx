@@ -367,8 +367,6 @@ export default function ReportsPage() {
 
                 {/* Workers Tab */}
                 <TabsContent value="workers" className="space-y-4">
-                    </Card>
-
                     <Card className="mt-6">
                         <CardHeader>
                             <CardTitle className="flex items-center justify-between">
