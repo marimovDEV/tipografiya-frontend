@@ -780,9 +780,10 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                                   if (activeStep.page_count) {
                                     const numVal = parseFloat(val) || 0
                                     const calcBooks = numVal / activeStep.page_count
-                                    const remainingQty = (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0))
-                                    // Cap it at remaining and fix precision
-                                    setProduced(Math.min(calcBooks, remainingQty).toFixed(2))
+                                    const remainingQty = Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)))
+                                    // Cap it strictly
+                                    const finalVal = Math.min(calcBooks, remainingQty)
+                                    setProduced(finalVal.toFixed(2))
                                   }
                                 }}
                               />
@@ -805,9 +806,10 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                                   if (activeStep.page_count) {
                                     const numVal = parseFloat(val) || 0
                                     const calcBooks = numVal / activeStep.page_count
-                                    const remainingQty = (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0))
-                                    // Cap it at remaining and fix precision
-                                    setDefects(Math.min(calcBooks, remainingQty).toFixed(2))
+                                    const remainingQty = Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)))
+                                    // Cap it strictly
+                                    const finalVal = Math.min(calcBooks, remainingQty)
+                                    setDefects(finalVal.toFixed(2))
                                   }
                                 }}
                               />
@@ -835,26 +837,48 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                             {activeStep.page_count ? "Hisoblangan kitob (dona)" : "Bajarildi (dona)"}
                          </Label>
                          <Input 
-                           type="number" 
-                           step="0.0001"
-                           placeholder="0.00"
-                           className="h-12 sm:h-14 bg-slate-950 border-slate-800 rounded-xl sm:rounded-2xl text-lg sm:text-xl font-black font-mono focus:ring-indigo-500/20 text-white"
-                           value={produced}
-                           onChange={e => setProduced(e.target.value)}
-                         />
+                            type="number" 
+                            step="0.0001"
+                            placeholder="0.00"
+                            className="h-12 sm:h-14 bg-slate-950 border-slate-800 rounded-xl sm:rounded-2xl text-lg sm:text-xl font-black font-mono focus:ring-indigo-500/20 text-white"
+                            value={produced}
+                            onChange={e => {
+                              const val = e.target.value;
+                              const numVal = parseFloat(val) || 0;
+                              const remainingQty = Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)));
+                              
+                              if (numVal > remainingQty) {
+                                setProduced(remainingQty.toString());
+                                toast.warning("Qolgan miqdordan ko'p yozib bo'lmaydi");
+                              } else {
+                                setProduced(val);
+                              }
+                            }}
+                          />
                       </div>
                       <div className="space-y-2">
                          <Label className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
                             {activeStep.page_count ? "Hisoblangan brak (dona)" : "Brak (nuqson)"}
                          </Label>
                          <Input 
-                           type="number" 
-                           step="0.0001"
-                           placeholder="0.00"
-                           className="h-12 sm:h-14 bg-slate-950 border-slate-800 rounded-xl sm:rounded-2xl text-lg sm:text-xl font-black font-mono focus:ring-rose-500/20 text-rose-500"
-                           value={defects}
-                           onChange={e => setDefects(e.target.value)}
-                         />
+                            type="number" 
+                            step="0.0001"
+                            placeholder="0.00"
+                            className="h-12 sm:h-14 bg-slate-950 border-slate-800 rounded-xl sm:rounded-2xl text-lg sm:text-xl font-black font-mono focus:ring-rose-500/20 text-rose-500"
+                            value={defects}
+                            onChange={e => {
+                              const val = e.target.value;
+                              const numVal = parseFloat(val) || 0;
+                              const remainingQty = Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)));
+                              
+                              if (numVal > remainingQty) {
+                                setDefects(remainingQty.toString());
+                                toast.warning("Qolgan miqdordan ko'p yozib bo'lmaydi");
+                              } else {
+                                setDefects(val);
+                              }
+                            }}
+                          />
                       </div>
                    </div>
                    
