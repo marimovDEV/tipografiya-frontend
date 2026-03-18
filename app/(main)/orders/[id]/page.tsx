@@ -239,7 +239,7 @@ export default function OrderDetailPage() {
                                 </div>
                                 <div className="flex items-center gap-1.5 text-xs text-slate-500 font-bold uppercase">
                                     <Package className="h-3 w-3" />
-                                    <span>{order.quantity.toLocaleString()} ta</span>
+                                    <span>{Math.round(order.quantity).toLocaleString()} ta</span>
                                 </div>
                                 <div className="flex items-center gap-1.5 text-xs text-cyan-500 font-bold uppercase bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
                                     <TrendingUp className="h-3 w-3" />
@@ -543,12 +543,12 @@ export default function OrderDetailPage() {
                                                     <div className="mt-3 flex items-center gap-4 p-2 bg-slate-950/30 rounded-lg border border-slate-800/50 w-fit">
                                                         <div className="flex flex-col">
                                                             <span className="text-[8px] text-slate-500 font-black uppercase tracking-tighter">Bajarildi</span>
-                                                            <span className="text-[10px] font-black text-emerald-500">{step.produced_qty}</span>
+                                                            <span className="text-[10px] font-black text-emerald-500">{Math.round(step.produced_qty)} ta</span>
                                                         </div>
                                                         <div className="w-px h-4 bg-slate-800" />
                                                         <div className="flex flex-col">
                                                             <span className="text-[8px] text-slate-500 font-black uppercase tracking-tighter">Brak</span>
-                                                            <span className="text-[10px] font-black text-rose-500">{step.defect_qty}</span>
+                                                            <span className="text-[10px] font-black text-rose-500">{Math.round(step.defect_qty)} dona</span>
                                                         </div>
                                                     </div>
                                                 )}

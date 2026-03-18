@@ -274,7 +274,7 @@ export default function OrdersPage() {
                           <div className="font-black text-[11px] text-slate-100 uppercase tracking-tight">{order.box_type || 'Standart'}</div>
                         </TableCell>
                         <TableCell className="py-5 text-right font-mono text-[11px] text-slate-400 font-bold">
-                          <span className="text-emerald-500">{order.completed_quantity || 0}</span> / {order.quantity.toLocaleString()}
+                          <span className="text-emerald-500">{Math.round(order.completed_quantity || 0)}</span> / {Math.round(order.quantity).toLocaleString()} ta
                         </TableCell>
                         <TableCell className="py-5 text-right font-mono font-black text-sm text-white italic">
                           {formatCurrency(order.total_price || 0)}
@@ -373,7 +373,7 @@ export default function OrdersPage() {
               <div className="grid grid-cols-2 gap-4 py-4 border-y border-slate-800">
                 <div>
                    <p className="text-[8px] font-black text-slate-500 uppercase mb-1">MIQDOR</p>
-                   <p className="text-sm font-black text-white italic">{order.quantity.toLocaleString()}</p>
+                   <p className="text-sm font-black text-white italic">{Math.round(order.quantity).toLocaleString()} ta</p>
                 </div>
                 <div className="text-right">
                    <p className="text-[8px] font-black text-slate-500 uppercase mb-1">SUMMA</p>
