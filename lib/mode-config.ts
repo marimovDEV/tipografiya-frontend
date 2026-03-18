@@ -7,24 +7,7 @@ export type UserMode = 'admin' | 'manager' | 'worker' | 'client'
 
 export type UserRole =
     | 'admin'
-    | 'project_manager'
-    | 'warehouse'
-    | 'printer'
-    | 'cutter'
-    | 'finishing'
-    | 'qc'
-    | 'client'
-    | 'accountant'
-    | 'sales_manager'
-    | 'production_manager'
-    | 'warehouse_manager'
-    | 'operator_print'
-    | 'operator_cutting'
-    | 'operator_packing'
-    | 'quality_controller'
-    | 'finance_manager'
-    | 'shop_floor_supervisor'
-    | 'customer_service'
+    | 'worker'
 
 export interface ModeConfig {
     theme: 'dark' | 'light' | 'high-contrast' | 'minimal'
@@ -97,24 +80,7 @@ export const MODE_CONFIGS: Record<UserMode, ModeConfig> = {
 export function getUserMode(role: UserRole): UserMode {
     const roleToMode: Record<UserRole, UserMode> = {
         'admin': 'admin',
-        'project_manager': 'admin',
-        'warehouse': 'worker',
-        'printer': 'worker',
-        'cutter': 'worker',
-        'finishing': 'worker',
-        'qc': 'worker',
-        'client': 'client',
-        'accountant': 'admin',
-        'sales_manager': 'admin',
-        'production_manager': 'admin',
-        'warehouse_manager': 'admin',
-        'finance_manager': 'admin',
-        'shop_floor_supervisor': 'admin',
-        'customer_service': 'admin',
-        'operator_print': 'worker',
-        'operator_cutting': 'worker',
-        'operator_packing': 'worker',
-        'quality_controller': 'worker'
+        'worker': 'worker'
     }
 
     return roleToMode[role] || 'worker'

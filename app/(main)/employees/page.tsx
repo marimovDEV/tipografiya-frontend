@@ -478,8 +478,6 @@ export default function EmployeesPage() {
                     <SelectContent className="bg-slate-900 border-slate-800 text-white">
                         <SelectItem value="worker" className="font-bold text-xs uppercase">Ishchi / Operator</SelectItem>
                         <SelectItem value="admin" className="font-bold text-xs uppercase">Administrator</SelectItem>
-                        <SelectItem value="warehouse" className="font-bold text-xs uppercase">Omborchi</SelectItem>
-                        <SelectItem value="accountant" className="font-bold text-xs uppercase">Buxgalter</SelectItem>
                     </SelectContent>
                 </Select>
               </div>
