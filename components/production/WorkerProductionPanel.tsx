@@ -62,6 +62,16 @@ interface ProductionStep {
   cover_weight?: number
   lamination?: string
   format?: string
+  production_logs?: Array<{
+    id: number
+    worker_name: string
+    produced_qty: number
+    defect_qty: number
+    produced_pages: number
+    defect_pages: number
+    notes: string
+    created_at: string
+  }>
   all_steps?: Array<{
     id: string
     step: string
@@ -268,7 +278,8 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
         produced_qty: parseFloat(produced || "0"),
         defect_qty: parseFloat(defects || "0"),
         produced_pages: producedPages ? parseInt(producedPages) : undefined,
-        defect_pages: defectPages ? parseInt(defectPages) : undefined
+        defect_pages: defectPages ? parseInt(defectPages) : undefined,
+        notes: "" // Add notes if needed
       })
       toast.success("Hisobot saqlandi")
       setProduced("")
@@ -651,7 +662,53 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                     </div>
                  </div>
 
-                 {/* STAGE SEQUENCE - NEW (Strict Sequential Model) */}
+                  </div>
+                  </div>
+                  
+                  {/* HISTORY SECTION - NEW (Worker Transparency) */}
+                  <div className="pt-6 border-t border-slate-800/50">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                        <History className="w-3 h-3" />
+                        OXIRGI HARAKATLAR (LOGLAR)
+                      </h4>
+                      {activeStep.production_logs && activeStep.production_logs.length > 0 && (
+                        <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">
+                          BUGUN JAMI: {Math.round(activeStep.production_logs.reduce((sum, log) => sum + Number(log.produced_pages || 0), 0))} BET
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2 max-h-[160px] overflow-y-auto no-scrollbar pr-2">
+                       {activeStep.production_logs && activeStep.production_logs.length > 0 ? (
+                         activeStep.production_logs.map((log) => (
+                           <div key={log.id} className="flex items-center justify-between p-3 bg-slate-950/40 border border-slate-800/50 rounded-xl hover:bg-slate-900/40 transition-colors">
+                              <div className="flex items-center gap-3">
+                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                 <div>
+                                    <p className="text-[10px] font-black text-white uppercase tracking-tighter">
+                                       +{Math.round(log.produced_pages || 0)} bet 
+                                       {log.defect_pages > 0 && <span className="text-rose-500 ml-1">(-{Math.round(log.defect_pages)} brak)</span>}
+                                    </p>
+                                    <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">
+                                       {new Date(log.created_at).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })} • {log.worker_name}
+                                    </p>
+                                 </div>
+                              </div>
+                              <Badge className="bg-slate-800 text-slate-400 border-none text-[8px] font-black uppercase">
+                                 SAVED
+                              </Badge>
+                           </div>
+                         ))
+                       ) : (
+                         <div className="py-4 text-center border border-dashed border-slate-800/50 rounded-xl">
+                            <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest italic">Hozircha tarix mavjud emas</p>
+                         </div>
+                       )}
+                    </div>
+                  </div>
+
+                  {/* STAGE SEQUENCE */}
                  <div className="pt-6 border-t border-slate-800/50">
                     <h4 className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6">Bosqichlar Navbati</h4>
                     <div className="relative flex items-center justify-between px-2 sm:px-6">
@@ -699,9 +756,16 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                            <div className="space-y-2">
-                              <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Bitgan sahifa (bet)</Label>
-                              <Input 
-                                type="number" 
+                         <div className="flex items-center justify-between">
+                            <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Bitgan sahifa (bet)</Label>
+                            {activeStep.production_logs && activeStep.production_logs.length > 0 && (
+                              <p className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mr-1 underline underline-offset-2">
+                                Oxirgi: +{Math.round(activeStep.production_logs[0].produced_pages)}
+                              </p>
+                            )}
+                         </div>
+                              <Input
+                                type="number"
                                 placeholder="0"
                                 className="h-12 bg-slate-950 border-slate-800 rounded-xl text-lg font-black font-mono focus:ring-indigo-500/20 text-white"
                                 value={producedPages}
