@@ -170,6 +170,7 @@ export interface Order {
   created_by?: number | string
   created_at: string
   updated_at?: string
+  completed_quantity?: number
 
   // Relations (joined)
   client?: Client
