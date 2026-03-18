@@ -10,7 +10,7 @@ import {
     FileText, Download, Filter, CheckCircle, XCircle, AlertTriangle
 } from "lucide-react"
 import { fetchWithAuth } from "@/lib/api-client"
-import { getProductionAnalytics, getWarehouseStatusReport } from "@/lib/api/printery"
+import { getProductionAnalytics, getWarehouseStatusReport, getProductionLogStats } from "@/lib/api/printery"
 import { toast } from "sonner"
 import { formatCurrency } from "@/lib/data/mock-data"
 
@@ -41,6 +41,7 @@ export default function ReportsPage() {
     const [workerReports, setWorkerReports] = useState<WorkerReport[]>([])
     const [productionAnalytics, setProductionAnalytics] = useState<any>(null)
     const [warehouseStatus, setWarehouseStatus] = useState<any>(null)
+    const [productionLogStats, setProductionLogStats] = useState<any[]>([])
 
     useEffect(() => {
         loadAllReports()
@@ -53,7 +54,8 @@ export default function ReportsPage() {
                 loadDailyProduction(),
                 loadWorkerReports(),
                 loadProductionAnalytics(),
-                loadWarehouseStatus()
+                loadWarehouseStatus(),
+                loadProductionLogStats()
             ])
         } finally {
             setLoading(false)
@@ -136,6 +138,16 @@ export default function ReportsPage() {
             setWarehouseStatus(status)
         } catch (error) {
             console.error("Failed to load warehouse status:", error)
+        }
+    }
+
+    async function loadProductionLogStats() {
+        try {
+            const days = dateFilter === 'today' ? 1 : dateFilter === 'week' ? 7 : dateFilter === 'month' ? 30 : 365
+            const stats = await getProductionLogStats(days)
+            setProductionLogStats(stats)
+        } catch (error) {
+            console.error("Failed to load production log stats:", error)
         }
     }
 
@@ -355,10 +367,15 @@ export default function ReportsPage() {
 
                 {/* Workers Tab */}
                 <TabsContent value="workers" className="space-y-4">
-                    <Card>
+                    </Card>
+
+                    <Card className="mt-6">
                         <CardHeader>
                             <CardTitle className="flex items-center justify-between">
-                                <span>Xodimlar Samaradorligi</span>
+                                <span>Ishlab chiqarish unumdorligi (Batafsil)</span>
+                                <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-widest bg-indigo-500/5 text-indigo-400 border-indigo-500/20">
+                                    Haqiqiy Loglar Bo'yicha
+                                </Badge>
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -366,35 +383,60 @@ export default function ReportsPage() {
                                 <table className="w-full text-sm">
                                     <thead className="bg-muted/50">
                                         <tr>
-                                            <th className="p-3 text-left font-medium text-muted-foreground">Xodim</th>
-                                            <th className="p-3 text-center font-medium text-muted-foreground">Jami Vazifalar</th>
-                                            <th className="p-3 text-center font-medium text-muted-foreground">Tugallangan</th>
-                                            <th className="p-3 text-center font-medium text-muted-foreground">Ish Vaqti</th>
-                                            <th className="p-3 text-center font-medium text-muted-foreground">Samaradorlik</th>
+                                            <th className="p-3 text-left font-medium text-muted-foreground uppercase text-[10px]">Xodim</th>
+                                            <th className="p-3 text-center font-medium text-muted-foreground uppercase text-[10px]">Jami Sahifa</th>
+                                            <th className="p-3 text-center font-medium text-muted-foreground uppercase text-[10px]">Brak (Sahifa)</th>
+                                            <th className="p-3 text-center font-medium text-muted-foreground uppercase text-[10px]">Brak %</th>
+                                            <th className="p-3 text-center font-medium text-muted-foreground uppercase text-[10px]">Harakatlar</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y">
-                                        {workerReports.map((worker, idx) => (
-                                            <tr key={idx} className="hover:bg-muted/50">
-                                                <td className="p-3 font-medium">{worker.worker_name}</td>
-                                                <td className="p-3 text-center">{worker.total_steps}</td>
-                                                <td className="p-3 text-center text-green-600 font-medium">
-                                                    {worker.completed_steps}
-                                                </td>
-                                                <td className="p-3 text-center">
-                                                    {formatDuration(worker.total_work_minutes)}
-                                                </td>
-                                                <td className="p-3 text-center">
-                                                    <Badge className={
-                                                        worker.efficiency_score >= 80 ? "bg-green-100 text-green-700" :
-                                                            worker.efficiency_score >= 60 ? "bg-yellow-100 text-yellow-700" :
-                                                                "bg-red-100 text-red-700"
-                                                    }>
-                                                        {worker.efficiency_score}%
-                                                    </Badge>
+                                        {productionLogStats.length > 0 ? (
+                                            productionLogStats.map((stat, idx) => {
+                                                const defectPercent = stat.total_pages > 0 
+                                                    ? (stat.defect_pages / stat.total_pages) * 100 
+                                                    : 0;
+                                                
+                                                return (
+                                                    <tr key={idx} className="hover:bg-muted/50 transition-colors">
+                                                        <td className="p-3">
+                                                            <div className="flex flex-col">
+                                                                <span className="font-bold text-slate-900">
+                                                                    {stat.worker__first_name && stat.worker__last_name 
+                                                                        ? `${stat.worker__first_name} ${stat.worker__last_name}`
+                                                                        : stat.worker__username}
+                                                                </span>
+                                                                <span className="text-[10px] text-slate-500 uppercase tracking-tighter">@{stat.worker__username}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-3 text-center font-black text-indigo-600">
+                                                            {Math.round(stat.total_pages || 0).toLocaleString()}
+                                                        </td>
+                                                        <td className="p-3 text-center font-bold text-rose-500">
+                                                            {Math.round(stat.defect_pages || 0).toLocaleString()}
+                                                        </td>
+                                                        <td className="p-3 text-center">
+                                                            <Badge className={
+                                                                defectPercent < 1 ? "bg-emerald-100 text-emerald-700 border-emerald-200" :
+                                                                defectPercent < 3 ? "bg-amber-100 text-amber-700 border-amber-200" :
+                                                                "bg-rose-100 text-rose-700 border-rose-200"
+                                                            }>
+                                                                {defectPercent.toFixed(1)}%
+                                                            </Badge>
+                                                        </td>
+                                                        <td className="p-3 text-center text-slate-400 font-mono text-[10px]">
+                                                            {stat.log_count} ta update
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })
+                                        ) : (
+                                            <tr>
+                                                <td colSpan={5} className="p-8 text-center text-slate-500 italic">
+                                                    Bu muddat uchun ma'lumotlar topilmadi
                                                 </td>
                                             </tr>
-                                        ))}
+                                        )}
                                     </tbody>
                                 </table>
                             </div>

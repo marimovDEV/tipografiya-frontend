@@ -481,3 +481,13 @@ export async function completeProductionStep(stepId: string): Promise<any> {
 
     return response.json()
 }
+
+export async function getProductionLogStats(days: number = 30): Promise<any[]> {
+    const response = await fetchWithAuth(`${API_BASE}/production-logs/stats/?days=${days}`)
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch production log stats")
+    }
+
+    return response.json()
+}
