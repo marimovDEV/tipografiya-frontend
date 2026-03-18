@@ -11,8 +11,9 @@ import {
     User, Calendar, Clock, FileText, ExternalLink,
     Settings, DollarSign, TrendingUp, CheckCircle2,
     Truck, Box, XCircle, ChevronRight, AlertCircle, Play, Book, Edit,
-    Download, Trash2, Layers, MoreHorizontal, UploadCloud
+    Download, Trash2, Layers, MoreHorizontal, UploadCloud, Save
 } from "lucide-react"
+import { Input } from "@/components/ui/input"
 import { getStatusLabel, getStatusBadgeColor, formatCurrency } from "@/lib/data/mock-data"
 import { fetchWithAuth } from "@/lib/api-client"
 import { Order, OrderStatus } from "@/lib/types"
@@ -52,6 +53,8 @@ export default function OrderDetailPage() {
     const [order, setOrder] = useState<Order | null>(null)
     const [loading, setLoading] = useState(true)
     const [updating, setUpdating] = useState(false)
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+    const [editFormData, setEditFormData] = useState<any>({})
 
     const isAdmin = currentRole === "admin" || currentRole === "accountant"
 
@@ -85,6 +88,43 @@ export default function OrderDetailPage() {
         } finally {
             setUpdating(false)
         }
+    }
+
+    const handleUpdateOrder = async () => {
+        setUpdating(true)
+        try {
+            const res = await fetchWithAuth(`/api/orders/${id}/`, {
+                method: "PATCH",
+                body: JSON.stringify(editFormData)
+            })
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.non_field_errors?.[0] || "Update failed")
+            }
+            toast.success("Buyurtma muvaffaqiyatli tahrirlandi")
+            setIsEditDialogOpen(false)
+            fetchOrder()
+        } catch (e: any) {
+            toast.error(e.message)
+        } finally {
+            setUpdating(false)
+        }
+    }
+
+    const openEditModal = () => {
+        if (!order) return
+        setEditFormData({
+            box_type: order.box_type,
+            quantity: order.quantity,
+            total_price: order.total_price,
+            deadline: order.deadline ? order.deadline.split('T')[0] : '',
+            notes: order.notes,
+            book_name: order.book_name,
+            page_count: order.page_count,
+            cover_type: order.cover_type,
+            binding_type: order.binding_type
+        })
+        setIsEditDialogOpen(true)
     }
 
     // Granular Progress calculation
@@ -215,9 +255,103 @@ export default function OrderDetailPage() {
                                 <Play className="h-4 w-4 mr-2" /> Ishni boshlash
                             </Button>
                         )}
-                        <Button variant="outline" className="h-10 bg-slate-900 border-slate-800 hover:bg-slate-800 text-slate-400 font-bold text-xs uppercase rounded-xl">
+                        <Button 
+                            variant="outline" 
+                            onClick={openEditModal}
+                            className="h-10 bg-slate-900 border-slate-800 hover:bg-slate-800 text-slate-400 font-bold text-xs uppercase rounded-xl"
+                        >
                             <Edit className="h-4 w-4 mr-2" /> Tahrirlash
                         </Button>
+
+                        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                            <DialogContent className="max-w-2xl bg-slate-900 border-slate-800 text-slate-200">
+                                <DialogHeader>
+                                    <DialogTitle className="text-xl font-black uppercase italic tracking-tight">Buyurtmani Tahrirlash</DialogTitle>
+                                    <DialogDescription className="text-slate-500">
+                                        Buyurtma parametrlarini o'zgartirish. Ba'zi o'zgarishlar ishlab chiqarish bosqichlariga ta'sir qilishi mumkin.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] font-black uppercase text-slate-500">Mahsulot nomi</Label>
+                                        <Input 
+                                            value={editFormData.box_type || ''} 
+                                            onChange={e => setEditFormData({...editFormData, box_type: e.target.value})}
+                                            className="bg-slate-950 border-slate-800 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] font-black uppercase text-slate-500">Miqdori (ta)</Label>
+                                        <Input 
+                                            type="number"
+                                            value={editFormData.quantity || ''} 
+                                            onChange={e => setEditFormData({...editFormData, quantity: parseInt(e.target.value)})}
+                                            className="bg-slate-950 border-slate-800 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] font-black uppercase text-slate-500">Umumiy summa (so'm)</Label>
+                                        <Input 
+                                            type="number"
+                                            value={editFormData.total_price || ''} 
+                                            onChange={e => setEditFormData({...editFormData, total_price: parseFloat(e.target.value)})}
+                                            className="bg-slate-950 border-slate-800 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] font-black uppercase text-slate-500">Deadline (Muddat)</Label>
+                                        <Input 
+                                            type="date"
+                                            value={editFormData.deadline || ''} 
+                                            onChange={e => setEditFormData({...editFormData, deadline: e.target.value})}
+                                            className="bg-slate-950 border-slate-800 focus:ring-blue-500 [color-scheme:dark]"
+                                        />
+                                    </div>
+
+                                    {order.book_name && (
+                                        <>
+                                            <div className="space-y-2">
+                                                <Label className="text-[10px] font-black uppercase text-slate-500">Kitob nomi</Label>
+                                                <Input 
+                                                    value={editFormData.book_name || ''} 
+                                                    onChange={e => setEditFormData({...editFormData, book_name: e.target.value})}
+                                                    className="bg-slate-950 border-slate-800 focus:ring-blue-500"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-[10px] font-black uppercase text-slate-500">Betlar soni</Label>
+                                                <Input 
+                                                    type="number"
+                                                    value={editFormData.page_count || ''} 
+                                                    onChange={e => setEditFormData({...editFormData, page_count: parseInt(e.target.value)})}
+                                                    className="bg-slate-950 border-slate-800 focus:ring-blue-500"
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div className="md:col-span-2 space-y-2">
+                                        <Label className="text-[10px] font-black uppercase text-slate-500">Ichki izohlar</Label>
+                                        <Textarea 
+                                            value={editFormData.notes || ''} 
+                                            onChange={e => setEditFormData({...editFormData, notes: e.target.value})}
+                                            className="bg-slate-950 border-slate-800 focus:ring-blue-500 min-h-[100px]"
+                                            placeholder="Buyurtma bo'yicha qo'shimcha izohlar..."
+                                        />
+                                    </div>
+                                </div>
+
+                                <DialogFooter className="gap-2">
+                                    <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="bg-slate-800 border-slate-700 hover:bg-slate-700">Bekor qilish</Button>
+                                    <Button onClick={handleUpdateOrder} disabled={updating} className="bg-blue-600 hover:bg-blue-500 text-white font-black uppercase text-xs tracking-widest px-8">
+                                        {updating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                                        Saqlash
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="outline" className="h-10 w-10 p-0 bg-slate-900 border-slate-800 hover:bg-slate-800 rounded-xl">
@@ -253,6 +387,30 @@ export default function OrderDetailPage() {
                     <div>
                         <h4 className="text-sm font-black text-orange-400 uppercase tracking-widest italic">Avans kutilmoqda!</h4>
                         <p className="text-xs text-slate-500 font-medium">Ushbu buyurtma uchun hali to'lov kiritilmagan. Ishni boshlash xavfli bo'lishi mumkin.</p>
+                    </div>
+                </div>
+            )}
+
+            {/* CELEBRATORY BANNER (PrintERP TZ Fix) */}
+            {order.status === 'ready' && (
+                <div className="mb-8 p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative group transition-all hover:bg-emerald-500/15">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
+                    <div className="flex items-center gap-5 relative z-10">
+                        <div className="w-14 h-14 bg-emerald-500/20 rounded-full flex items-center justify-center border border-emerald-500/30">
+                            <CheckCircle2 className="h-8 w-8 text-emerald-500 animate-pulse" />
+                        </div>
+                        <div>
+                            <h3 className="text-emerald-400 font-black uppercase text-lg tracking-widest italic leading-none mb-1">Buyurtma Tayyor!</h3>
+                            <p className="text-emerald-500/70 text-xs font-bold uppercase tracking-widest">Barcha ishlab chiqarish bosqichlari (100%) yakunlandi</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3 relative z-10">
+                        <Button 
+                            className="bg-emerald-500 text-emerald-950 font-black border-none hover:bg-emerald-400 uppercase text-xs tracking-widest px-8 h-12 rounded-xl transition-all shadow-xl shadow-emerald-500/20 active:scale-95 group-hover:scale-105"
+                            onClick={() => router.push(`/api/orders/${order.id}/deliver/`)}
+                        >
+                            <Truck className="h-5 w-5 mr-3" /> Mijozga topshirish
+                        </Button>
                     </div>
                 </div>
             )}

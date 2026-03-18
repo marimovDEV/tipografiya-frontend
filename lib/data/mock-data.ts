@@ -152,11 +152,11 @@ export function getStatusLabel(status: OrderStatus | string) {
     case "in_production":
       return "Ishlab chiqarishda"
     case "ready":
-      return "Tayyor (Sklad)"
+      return "Tugallangan (Sklad)"
     case "delivered":
       return "Topshirildi"
     case "completed":
-      return "Tugallandi"
+      return "Yakunlandi"
     case "canceled":
       return "Bekor qilindi"
     case "problem":
