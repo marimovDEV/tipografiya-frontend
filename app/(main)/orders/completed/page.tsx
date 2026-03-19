@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Search, CheckCircle2, Truck, Clock, Eye, MoreVertical } from "lucide-react"
+import { Search, CheckCircle2, Truck, Clock, Eye, MoreVertical, DollarSign, AlertCircle } from "lucide-react"
 import { formatCurrency } from "@/lib/data/mock-data"
 import Link from "next/link"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -12,6 +12,9 @@ import { StatusPill } from "@/components/ui/status-pill"
 import { Order } from "@/lib/types"
 import { fetchWithAuth } from "@/lib/api-client"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
 import { format } from "date-fns"
 
@@ -19,6 +22,11 @@ export default function CompletedOrdersPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
+  const [isHandoverDialogOpen, setIsHandoverDialogOpen] = useState(false)
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [handoverAmount, setHandoverAmount] = useState<number>(0)
+  const [paymentMethod, setPaymentMethod] = useState<string>("cash")
+  const [processing, setProcessing] = useState(false)
 
   useEffect(() => {
     fetchOrders()
@@ -54,19 +62,56 @@ export default function CompletedOrdersPage() {
     }
   }
 
-  const handleHandover = async (orderId: string | number) => {
+  const handleHandover = (order: Order) => {
+    const debt = Math.max(0, (Number(order.total_price) || 0) - (Number(order.advance_payment) || 0))
+    setSelectedOrder(order)
+    setHandoverAmount(debt)
+    setIsHandoverDialogOpen(true)
+  }
+
+  const handleHandoverSubmit = async () => {
+    if (!selectedOrder) return
+    setProcessing(true)
+    
     try {
-      const response = await fetchWithAuth(`/api/orders/${orderId}/handover/`, {
-        method: "POST"
+      // 1. If there's a payment, record it first
+      if (handoverAmount > 0) {
+        const payRes = await fetchWithAuth(`/api/transactions/`, {
+            method: 'POST',
+            body: JSON.stringify({
+                order: selectedOrder.id,
+                client: selectedOrder.client?.id,
+                amount: handoverAmount,
+                type: 'income',
+                category: 'sales',
+                payment_method: paymentMethod,
+                notes: `Buyurtma #${selectedOrder.order_number} topshirish vaqtidagi yakuniy to'lov (Completed sahifasi)`
+            })
+        })
+        if (!payRes.ok) {
+            toast.error("To'lovni saqlashda xatolik!")
+            setProcessing(false)
+            return
+        }
+      }
+
+      // 2. Perform Handover
+      const res = await fetchWithAuth(`/api/orders/${selectedOrder.id}/handover/`, {
+        method: 'POST'
       })
       
-      if (!response.ok) throw new Error("Handover failed")
-      
-      toast.success("Buyurtma topshirildi!")
-      fetchOrders() // Refresh list
+      if (res.ok) {
+        toast.success("Buyurtma topshirildi!")
+        setIsHandoverDialogOpen(false)
+        fetchOrders()
+      } else {
+        toast.error("Topshirishda xatolik!")
+      }
     } catch (error) {
-        console.error("Handover error:", error)
-        toast.error("Topshirishda xatolik yuz berdi")
+      console.error(error)
+      toast.error("Xatolik yuz berdi")
+    } finally {
+      setProcessing(false)
     }
   }
 
@@ -248,7 +293,97 @@ export default function CompletedOrdersPage() {
             </div>
           </Card>
         ))}
-      </div>
+       </div>
+
+      {/* Handover & Payment Dialog */}
+      <Dialog open={isHandoverDialogOpen} onOpenChange={setIsHandoverDialogOpen}>
+        <DialogContent className="sm:max-w-[500px] bg-slate-900 border-slate-800 text-slate-200 rounded-[2.5rem]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black uppercase italic tracking-tight flex items-center gap-3">
+              <Truck className="h-6 w-6 text-primary" />
+              Mijozga Topshirish
+            </DialogTitle>
+            <DialogDescription className="text-slate-500 font-bold uppercase text-[10px]">
+              Buyurtma #{selectedOrder?.order_number?.split('-').pop()} • {selectedOrder?.client?.full_name}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-6 space-y-6">
+            {/* Status Summary */}
+            <div className="p-4 bg-slate-950/50 rounded-2xl border border-slate-800 space-y-3">
+                <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black uppercase text-slate-500">Umumiy Summa</span>
+                    <span className="font-mono font-black text-sm">{formatCurrency(selectedOrder?.total_price || 0)}</span>
+                </div>
+                <div className="flex justify-between items-center text-amber-500">
+                    <span className="text-[10px] font-black uppercase">To'langan (Avans)</span>
+                    <span className="font-mono font-black text-sm">{formatCurrency(selectedOrder?.advance_payment || 0)}</span>
+                </div>
+                <div className="h-px bg-slate-800" />
+                <div className="flex justify-between items-center text-primary">
+                    <span className="text-[10px] font-black uppercase">Qarz (Qoldiq)</span>
+                    <span className="font-mono font-black text-lg italic">{formatCurrency(Math.max(0, (Number(selectedOrder?.total_price) || 0) - (Number(selectedOrder?.advance_payment) || 0)))}</span>
+                </div>
+            </div>
+
+            {/* Payment Section */}
+            {Math.max(0, (Number(selectedOrder?.total_price) || 0) - (Number(selectedOrder?.advance_payment) || 0)) > 0 && (
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-primary">
+                        <DollarSign className="h-4 w-4" />
+                        <h4 className="text-[10px] font-black uppercase tracking-widest">To'lovni qabul qilish</h4>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">To'lov Summasi</Label>
+                            <Input 
+                                type="number"
+                                value={handoverAmount}
+                                onChange={(e) => setHandoverAmount(parseFloat(e.target.value) || 0)}
+                                className="bg-slate-950 border-slate-800 focus:ring-primary rounded-xl"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">To'lov Usuli</Label>
+                            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                                <SelectTrigger className="bg-slate-950 border-slate-800 rounded-xl">
+                                    <SelectValue placeholder="Tanlang" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-900 border-slate-800">
+                                    <SelectItem value="cash">Naqd</SelectItem>
+                                    <SelectItem value="card">Plastik (Karta)</SelectItem>
+                                    <SelectItem value="transfer">O'tkazma (Perexisl)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex gap-3 italic">
+                <AlertCircle className="h-5 w-5 text-primary shrink-0" />
+                <p className="text-[10px] font-bold text-slate-400">Topshirish bosilgandan so'ng buyurtma holati "Topshirildi" ga o'zgaradi va tarixga saqlanadi.</p>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-3">
+            <Button 
+                variant="ghost" 
+                onClick={() => setIsHandoverDialogOpen(false)}
+                className="rounded-xl font-black text-[10px] uppercase tracking-widest"
+            >
+                Bekor qilish
+            </Button>
+            <Button 
+                onClick={handleHandoverSubmit}
+                disabled={processing}
+                className="bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest px-8 rounded-xl h-11 shadow-lg shadow-primary/20"
+            >
+                {processing ? "Bajarilmoqda..." : "Topshirish va Yakunlash"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
