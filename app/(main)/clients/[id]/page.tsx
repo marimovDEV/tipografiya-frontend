@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import {
     Banknote, Landmark, Smartphone, Phone, Building2, User,
-    CreditCard, ArrowLeft, Edit, Trash2, Package, History,
+    CreditCard, ArrowLeft, Edit, Trash2, Package, History as HistoryIcon,
     ExternalLink, AlertCircle, Wallet
 } from "lucide-react"
 import {
@@ -27,16 +27,15 @@ import { DebtPaymentModal } from "@/components/clients/DebtPaymentModal"
 import { toast } from "sonner"
 import Link from "next/link"
 
-
-const paymentMethods = [
-  { id: "cash", label: "Naqd", icon: Banknote, color: "text-emerald-500", bgColor: "bg-emerald-500/10" },
-  { id: "card", label: "Plastik", icon: CreditCard, color: "text-blue-500", bgColor: "bg-blue-500/10" },
-  { id: "transfer", label: "Pul o'tkazish", icon: Landmark, color: "text-purple-500", bgColor: "bg-purple-500/10" },
-  { id: "click", label: "Click", icon: Smartphone, color: "text-cyan-500", bgColor: "bg-cyan-500/10" },
-  { id: "payme", label: "Payme", icon: Smartphone, color: "text-teal-500", bgColor: "bg-teal-500/10" },
-]
-
 export default function ClientDetailPage() {
+    const paymentMethods = [
+      { id: "cash", label: "Naqd", icon: Banknote, color: "text-emerald-500", bgColor: "bg-emerald-500/10" },
+      { id: "card", label: "Plastik", icon: CreditCard, color: "text-blue-500", bgColor: "bg-blue-500/10" },
+      { id: "transfer", label: "Pul o'tkazish", icon: Landmark, color: "text-purple-500", bgColor: "bg-purple-500/10" },
+      { id: "click", label: "Click", icon: Smartphone, color: "text-cyan-500", bgColor: "bg-cyan-500/10" },
+      { id: "payme", label: "Payme", icon: Smartphone, color: "text-teal-500", bgColor: "bg-teal-500/10" },
+    ]
+
     const router = useRouter();
     const { id } = useParams();
     const [client, setClient] = useState<Client | null>(null);
@@ -211,7 +210,7 @@ export default function ClientDetailPage() {
             <Tabs defaultValue="orders" className="space-y-4">
                 <TabsList>
                     <TabsTrigger value="orders" className="gap-2"><Package className="h-4 w-4" /> Buyurtmalar</TabsTrigger>
-                    <TabsTrigger value="finance" className="gap-2"><History className="h-4 w-4" /> To'lovlar Tarixi</TabsTrigger>
+                    <TabsTrigger value="finance" className="gap-2"><HistoryIcon className="h-4 w-4" /> To'lovlar Tarixi</TabsTrigger>
                     <TabsTrigger value="info" className="gap-2"><User className="h-4 w-4" /> Ma'lumotlar</TabsTrigger>
                 </TabsList>
 

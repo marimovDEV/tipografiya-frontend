@@ -7,7 +7,10 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { Plus, Search, Phone, Building2, User, Wallet, AlertCircle, LayoutGrid, List, MoreVertical, CreditCard } from "lucide-react"
+import { 
+  Plus, Search, Phone, Building2, User, Wallet, AlertCircle, 
+  LayoutGrid, List, MoreVertical, CreditCard 
+} from "lucide-react"
 import Link from "next/link"
 import { Client } from "@/lib/types"
 import { fetchWithAuth } from "@/lib/api-client"

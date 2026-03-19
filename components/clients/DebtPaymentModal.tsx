@@ -26,12 +26,11 @@ interface DebtPaymentModalProps {
   onSuccess: () => void
 }
 
-const paymentMethods = [
-  { id: "cash", label: "Naqd", icon: Banknote, color: "text-emerald-500", bgColor: "bg-emerald-500/10" },
-  { id: "card", label: "Plastik", icon: CreditCard, color: "text-blue-500", bgColor: "bg-blue-500/10" },
-]
-
 export function DebtPaymentModal({ isOpen, onClose, client, onSuccess }: DebtPaymentModalProps) {
+  const paymentMethods = [
+    { id: "cash", label: "Naqd", icon: Banknote, color: "text-emerald-500", bgColor: "bg-emerald-500/10" },
+    { id: "card", label: "Plastik", icon: CreditCard, color: "text-blue-500", bgColor: "bg-blue-500/10" },
+  ]
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     amount: "",
