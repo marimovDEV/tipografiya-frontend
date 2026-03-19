@@ -357,6 +357,59 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
     }
   }
 
+  const handleQuickFinish = async (stepId: string) => {
+    if (user?.status !== 'working') {
+      toast.error("Smenani boshlang")
+      return
+    }
+    
+    try {
+      setSubmitting(true)
+      
+      // Find the step data
+      const targetStep = availableOrders.find(o => o.id.toString() === stepId.toString()) || 
+                         (activeStep && activeStep.id.toString() === stepId.toString() ? activeStep : null);
+      
+      if (!targetStep) {
+        toast.error("Vazifa ma'lumotlari topilmadi")
+        return
+      }
+
+      // If not active, claim it first
+      if (!activeStep || activeStep.id.toString() !== stepId.toString()) {
+        await fetchWithAuth(`/api/production/${stepId}/claim/`, { method: "POST" })
+      }
+      
+      const remaining = (Number(targetStep.input_qty) || 0) - 
+                        ((Number(targetStep.produced_qty) || 0) + (Number(targetStep.defect_qty) || 0))
+      
+      if (remaining > 0) {
+        await reportStepProgress({
+          production_step_id: targetStep.id,
+          produced_qty: remaining,
+          defect_qty: 0,
+          notes: "Timeline orqali tezkor yakunlash"
+        })
+      }
+      
+      await completeProductionStep(targetStep.id)
+      toast.success("Bosqich yakunlandi")
+      
+      if (activeStep?.id.toString() === stepId.toString()) {
+        setActiveStep(null)
+      }
+      
+      fetchWorkerData()
+      fetchDailyStats()
+      fetchStepStats()
+    } catch (e) {
+      console.error(e)
+      toast.error("Xatolik yuz berdi")
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   if (loading) return (
     <div className="flex items-center justify-center p-12">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -733,12 +786,28 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                                   {s.status === 'completed' ? <CheckCircle2 size={12} /> : <span className="text-[10px] font-black">{s.sequence}</span>}
                                </div>
                                {/* Label */}
-                               <div className={`absolute top-9 whitespace-nowrap text-center transition-colors duration-300 ${
+                               <div className={`absolute top-9 whitespace-nowrap text-center transition-all duration-300 flex flex-col items-center gap-1.5 ${
                                   s.id === activeStep.id.toString() ? "text-indigo-400 font-black" : "text-slate-600 font-bold"
                                }`}>
                                   <p className="text-[8px] uppercase tracking-tighter">
                                      {getStepLabelUz(s.step)}
                                   </p>
+                                  {s.status !== 'completed' && (
+                                    <Button
+                                      className={`h-5 text-[7px] px-2 rounded-md font-black uppercase tracking-widest transition-all ${
+                                        s.id === activeStep.id.toString()
+                                        ? "bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-600 hover:text-white"
+                                        : "bg-slate-800/50 text-slate-500 border border-slate-700/50 hover:bg-slate-700 hover:text-slate-300"
+                                      }`}
+                                      disabled={submitting}
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleQuickFinish(s.id)
+                                      }}
+                                    >
+                                      Tugatish
+                                    </Button>
+                                  )}
                                </div>
                            </div>
                         ))}
