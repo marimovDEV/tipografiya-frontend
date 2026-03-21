@@ -91,11 +91,9 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
   const [stepStats, setStepStats] = useState<Record<string, { display: string, count: number, total_available: number }>>({})
   const router = useRouter()
   
-  // Reporting state
-  const [produced, setProduced] = useState("")
-  const [defects, setDefects] = useState("")
-  const [producedPages, setProducedPages] = useState("")
-  const [defectPages, setDefectPages] = useState("")
+  // Reporting state (Simplified for individual tasks)
+  const [reportData, setReportData] = useState<Record<string, { produced: string, defects: string, producedPages: string, defectPages: string }>>({})
+  const [expandedSteps, setExpandedSteps] = useState<Record<string, boolean>>({}) // Track which steps are expanded for reporting
   const [submitting, setSubmitting] = useState(false)
   const [user, setUser] = useState<any>(null)
 
@@ -260,40 +258,48 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
     }
   }
 
-  const handleReport = async () => {
+  const handleReport = async (stepId: string) => {
     if (user?.status !== 'working') {
       toast.error("Smena yakunlangan. Hisobot yuborish uchun smenani qayta boshlang.")
       return
     }
-    if (!activeStep) return
-    if (!produced) {
+    
+    const stepData = reportData[stepId] || { produced: "", defects: "", producedPages: "", defectPages: "" }
+    const step = availableOrders.find(o => o.id.toString() === stepId.toString()) || activeStep
+    
+    if (!step) return
+    if (!stepData.produced && !stepData.producedPages) {
       toast.error("Bajarilgan miqdorni kiriting")
       return
     }
 
-    const producedVal = parseFloat(produced || "0")
-    const remainingQty = (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0))
+    const producedVal = parseFloat(stepData.produced || "0")
+    // Logic for remaining qty validation
+    const remainingQty = (Number(step.input_qty) || 0) - ((Number(step.produced_qty) || 0) + (Number(step.defect_qty) || 0))
     
-    if (producedVal > remainingQty + 0.001) {
-      toast.error(`Siz ko'p miqdor kiritdingiz. Qolgan: ${Math.round(remainingQty)} dona`)
-      return
+    if (producedVal > remainingQty + 0.1) {
+      toast.warning(`Siz ko'p miqdor kiritdingiz. Qolgan: ${Math.round(remainingQty)} dona`)
     }
 
     try {
       setSubmitting(true)
       await reportStepProgress({
-        production_step_id: activeStep.id,
-        produced_qty: parseFloat(produced || "0"),
-        defect_qty: parseFloat(defects || "0"),
-        produced_pages: producedPages ? parseInt(producedPages) : undefined,
-        defect_pages: defectPages ? parseInt(defectPages) : undefined,
-        notes: "" // Add notes if needed
+        production_step_id: stepId,
+        produced_qty: producedVal,
+        defect_qty: parseFloat(stepData.defects || "0"),
+        produced_pages: stepData.producedPages ? parseInt(stepData.producedPages) : undefined,
+        defect_pages: stepData.defectPages ? parseInt(stepData.defectPages) : undefined,
+        notes: "Flow-based reporting"
       })
       toast.success("Hisobot saqlandi")
-      setProduced("")
-      setDefects("")
-      setProducedPages("")
-      setDefectPages("")
+      
+      // Clear reporting data for this step
+      setReportData(prev => {
+        const next = { ...prev }
+        delete next[stepId]
+        return next
+      })
+      
       fetchWorkerData()
       fetchDailyStats()
     } catch (error) {
@@ -842,23 +848,27 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                                 type="number"
                                 placeholder="0"
                                 className="h-12 bg-slate-950 border-slate-800 rounded-xl text-lg font-black font-mono focus:ring-indigo-500/20 text-white"
-                                value={producedPages}
+                                value={reportData[activeStep.id]?.producedPages || ""}
                                 onChange={e => {
                                   const val = e.target.value
-                                  setProducedPages(val)
-                                  if (activeStep.page_count) {
-                                    const numVal = parseFloat(val) || 0
-                                    const calcBooks = numVal / activeStep.page_count
-                                    const remainingQty = Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)))
-                                    // Cap it strictly
-                                    const finalVal = Math.min(calcBooks, remainingQty)
-                                    setProduced(finalVal.toFixed(2))
-                                  }
+                                  const numVal = parseFloat(val) || 0
+                                  const calcBooks = activeStep.page_count ? numVal / activeStep.page_count : 0
+                                  const remainingQty = Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)))
+                                  const finalVal = Math.min(calcBooks, remainingQty)
+                                  
+                                  setReportData(prev => ({
+                                    ...prev,
+                                    [activeStep.id]: {
+                                      ...prev[activeStep.id],
+                                      producedPages: val,
+                                      produced: finalVal.toFixed(2)
+                                    }
+                                  }))
                                 }}
                               />
-                              {producedPages && (
+                              {reportData[activeStep.id]?.producedPages && (
                                 <p className="text-[8px] font-black text-indigo-500/60 uppercase ml-1">
-                                  ≈ {(parseFloat(producedPages) / 16).toFixed(1)} bosma list
+                                  ≈ {(parseFloat(reportData[activeStep.id]?.producedPages) / 16).toFixed(1)} bosma list
                                 </p>
                               )}
                            </div>
@@ -868,32 +878,33 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                                 type="number" 
                                 placeholder="0"
                                 className="h-12 bg-slate-950 border-slate-800 rounded-xl text-lg font-black font-mono focus:ring-rose-500/20 text-rose-500"
-                                value={defectPages}
+                                value={reportData[activeStep.id]?.defectPages || ""}
                                 onChange={e => {
                                   const val = e.target.value
-                                  setDefectPages(val)
-                                  if (activeStep.page_count) {
-                                    const numVal = parseFloat(val) || 0
-                                    const calcBooks = numVal / activeStep.page_count
-                                    const remainingQty = Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)))
-                                    // Cap it strictly
-                                    const finalVal = Math.min(calcBooks, remainingQty)
-                                    setDefects(finalVal.toFixed(2))
-                                  }
+                                  const numVal = parseFloat(val) || 0
+                                  const calcBooks = activeStep.page_count ? numVal / activeStep.page_count : 0
+                                  const remainingQty = Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)))
+                                  const finalVal = Math.min(calcBooks, remainingQty)
+
+                                  setReportData(prev => ({
+                                    ...prev,
+                                    [activeStep.id]: {
+                                      ...prev[activeStep.id],
+                                      defectPages: val,
+                                      defects: finalVal.toFixed(2)
+                                    }
+                                  }))
                                 }}
                               />
                            </div>
                         </div>
-                        {producedPages && (
+                        {reportData[activeStep.id]?.producedPages && (
                            <div className="p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-xl flex items-center justify-between">
                               <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">
                                  HISOBLANGAN KITOB:
                               </p>
                               <p className="text-xs font-black text-emerald-400 font-mono">
-                                {Math.min(
-                                  parseFloat(producedPages || "0") / activeStep.page_count, 
-                                  (Number(activeStep.input_qty || 0) - (Number(activeStep.produced_qty || 0) + Number(activeStep.defect_qty || 0)))
-                                ).toFixed(2)} dona
+                                {reportData[activeStep.id]?.produced} dona
                               </p>
                            </div>
                         )}
@@ -910,18 +921,20 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                             step="0.0001"
                             placeholder="0.00"
                             className="h-12 sm:h-14 bg-slate-950 border-slate-800 rounded-xl sm:rounded-2xl text-lg sm:text-xl font-black font-mono focus:ring-indigo-500/20 text-white"
-                            value={produced}
+                            value={reportData[activeStep.id]?.produced || ""}
                             onChange={e => {
                               const val = e.target.value;
                               const numVal = parseFloat(val) || 0;
                               const remainingQty = Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)));
                               
-                              if (numVal > remainingQty) {
-                                setProduced(remainingQty.toString());
-                                toast.warning("Qolgan miqdordan ko'p yozib bo'lmaydi");
-                              } else {
-                                setProduced(val);
-                              }
+                              setReportData(prev => ({
+                                ...prev,
+                                [activeStep.id]: {
+                                  ...prev[activeStep.id],
+                                  produced: numVal > remainingQty ? remainingQty.toString() : val
+                                }
+                              }))
+                              if (numVal > remainingQty) toast.warning("Qolgan miqdordan ko'p yozib bo'lmaydi");
                             }}
                           />
                       </div>
@@ -934,18 +947,20 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                             step="0.0001"
                             placeholder="0.00"
                             className="h-12 sm:h-14 bg-slate-950 border-slate-800 rounded-xl sm:rounded-2xl text-lg sm:text-xl font-black font-mono focus:ring-rose-500/20 text-rose-500"
-                            value={defects}
+                            value={reportData[activeStep.id]?.defects || ""}
                             onChange={e => {
                               const val = e.target.value;
                               const numVal = parseFloat(val) || 0;
                               const remainingQty = Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)));
                               
-                              if (numVal > remainingQty) {
-                                setDefects(remainingQty.toString());
-                                toast.warning("Qolgan miqdordan ko'p yozib bo'lmaydi");
-                              } else {
-                                setDefects(val);
-                              }
+                              setReportData(prev => ({
+                                ...prev,
+                                [activeStep.id]: {
+                                  ...prev[activeStep.id],
+                                  defects: numVal > remainingQty ? remainingQty.toString() : val
+                                }
+                              }))
+                              if (numVal > remainingQty) toast.warning("Qolgan miqdordan ko'p yozib bo'lmaydi");
                             }}
                           />
                       </div>
@@ -963,7 +978,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                        <div className="flex gap-4 flex-1 order-1 sm:order-2">
                          <Button 
                           className="flex-[2] h-12 sm:h-14 rounded-xl sm:rounded-2xl bg-indigo-600 text-white font-black text-[10px] sm:text-[11px] uppercase tracking-[0.15em] shadow-lg shadow-indigo-500/30 hover:bg-indigo-500 transition-all border-none"
-                          onClick={handleReport}
+                          onClick={() => handleReport(activeStep.id)}
                           disabled={submitting}
                         >
                           {submitting ? "..." : "MIQDORNI SAQLASH"}
@@ -1061,7 +1076,9 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
 
             <div className="space-y-4">
               {filteredOrders.length > 0 ? filteredOrders.map((order, idx) => (
-                <div key={idx} className="p-5 rounded-2.5xl bg-slate-800/30 border border-slate-800 hover:border-indigo-500/50 transition-all group relative overflow-hidden">
+                <div key={idx} className={`p-5 rounded-2.5xl border transition-all group relative overflow-hidden ${
+                  expandedSteps[order.id] ? 'bg-slate-800/60 border-indigo-500/50 shadow-xl' : 'bg-slate-800/30 border-slate-800 hover:border-slate-700'
+                }`}>
                   <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 -translate-y-1/2 translate-x-1/2 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-colors" />
                   <div className="flex items-center justify-between relative z-10">
                     <div className="space-y-2">
@@ -1085,18 +1102,119 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                     </div>
                     <Button 
                       size="sm" 
-                      onClick={() => handleStart(order.id)}
-                      disabled={!!activeStep}
+                      variant={expandedSteps[order.id] ? "default" : "outline"}
+                      onClick={() => setExpandedSteps(prev => ({ ...prev, [order.id]: !prev[order.id] }))}
                       className={`rounded-xl h-10 px-5 font-black text-[10px] uppercase tracking-widest transition-all ${
-                        activeStep 
-                        ? "bg-slate-800 text-slate-600 border-slate-700 cursor-not-allowed" 
+                        expandedSteps[order.id]
+                        ? "bg-indigo-600 text-white"
                         : "bg-indigo-600/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-600 hover:text-white"
                       }`}
                     >
-                      BOSHLASH
-                      <ArrowRight className="w-3.5 h-3.5 ml-2 opacity-50 group-hover:translate-x-1 transition-transform" />
+                      {expandedSteps[order.id] ? "YOPISH" : "HISOBOT"}
+                      {expandedSteps[order.id] ? <ChevronDown className="w-3.5 h-3.5 ml-2" /> : <ArrowRight className="w-3.5 h-3.5 ml-2 opacity-50 group-hover:translate-x-1 transition-transform" />}
                     </Button>
                   </div>
+
+                  {/* Inline Reporting Form */}
+                  {expandedSteps[order.id] && (
+                    <div className="mt-6 pt-6 border-t border-slate-700/50 space-y-4 animate-in slide-in-from-top-4 duration-300">
+                       {order.page_count && (
+                         <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                               <Label className="text-[8px] font-black text-slate-500 uppercase ml-1">Bitgan (bet)</Label>
+                               <Input 
+                                 type="number"
+                                 className="h-10 bg-slate-950 border-slate-900 rounded-lg text-sm font-black font-mono text-white"
+                                 value={reportData[order.id]?.producedPages || ""}
+                                 onChange={e => {
+                                   const val = e.target.value
+                                   const numVal = parseFloat(val) || 0
+                                   const calcBooks = order.page_count ? numVal / order.page_count : 0
+                                   const remainingQty = Math.max(0, (Number(order.input_qty) || 0) - ((Number(order.produced_qty) || 0) + (Number(order.defect_qty) || 0)))
+                                   const finalVal = Math.min(calcBooks, remainingQty)
+                                   
+                                   setReportData(prev => ({
+                                     ...prev,
+                                     [order.id]: {
+                                       ...prev[order.id],
+                                       producedPages: val,
+                                       produced: finalVal.toFixed(2)
+                                     }
+                                   }))
+                                 }}
+                               />
+                            </div>
+                            <div className="space-y-1.5">
+                               <Label className="text-[8px] font-black text-slate-500 uppercase ml-1">Brak (bet)</Label>
+                               <Input 
+                                 type="number"
+                                 className="h-10 bg-slate-950 border-slate-900 rounded-lg text-sm font-black font-mono text-rose-500"
+                                 value={reportData[order.id]?.defectPages || ""}
+                                 onChange={e => {
+                                   const val = e.target.value
+                                   const numVal = parseFloat(val) || 0
+                                   const calcBooks = order.page_count ? numVal / order.page_count : 0
+                                   const remainingQty = Math.max(0, (Number(order.input_qty) || 0) - ((Number(order.produced_qty) || 0) + (Number(order.defect_qty) || 0)))
+                                   const finalVal = Math.min(calcBooks, remainingQty)
+                                   
+                                   setReportData(prev => ({
+                                     ...prev,
+                                     [order.id]: {
+                                       ...prev[order.id],
+                                       defectPages: val,
+                                       defects: finalVal.toFixed(2)
+                                     }
+                                   }))
+                                 }}
+                               />
+                            </div>
+                         </div>
+                       )}
+
+                       <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                             <Label className="text-[8px] font-black text-slate-500 uppercase ml-1">Dona (tayyor)</Label>
+                             <Input 
+                               type="number"
+                               step="0.0001"
+                               className="h-10 bg-slate-950 border-slate-900 rounded-lg text-sm font-black font-mono text-white"
+                               value={reportData[order.id]?.produced || ""}
+                               onChange={e => {
+                                 const val = e.target.value
+                                 setReportData(prev => ({
+                                   ...prev,
+                                   [order.id]: { ...prev[order.id], produced: val }
+                                 }))
+                               }}
+                             />
+                          </div>
+                          <div className="space-y-1.5">
+                             <Label className="text-[8px] font-black text-slate-500 uppercase ml-1">Dona (brak)</Label>
+                             <Input 
+                               type="number"
+                               step="0.0001"
+                               className="h-10 bg-slate-950 border-slate-900 rounded-lg text-sm font-black font-mono text-rose-500"
+                               value={reportData[order.id]?.defects || ""}
+                               onChange={e => {
+                                 const val = e.target.value
+                                 setReportData(prev => ({
+                                   ...prev,
+                                   [order.id]: { ...prev[order.id], defects: val }
+                                 }))
+                               }}
+                             />
+                          </div>
+                       </div>
+                       
+                       <Button 
+                         className="w-full h-10 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-lg shadow-indigo-500/20"
+                         disabled={submitting || (!reportData[order.id]?.produced && !reportData[order.id]?.producedPages)}
+                         onClick={() => handleReport(order.id)}
+                       >
+                         {submitting ? "..." : "TASDIQLASH VA SAQLASH"}
+                       </Button>
+                    </div>
+                  )}
                 </div>
               )) : (
                  <div className="py-24 text-center opacity-40">
