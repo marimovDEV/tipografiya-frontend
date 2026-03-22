@@ -7,12 +7,14 @@ import { DEFAULT_SETTINGS } from "@/lib/default-settings"
 import { EmployeesTab } from "@/components/settings/EmployeesTab"
 import { FinanceTab } from "@/components/settings/FinanceTab"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Users2, DollarSign, Settings2, Binary } from "lucide-react"
+import { Users2, DollarSign, Settings2, Binary, ShieldAlert } from "lucide-react"
+import { ResetSystemModal } from "@/components/settings/ResetSystemModal"
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<any>(DEFAULT_SETTINGS)
   const [loading, setLoading] = useState(true)
   const [users, setUsers] = useState<any[]>([])
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false)
 
   useEffect(() => {
     fetchSettings()
@@ -82,6 +84,13 @@ export default function SettingsPage() {
             <DollarSign className="w-4 h-4" />
             Moliya Rejalashtirish
           </TabsTrigger>
+          <TabsTrigger 
+            value="security" 
+            className="rounded-xl px-10 data-[state=active]:bg-red-500 data-[state=active]:text-white flex items-center gap-3 font-black text-[11px] uppercase tracking-widest transition-all h-full"
+          >
+            <ShieldAlert className="w-4 h-4" />
+            Tizim Xavfsizligi
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="employees" className="mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -95,7 +104,42 @@ export default function SettingsPage() {
         <TabsContent value="finance" className="mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <FinanceTab />
         </TabsContent>
+
+        <TabsContent value="security" className="mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8 backdrop-blur-sm shadow-xl space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-red-500/20 rounded-2xl">
+                  <ShieldAlert className="w-8 h-8 text-red-500" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-white uppercase italic">Tizimni Tozalash</h3>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Barcha operatsion ma'lumotlarni o'chirish</p>
+                </div>
+              </div>
+              
+              <div className="p-4 bg-red-950/20 border border-red-900/20 rounded-2xl">
+                <p className="text-xs text-red-400 font-medium leading-relaxed">
+                  DIQQAT: Ushbu amal barcha buyurtmalar, mijozlar, to'lovlar va ombor tarixini butunlay o'chirib tashlaydi.
+                  Faqat yangi bazadan boshlamoqchi bo'lsangiz ishlating.
+                </p>
+              </div>
+
+              <button
+                onClick={() => setIsResetModalOpen(true)}
+                className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all shadow-lg shadow-red-600/20 flex items-center justify-center gap-3"
+              >
+                TIZIMNI RESET QILISH (DANGER ZONE)
+              </button>
+            </div>
+          </div>
+        </TabsContent>
       </Tabs>
+
+      <ResetSystemModal 
+        isOpen={isResetModalOpen} 
+        onClose={() => setIsResetModalOpen(false)} 
+      />
     </div>
   )
 }
