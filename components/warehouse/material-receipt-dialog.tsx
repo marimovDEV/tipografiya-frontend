@@ -21,16 +21,10 @@ import { Material, Supplier } from "@/lib/types"
 
 const formSchema = z.object({
     material_id: z.string().min(1, "Materialni tanlang"),
-    supplier_id: z.string().optional(), // Now optional
-    batch_number: z.string().min(1, "Partiya raqami kiritilishi shart"),
+    supplier_id: z.string().optional(),
     initial_quantity: z.string().refine(val => val !== "" && parseFloat(val) > 0, {
         message: "Miqdor 0 dan katta bo'lishi shart"
     }),
-    cost_per_unit: z.string().refine(val => val !== "" && parseFloat(val) > 0, {
-        message: "Narx 0 dan katta bo'lishi shart"
-    }),
-    expiry_date: z.date().optional(),
-    received_date: z.date(),
 })
 
 interface MaterialReceiptDialogProps {
@@ -49,23 +43,17 @@ export function MaterialReceiptDialog({ open, onOpenChange, onSuccess }: Materia
         defaultValues: {
             material_id: "",
             supplier_id: "",
-            batch_number: "",
             initial_quantity: "",
-            cost_per_unit: "",
-            received_date: new Date(),
         },
     })
 
     useEffect(() => {
         if (open) {
             loadData()
-            // Generate partial random batch number
-            const randomBatch = `BATCH-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
-            form.setValue("batch_number", randomBatch)
         }
     }, [open])
 
-    // Watch material_id and auto-fill price/unit
+    // Watch material_id and auto-fill unit
     const selectedMaterialId = form.watch("material_id")
     const [selectedMaterialUnit, setSelectedMaterialUnit] = useState<string>("pcs")
     
@@ -73,9 +61,6 @@ export function MaterialReceiptDialog({ open, onOpenChange, onSuccess }: Materia
         if (selectedMaterialId) {
             const selectedMaterial = materials.find(m => String(m.id) === selectedMaterialId)
             if (selectedMaterial) {
-                if (selectedMaterial.price_per_unit) {
-                    form.setValue("cost_per_unit", String(selectedMaterial.price_per_unit))
-                }
                 setSelectedMaterialUnit(selectedMaterial.unit)
             }
         }
@@ -104,13 +89,10 @@ export function MaterialReceiptDialog({ open, onOpenChange, onSuccess }: Materia
         try {
             const payload = {
                 material: values.material_id,
-                supplier: values.supplier_id || null, // Allow null
-                batch_number: values.batch_number,
+                supplier: values.supplier_id || null,
+                batch_number: `RCV-${new Date().getTime().toString().slice(-6)}`, // Automatic batch id
                 initial_quantity: parseFloat(values.initial_quantity),
                 current_quantity: parseFloat(values.initial_quantity),
-                cost_per_unit: parseFloat(values.cost_per_unit),
-                received_date: format(values.received_date, "yyyy-MM-dd"),
-                expiry_date: values.expiry_date ? format(values.expiry_date, "yyyy-MM-dd") : null,
                 is_active: true
             }
 
@@ -129,11 +111,11 @@ export function MaterialReceiptDialog({ open, onOpenChange, onSuccess }: Materia
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[550px]">
+            <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                     <DialogTitle>Material Qabul Qilish</DialogTitle>
                     <DialogDescription>
-                        Yangi partiya (batch) ma'lumotlarini kiriting. Omborga kirim qilinadi.
+                        Omborga kirim qilish uchun material va miqdorni kiriting.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -175,7 +157,7 @@ export function MaterialReceiptDialog({ open, onOpenChange, onSuccess }: Materia
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder="Tanlang (shart emas)" />
+                                                    <SelectValue placeholder="Tanlang" />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
@@ -194,148 +176,24 @@ export function MaterialReceiptDialog({ open, onOpenChange, onSuccess }: Materia
 
                         <FormField
                             control={form.control}
-                            name="batch_number"
+                            name="initial_quantity"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Partiya Raqami (Batch No) *</FormLabel>
+                                    <div className="flex items-center justify-between mb-1">
+                                        <FormLabel className="text-blue-600 font-bold">Miqdor *</FormLabel>
+                                        <UnitConverterHelper 
+                                            baseUnit={selectedMaterialUnit} 
+                                            onCalculate={(val) => form.setValue("initial_quantity", String(val))} 
+                                        />
+                                    </div>
                                     <FormControl>
-                                        <Input {...field} placeholder="BATCH-2024-XXX" />
+                                        <Input {...field} type="number" step="0.01" placeholder="Masalan: 2500" className="text-lg h-12 font-bold" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="initial_quantity"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <div className="flex items-center justify-between mb-1">
-                                            <FormLabel>Miqdor *</FormLabel>
-                                            <UnitConverterHelper 
-                                                baseUnit={selectedMaterialUnit} 
-                                                onCalculate={(val) => form.setValue("initial_quantity", String(val))} 
-                                            />
-                                        </div>
-                                        <FormControl>
-                                            <Input {...field} type="number" step="0.01" placeholder="100" />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="cost_per_unit"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Bir dona narxi (so'm) *</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} type="number" step="0.01" placeholder="25000" />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="received_date"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col">
-                                        <FormLabel>Qabul Sanasi *</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant={"outline"}
-                                                        className={cn(
-                                                            "w-full pl-3 text-left font-normal",
-                                                            !field.value && "text-muted-foreground"
-                                                        )}
-                                                    >
-                                                        {field.value ? (
-                                                            format(field.value, "PPP")
-                                                        ) : (
-                                                            <span>Sanani tanlang</span>
-                                                        )}
-                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0" align="start">
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={field.value}
-                                                    onSelect={field.onChange}
-                                                    disabled={(date) =>
-                                                        date > new Date() || date < new Date("1900-01-01")
-                                                    }
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="expiry_date"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col">
-                                        <FormLabel>Yaroqlilik muddati (Optional)</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant={"outline"}
-                                                        className={cn(
-                                                            "w-full pl-3 text-left font-normal",
-                                                            !field.value && "text-muted-foreground"
-                                                        )}
-                                                    >
-                                                        {field.value ? (
-                                                            format(field.value, "PPP")
-                                                        ) : (
-                                                            <span>Sanani tanlang</span>
-                                                        )}
-                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0" align="start">
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={field.value}
-                                                    onSelect={field.onChange}
-                                                    disabled={(date) =>
-                                                        date < new Date()
-                                                    }
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <DialogFooter className="mt-4">
-                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                                Bekor qilish
-                            </Button>
-                            <Button type="submit" disabled={loading}>
-                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Qabul qilish
-                            </Button>
                         </DialogFooter>
                     </form>
                 </Form >
