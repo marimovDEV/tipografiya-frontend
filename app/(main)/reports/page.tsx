@@ -178,8 +178,8 @@ export default function ReportsPage() {
           value={formatCurrency(financials.net_profit)}
           icon={TrendingUp}
           color="green"
-          subText={`Rentabellik: ${((financials.net_profit / (financials.total_revenue || 1)) * 100).toFixed(1)}%`}
-          highlightColor={((financials.net_profit / (financials.total_revenue || 1)) * 100) < 10 ? "text-red-500" : "text-emerald-500"}
+          subText={`Rentabellik: ${financials.rentability}%`}
+          highlightColor={financials.rentability < 10 ? "text-red-500" : "text-emerald-500"}
         />
         <KPIItem
           title="O'rtacha Chek"
