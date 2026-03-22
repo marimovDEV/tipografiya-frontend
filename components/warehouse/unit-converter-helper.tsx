@@ -9,29 +9,54 @@ import { Calculator, X } from "lucide-react"
 interface UnitConverterHelperProps {
   onCalculate: (total: number) => void
   baseUnit: string
+  units_per_pack?: number
+  packs_per_box?: number
 }
 
-export function UnitConverterHelper({ onCalculate, baseUnit }: UnitConverterHelperProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [boxes, setBoxes] = useState<string>("")
-  const [packsPerBox, setPacksPerBox] = useState<string>("")
-  const [unitsPerPack, setUnitsPerPack] = useState<string>("")
+type ConversionUnit = 'pcs' | 'pachka' | 'yashik'
 
+const UNIT_LABELS: Record<ConversionUnit, string> = {
+  pcs: 'Dona',
+  pachka: 'Pachka',
+  yashik: 'Yashik'
+}
+
+export function UnitConverterHelper({ 
+  onCalculate, 
+  baseUnit, 
+  units_per_pack = 500, 
+  packs_per_box = 5 
+}: UnitConverterHelperProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [inputValue, setInputValue] = useState<string>("")
+  const [inputUnit, setInputUnit] = useState<ConversionUnit>('yashik')
+
+  // Calculate base units whenever input changes
   useEffect(() => {
-    const b = parseFloat(boxes) || 0
-    const p = parseFloat(packsPerBox) || 0
-    const u = parseFloat(unitsPerPack) || 0
-    
-    // Only calculate if at least one factor is provided
-    if (b > 0 || p > 0 || u > 0) {
-        // Multi-level: Boxes * (Packs/Box) * (Units/Pack)
-        // If they only provide one (e.g. just units per box) it still works if others are 1
-        const total = (b || 1) * (p || 1) * (u || 1)
-        if (total > 0 && total !== 1) {
-            onCalculate(total)
-        }
+    const val = parseFloat(inputValue) || 0
+    if (val <= 0) return
+
+    let totalPcs = 0
+    if (inputUnit === 'pcs') {
+      totalPcs = val
+    } else if (inputUnit === 'pachka') {
+      totalPcs = val * units_per_pack
+    } else if (inputUnit === 'yashik') {
+      totalPcs = val * packs_per_box * units_per_pack
     }
-  }, [boxes, packsPerBox, unitsPerPack])
+
+    if (totalPcs > 0) {
+      onCalculate(totalPcs)
+    }
+  }, [inputValue, inputUnit, units_per_pack, packs_per_box])
+
+  const currentTotalPcs = (() => {
+    const val = parseFloat(inputValue) || 0
+    if (inputUnit === 'pcs') return val
+    if (inputUnit === 'pachka') return val * units_per_pack
+    if (inputUnit === 'yashik') return val * packs_per_box * units_per_pack
+    return 0
+  })()
 
   if (!isOpen) {
     return (
@@ -43,60 +68,71 @@ export function UnitConverterHelper({ onCalculate, baseUnit }: UnitConverterHelp
         onClick={() => setIsOpen(true)}
       >
         <Calculator className="w-3 h-3 mr-1" />
-        Kalkulyator
+        Kalkulyator (Birliklar bog'langan)
       </Button>
     )
   }
 
   return (
-    <div className="mt-2 p-2 bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200 shadow-sm transition-all">
-      <div className="flex-1 flex items-center gap-1">
-        <Input 
-          type="number" 
-          placeholder="Yashik" 
-          value={boxes} 
-          onChange={(e) => setBoxes(e.target.value)}
-          className="h-8 text-[11px] w-14 px-1 text-center bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 focus-visible:ring-1"
-        />
-        <span className="text-slate-400 text-[10px] font-bold">×</span>
-        <Input 
-          type="number" 
-          placeholder="Pachka" 
-          value={packsPerBox} 
-          onChange={(e) => setPacksPerBox(e.target.value)}
-          className="h-8 text-[11px] w-14 px-1 text-center bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 focus-visible:ring-1"
-        />
-        <span className="text-slate-400 text-[10px] font-bold">×</span>
-        <Input 
-          type="number" 
-          placeholder={baseUnit} 
-          value={unitsPerPack} 
-          onChange={(e) => setUnitsPerPack(e.target.value)}
-          className="h-8 text-[11px] w-16 px-1 text-center bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 focus-visible:ring-1"
-        />
-      </div>
-      
-      <div className="flex items-center gap-2 border-l pl-2 border-slate-300 dark:border-slate-600">
-        <div className="flex flex-col items-end min-w-[40px]">
-            <span className="text-[8px] text-blue-500 dark:text-blue-400 font-bold uppercase leading-none">Jami</span>
-            <span className="text-[11px] font-bold text-blue-700 dark:text-blue-300">
-                {((parseFloat(boxes) || 1) * (parseFloat(packsPerBox) || 1) * (parseFloat(unitsPerPack) || 1)).toLocaleString()}
-            </span>
+    <div className="mt-2 p-3 bg-slate-100/50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl animate-in fade-in zoom-in-95 duration-200 shadow-lg">
+      <div className="flex flex-col gap-3">
+        {/* Input Row */}
+        <div className="flex items-center gap-2">
+          <div className="flex-1">
+            <label className="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Miqdor kiritish</label>
+            <div className="flex items-center gap-1 group">
+              <Input 
+                type="number" 
+                placeholder="0" 
+                value={inputValue} 
+                onChange={(e) => setInputValue(e.target.value)}
+                className="h-10 text-lg font-bold bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 focus-visible:ring-blue-500"
+              />
+              <select 
+                value={inputUnit}
+                onChange={(e) => setInputUnit(e.target.value as ConversionUnit)}
+                className="h-10 px-2 bg-slate-200 dark:bg-slate-700 rounded-md text-sm font-semibold outline-none cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-600"
+              >
+                <option value="pcs">Dona</option>
+                <option value="pachka">Pachka</option>
+                <option value="yashik">Yashik</option>
+              </select>
+            </div>
+          </div>
+          
+          <Button 
+              type="button" 
+              variant="ghost" 
+              size="icon" 
+              className="mt-5 h-8 w-8 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors" 
+              onClick={() => {
+                  setIsOpen(false)
+                  setInputValue("")
+              }}
+          >
+              <X className="w-4 h-4" />
+          </Button>
         </div>
-        <Button 
-            type="button" 
-            variant="ghost" 
-            size="icon" 
-            className="h-6 w-6 text-slate-400 hover:text-red-500 dark:hover:text-red-400" 
-            onClick={() => {
-                setIsOpen(false)
-                setBoxes("")
-                setPacksPerBox("")
-                unitsPerPack !== "" && setUnitsPerPack("")
-            }}
-        >
-            <X className="w-3 h-3" />
-        </Button>
+
+        {/* Results Summary */}
+        <div className="grid grid-cols-3 gap-2 p-2 bg-white/50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
+           <div className="flex flex-col items-center">
+             <span className="text-[9px] text-slate-500 font-bold uppercase">Dona</span>
+             <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{currentTotalPcs.toLocaleString()}</span>
+           </div>
+           <div className="flex flex-col items-center border-x border-slate-200 dark:border-slate-700">
+             <span className="text-[9px] text-slate-500 font-bold uppercase">Pachka</span>
+             <span className="text-sm font-bold text-green-600 dark:text-green-400">{(currentTotalPcs / units_per_pack).toLocaleString()}</span>
+           </div>
+           <div className="flex flex-col items-center">
+             <span className="text-[9px] text-slate-500 font-bold uppercase">Yashik</span>
+             <span className="text-sm font-bold text-purple-600 dark:text-purple-400">{(currentTotalPcs / (units_per_pack * packs_per_box)).toLocaleString()}</span>
+           </div>
+        </div>
+        
+        <div className="text-[10px] text-slate-400 italic text-center">
+          Format: 1 yashik = {packs_per_box} pachka = {packs_per_box * units_per_pack} dona
+        </div>
       </div>
     </div>
   )

@@ -42,6 +42,8 @@ const formSchema = z.object({
     category: z.string().min(1, "Kategoriya tanlang"),
     new_category: z.string().optional(),
     unit: z.string().min(1, "O'lchov birligini tanlang"),
+    units_per_pack: z.string().optional(),
+    packs_per_box: z.string().optional(),
     min_stock: z.string().min(1, "Minimal qoldiq kiritilishi shart"),
     initial_quantity: z.string().optional(),
     supplier_id: z.string().optional(),
@@ -93,6 +95,8 @@ export function NewMaterialDialog({ open, onOpenChange, onSuccess }: NewMaterial
             category: "",
             new_category: "",
             unit: "kg",
+            units_per_pack: "500",
+            packs_per_box: "5",
             min_stock: "100",
             initial_quantity: "0",
             supplier_id: "",
@@ -124,6 +128,8 @@ export function NewMaterialDialog({ open, onOpenChange, onSuccess }: NewMaterial
                 name: values.name,
                 category: isCustomCategory ? values.new_category : values.category,
                 unit: values.unit,
+                units_per_pack: parseInt(values.units_per_pack || "500"),
+                packs_per_box: parseInt(values.packs_per_box || "5"),
                 min_stock: parseFloat(values.min_stock),
                 current_stock: 0,
                 is_active: true
@@ -140,8 +146,6 @@ export function NewMaterialDialog({ open, onOpenChange, onSuccess }: NewMaterial
                         batch_number: `INIT-${new Date().getTime().toString().slice(-6)}`,
                         initial_quantity: initQty,
                         current_quantity: initQty,
-                        cost_per_unit: 0,
-                        received_date: format(new Date(), "yyyy-MM-dd"),
                         is_active: true
                     })
                     toast.success("Boshlang'ich qoldiq qo'shildi")
@@ -257,6 +261,34 @@ export function NewMaterialDialog({ open, onOpenChange, onSuccess }: NewMaterial
                                 )}
                             />
                         </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="units_per_pack"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-[11px] text-slate-500">Pachkadagi dona (soni)</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} type="number" placeholder="500" className="h-9" />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="packs_per_box"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-[11px] text-slate-500">Yashikdagi pachka (soni)</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} type="number" placeholder="5" className="h-9" />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
 
                         {isCustomCategory && (
                             <FormField
@@ -299,11 +331,13 @@ export function NewMaterialDialog({ open, onOpenChange, onSuccess }: NewMaterial
                                     <FormLabel className="text-blue-600 block mb-1">Boshlang'ich Qoldiq</FormLabel>
                                     <UnitConverterHelper 
                                         baseUnit={form.watch("unit")} 
+                                        units_per_pack={parseInt(form.watch("units_per_pack") || "500")}
+                                        packs_per_box={parseInt(form.watch("packs_per_box") || "5")}
                                         onCalculate={(val) => form.setValue("initial_quantity", String(val))} 
                                     />
-                                        <FormControl>
-                                            <Input {...field} type="number" step="0.01" />
-                                        </FormControl>
+                                    <FormControl>
+                                        <Input {...field} type="number" step="0.01" className="h-10 text-lg font-bold bg-blue-50/30 dark:bg-blue-900/10" />
+                                    </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}

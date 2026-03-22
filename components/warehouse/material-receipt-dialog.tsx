@@ -53,15 +53,20 @@ export function MaterialReceiptDialog({ open, onOpenChange, onSuccess }: Materia
         }
     }, [open])
 
-    // Watch material_id and auto-fill unit
+    // Watch material_id and auto-fill unit/rates
     const selectedMaterialId = form.watch("material_id")
     const [selectedMaterialUnit, setSelectedMaterialUnit] = useState<string>("pcs")
+    const [selectedMaterialRates, setSelectedMaterialRates] = useState({ units_per_pack: 500, packs_per_box: 5 })
     
     useEffect(() => {
         if (selectedMaterialId) {
             const selectedMaterial = materials.find(m => String(m.id) === selectedMaterialId)
             if (selectedMaterial) {
                 setSelectedMaterialUnit(selectedMaterial.unit)
+                setSelectedMaterialRates({
+                    units_per_pack: selectedMaterial.units_per_pack || 500,
+                    packs_per_box: selectedMaterial.packs_per_box || 5
+                })
             }
         }
     }, [selectedMaterialId, materials])
@@ -182,6 +187,8 @@ export function MaterialReceiptDialog({ open, onOpenChange, onSuccess }: Materia
                                     <FormLabel className="text-blue-600 font-bold block mb-1">Miqdor *</FormLabel>
                                     <UnitConverterHelper 
                                         baseUnit={selectedMaterialUnit} 
+                                        units_per_pack={selectedMaterialRates.units_per_pack}
+                                        packs_per_box={selectedMaterialRates.packs_per_box}
                                         onCalculate={(val) => form.setValue("initial_quantity", String(val))} 
                                     />
                                     <FormControl>
