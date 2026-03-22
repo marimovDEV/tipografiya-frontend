@@ -16,6 +16,7 @@ import { Client } from "@/lib/types"
 import { fetchWithAuth } from "@/lib/api-client"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { toast } from "sonner"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { DebtPaymentModal } from "@/components/clients/DebtPaymentModal"
 
