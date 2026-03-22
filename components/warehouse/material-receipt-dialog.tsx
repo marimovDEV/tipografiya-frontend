@@ -194,6 +194,14 @@ export function MaterialReceiptDialog({ open, onOpenChange, onSuccess }: Materia
                             )}
                         />
 
+                        <DialogFooter className="mt-4 pt-4 border-t">
+                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                                Bekor qilish
+                            </Button>
+                            <Button type="submit" disabled={loading} className="px-8">
+                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Qabul qilish
+                            </Button>
                         </DialogFooter>
                     </form>
                 </Form >
