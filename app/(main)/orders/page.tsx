@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Plus, Search, Eye, Filter, X, MoreVertical, Edit, CheckCircle2, Truck, DollarSign, AlertCircle } from "lucide-react"
+import { Plus, Search, Eye, Filter, X, MoreVertical, Edit, CheckCircle2, Truck, DollarSign, AlertCircle, Trash2 } from "lucide-react"
 import { getStatusLabel, formatCurrency } from "@/lib/data/mock-data"
 import Link from "next/link"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -87,6 +87,25 @@ export default function OrdersPage() {
         fetchOrders()
       } else {
         toast.error("Xatolik yuz berdi")
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error("Aloqa xatosi")
+    }
+  }
+
+  const handleDeleteOrder = async (orderId: string | number) => {
+    if (!confirm("Ushbu buyurtmani o'chirib yuborishni xohlaysizmi?")) return
+    
+    try {
+      const res = await fetchWithAuth(`/api/orders/${orderId}/`, {
+        method: 'DELETE'
+      })
+      if (res.ok) {
+        toast.success("Buyurtma o'chirildi")
+        fetchOrders()
+      } else {
+        toast.error("O'chirishda xatolik yuz berdi")
       }
     } catch (error) {
       console.error(error)
@@ -326,11 +345,17 @@ export default function OrdersPage() {
                                     <Eye className="h-4 w-4" /> Ko'rish (Monitoring)
                                   </DropdownMenuItem>
                                 </Link>
-                                 <Link href={`/orders/${order.id}/edit`}>
+                                <Link href={`/orders/${order.id}/edit`}>
                                   <DropdownMenuItem className="gap-3 cursor-pointer font-black text-[10px] uppercase tracking-widest py-3 rounded-xl focus:bg-indigo-500/10 focus:text-indigo-400">
                                     <Edit className="h-4 w-4" /> Tahrirlash
                                   </DropdownMenuItem>
                                 </Link>
+                                <DropdownMenuItem 
+                                  onClick={() => handleDeleteOrder(order.id)}
+                                  className="gap-3 cursor-pointer font-black text-[10px] uppercase tracking-widest py-3 rounded-xl focus:bg-red-500/10 focus:text-red-500 text-red-500/80"
+                                >
+                                  <Trash2 className="h-4 w-4" /> O'chirish
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
