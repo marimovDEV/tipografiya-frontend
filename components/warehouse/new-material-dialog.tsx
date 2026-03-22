@@ -15,6 +15,7 @@ import { fetchWithAuth } from "@/lib/api-client"
 import { Supplier, Material } from "@/lib/types"
 import { toast } from "sonner"
 import { format } from "date-fns"
+import { UnitConverterHelper } from "./unit-converter-helper"
 
 // Predefined categories and units
 const CATEGORIES = [
@@ -31,7 +32,9 @@ const UNITS = [
     { value: "pcs", label: "Dona (pcs)" },
     { value: "m2", label: "Metr kvadrat (m²)" },
     { value: "l", label: "Litr (l)" },
-    { value: "m", label: "Metr (m)" }
+    { value: "m", label: "Metr (m)" },
+    { value: "pachka", label: "Pachka (pack)" },
+    { value: "yashik", label: "Yashik (box)" }
 ]
 
 const formSchema = z.object({
@@ -293,7 +296,13 @@ export function NewMaterialDialog({ open, onOpenChange, onSuccess }: NewMaterial
                                 name="initial_quantity"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-blue-600">Boshlang'ich Qoldiq</FormLabel>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <FormLabel className="text-blue-600">Boshlang'ich Qoldiq</FormLabel>
+                                            <UnitConverterHelper 
+                                                baseUnit={form.watch("unit")} 
+                                                onCalculate={(val) => form.setValue("initial_quantity", String(val))} 
+                                            />
+                                        </div>
                                         <FormControl>
                                             <Input {...field} type="number" step="0.01" />
                                         </FormControl>

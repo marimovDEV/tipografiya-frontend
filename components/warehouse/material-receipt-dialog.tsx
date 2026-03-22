@@ -12,8 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon, Loader2 } from "lucide-react"
-import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { UnitConverterHelper } from "./unit-converter-helper"
 import { createMaterialBatch } from "@/lib/api/printery"
 import { fetchWithAuth } from "@/lib/api-client"
 import { toast } from "sonner"
@@ -65,13 +65,18 @@ export function MaterialReceiptDialog({ open, onOpenChange, onSuccess }: Materia
         }
     }, [open])
 
-    // Watch material_id and auto-fill price
+    // Watch material_id and auto-fill price/unit
     const selectedMaterialId = form.watch("material_id")
+    const [selectedMaterialUnit, setSelectedMaterialUnit] = useState<string>("pcs")
+    
     useEffect(() => {
         if (selectedMaterialId) {
             const selectedMaterial = materials.find(m => String(m.id) === selectedMaterialId)
-            if (selectedMaterial && selectedMaterial.price_per_unit) {
-                form.setValue("cost_per_unit", String(selectedMaterial.price_per_unit))
+            if (selectedMaterial) {
+                if (selectedMaterial.price_per_unit) {
+                    form.setValue("cost_per_unit", String(selectedMaterial.price_per_unit))
+                }
+                setSelectedMaterialUnit(selectedMaterial.unit)
             }
         }
     }, [selectedMaterialId, materials])
@@ -207,7 +212,13 @@ export function MaterialReceiptDialog({ open, onOpenChange, onSuccess }: Materia
                                 name="initial_quantity"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Miqdor *</FormLabel>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <FormLabel>Miqdor *</FormLabel>
+                                            <UnitConverterHelper 
+                                                baseUnit={selectedMaterialUnit} 
+                                                onCalculate={(val) => form.setValue("initial_quantity", String(val))} 
+                                            />
+                                        </div>
                                         <FormControl>
                                             <Input {...field} type="number" step="0.01" placeholder="100" />
                                         </FormControl>
