@@ -261,34 +261,37 @@ export function NewMaterialDialog({ open, onOpenChange, onSuccess }: NewMaterial
                                 )}
                             />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="units_per_pack"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-[11px] text-slate-500">Pachkadagi dona (soni)</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} type="number" placeholder="500" className="h-9" />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="packs_per_box"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-[11px] text-slate-500">Yashikdagi pachka (soni)</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} type="number" placeholder="5" className="h-9" />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
+
+                        {["pcs", "pachka", "yashik"].includes(form.watch("unit")) && (
+                            <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-2 duration-200">
+                                <FormField
+                                    control={form.control}
+                                    name="units_per_pack"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-[11px] text-slate-500">Pachkadagi dona (soni)</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} type="number" placeholder="500" className="h-9" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="packs_per_box"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-[11px] text-slate-500">Yashikdagi pachka (soni)</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} type="number" placeholder="5" className="h-9" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                        )}
 
                         {isCustomCategory && (
                             <FormField
@@ -329,12 +332,14 @@ export function NewMaterialDialog({ open, onOpenChange, onSuccess }: NewMaterial
                                 render={({ field }) => (
                                     <FormItem>
                                     <FormLabel className="text-blue-600 block mb-1">Boshlang'ich Qoldiq</FormLabel>
-                                    <UnitConverterHelper 
-                                        baseUnit={form.watch("unit")} 
-                                        units_per_pack={parseInt(form.watch("units_per_pack") || "500")}
-                                        packs_per_box={parseInt(form.watch("packs_per_box") || "5")}
-                                        onCalculate={(val) => form.setValue("initial_quantity", String(val))} 
-                                    />
+                                    {["pcs", "pachka", "yashik"].includes(form.watch("unit")) && (
+                                        <UnitConverterHelper 
+                                            baseUnit={form.watch("unit")} 
+                                            units_per_pack={parseInt(form.watch("units_per_pack") || "500")}
+                                            packs_per_box={parseInt(form.watch("packs_per_box") || "5")}
+                                            onCalculate={(val) => form.setValue("initial_quantity", String(val))} 
+                                        />
+                                    )}
                                     <FormControl>
                                         <Input {...field} type="number" step="0.01" className="h-10 text-lg font-bold bg-blue-50/30 dark:bg-blue-900/10" />
                                     </FormControl>

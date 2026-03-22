@@ -185,12 +185,14 @@ export function MaterialReceiptDialog({ open, onOpenChange, onSuccess }: Materia
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className="text-blue-600 font-bold block mb-1">Miqdor *</FormLabel>
-                                    <UnitConverterHelper 
-                                        baseUnit={selectedMaterialUnit} 
-                                        units_per_pack={selectedMaterialRates.units_per_pack}
-                                        packs_per_box={selectedMaterialRates.packs_per_box}
-                                        onCalculate={(val) => form.setValue("initial_quantity", String(val))} 
-                                    />
+                                    {["pcs", "pachka", "yashik"].includes(selectedMaterialUnit) && (
+                                        <UnitConverterHelper 
+                                            baseUnit={selectedMaterialUnit} 
+                                            units_per_pack={selectedMaterialRates.units_per_pack}
+                                            packs_per_box={selectedMaterialRates.packs_per_box}
+                                            onCalculate={(val) => form.setValue("initial_quantity", String(val))} 
+                                        />
+                                    )}
                                     <FormControl>
                                         <Input {...field} type="number" step="0.01" placeholder="Masalan: 2500" className="text-lg h-12 font-bold" />
                                     </FormControl>
