@@ -179,13 +179,11 @@ export function MaterialReceiptDialog({ open, onOpenChange, onSuccess }: Materia
                             name="initial_quantity"
                             render={({ field }) => (
                                 <FormItem>
-                                    <div className="flex items-center justify-between mb-1">
-                                        <FormLabel className="text-blue-600 font-bold">Miqdor *</FormLabel>
-                                        <UnitConverterHelper 
-                                            baseUnit={selectedMaterialUnit} 
-                                            onCalculate={(val) => form.setValue("initial_quantity", String(val))} 
-                                        />
-                                    </div>
+                                    <FormLabel className="text-blue-600 font-bold block mb-1">Miqdor *</FormLabel>
+                                    <UnitConverterHelper 
+                                        baseUnit={selectedMaterialUnit} 
+                                        onCalculate={(val) => form.setValue("initial_quantity", String(val))} 
+                                    />
                                     <FormControl>
                                         <Input {...field} type="number" step="0.01" placeholder="Masalan: 2500" className="text-lg h-12 font-bold" />
                                     </FormControl>

@@ -49,37 +49,37 @@ export function UnitConverterHelper({ onCalculate, baseUnit }: UnitConverterHelp
   }
 
   return (
-    <div className="mt-2 p-2 bg-blue-50/50 border border-blue-100 rounded-lg flex items-center gap-2 animate-in fade-in duration-200">
-      <div className="flex-1 flex items-center gap-1.5">
+    <div className="mt-2 p-2 bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200 shadow-sm transition-all">
+      <div className="flex-1 flex items-center gap-1">
         <Input 
           type="number" 
           placeholder="Yashik" 
           value={boxes} 
           onChange={(e) => setBoxes(e.target.value)}
-          className="h-8 text-xs w-16 px-1 text-center"
+          className="h-8 text-[11px] w-14 px-1 text-center bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 focus-visible:ring-1"
         />
-        <span className="text-slate-400 text-xs text-bold">×</span>
+        <span className="text-slate-400 text-[10px] font-bold">×</span>
         <Input 
           type="number" 
           placeholder="Pachka" 
           value={packsPerBox} 
           onChange={(e) => setPacksPerBox(e.target.value)}
-          className="h-8 text-xs w-16 px-1 text-center"
+          className="h-8 text-[11px] w-14 px-1 text-center bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 focus-visible:ring-1"
         />
-        <span className="text-slate-400 text-xs text-bold">×</span>
+        <span className="text-slate-400 text-[10px] font-bold">×</span>
         <Input 
           type="number" 
           placeholder={baseUnit} 
           value={unitsPerPack} 
           onChange={(e) => setUnitsPerPack(e.target.value)}
-          className="h-8 text-xs w-20 px-1 text-center"
+          className="h-8 text-[11px] w-16 px-1 text-center bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 focus-visible:ring-1"
         />
       </div>
       
-      <div className="flex items-center gap-2 border-l pl-2 border-blue-200">
-        <div className="flex flex-col items-end">
-            <span className="text-[9px] text-blue-500 font-bold uppercase leading-none">Jami</span>
-            <span className="text-xs font-bold text-blue-700">
+      <div className="flex items-center gap-2 border-l pl-2 border-slate-300 dark:border-slate-600">
+        <div className="flex flex-col items-end min-w-[40px]">
+            <span className="text-[8px] text-blue-500 dark:text-blue-400 font-bold uppercase leading-none">Jami</span>
+            <span className="text-[11px] font-bold text-blue-700 dark:text-blue-300">
                 {((parseFloat(boxes) || 1) * (parseFloat(packsPerBox) || 1) * (parseFloat(unitsPerPack) || 1)).toLocaleString()}
             </span>
         </div>
@@ -87,7 +87,7 @@ export function UnitConverterHelper({ onCalculate, baseUnit }: UnitConverterHelp
             type="button" 
             variant="ghost" 
             size="icon" 
-            className="h-6 w-6 text-slate-400 hover:text-red-500" 
+            className="h-6 w-6 text-slate-400 hover:text-red-500 dark:hover:text-red-400" 
             onClick={() => {
                 setIsOpen(false)
                 setBoxes("")

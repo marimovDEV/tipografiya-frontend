@@ -296,13 +296,11 @@ export function NewMaterialDialog({ open, onOpenChange, onSuccess }: NewMaterial
                                 name="initial_quantity"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <div className="flex items-center justify-between mb-1">
-                                            <FormLabel className="text-blue-600">Boshlang'ich Qoldiq</FormLabel>
-                                            <UnitConverterHelper 
-                                                baseUnit={form.watch("unit")} 
-                                                onCalculate={(val) => form.setValue("initial_quantity", String(val))} 
-                                            />
-                                        </div>
+                                    <FormLabel className="text-blue-600 block mb-1">Boshlang'ich Qoldiq</FormLabel>
+                                    <UnitConverterHelper 
+                                        baseUnit={form.watch("unit")} 
+                                        onCalculate={(val) => form.setValue("initial_quantity", String(val))} 
+                                    />
                                         <FormControl>
                                             <Input {...field} type="number" step="0.01" />
                                         </FormControl>
