@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { 
   Plus, Search, Phone, Building2, User, Wallet, AlertCircle, 
-  LayoutGrid, List, MoreVertical, CreditCard 
+  LayoutGrid, List, MoreVertical, CreditCard, Trash2 
 } from "lucide-react"
 import Link from "next/link"
 import { Client } from "@/lib/types"
@@ -43,6 +43,28 @@ export default function ClientsPage() {
       console.error("Error fetching clients:", error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDeleteClient = async (id: number, name: string) => {
+    if (!window.confirm(`${name} mijozini o'chirishni tasdiqlaysizmi? Bu amalni orqaga qaytarib bo'lmaydi.`)) {
+      return
+    }
+
+    try {
+      const response = await fetchWithAuth(`/api/customers/${id}/`, {
+        method: "DELETE",
+      })
+
+      if (response.ok) {
+        toast.success("Mijoz o'chirildi")
+        setClients(clients.filter(c => c.id !== id))
+      } else {
+        toast.error("O'chirishda xatolik yuz berdi")
+      }
+    } catch (error) {
+      console.error("Delete error:", error)
+      toast.error("Tarmoq xatoligi")
     }
   }
 
@@ -174,6 +196,13 @@ export default function ClientsPage() {
                       }} className="text-emerald-500 font-bold">
                         Qarz to'lash
                       </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => handleDeleteClient(client.id, client.full_name)}
+                        className="text-red-500 font-medium"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        O'chirish
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </CardHeader>
@@ -270,6 +299,14 @@ export default function ClientsPage() {
                         <Link href={`/clients/${client.id}`}>
                           <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground"><CreditCard className="h-4 w-4" /></Button>
                         </Link>
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                          onClick={() => handleDeleteClient(client.id, client.full_name)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
