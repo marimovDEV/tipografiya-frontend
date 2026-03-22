@@ -130,7 +130,7 @@ export default function OrdersPage() {
         const payRes = await fetchWithAuth(`/api/transactions/`, {
             method: 'POST',
             body: JSON.stringify({
-                order: selectedOrder.id,
+                order_link: selectedOrder.id,
                 client: selectedOrder.client?.id,
                 amount: handoverAmount,
                 type: 'income',

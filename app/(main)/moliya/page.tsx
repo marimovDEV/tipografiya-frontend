@@ -430,6 +430,18 @@ export default function MoliyaPage() {
                           <User className="w-3 h-3 text-primary" />
                           <span className="text-[9px] font-black text-primary uppercase">{t.worker_name}</span>
                         </div>
+                      ) : t.order_number ? (
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 rounded-lg border border-emerald-500/20 w-fit">
+                             <Tag className="w-3 h-3 text-emerald-400" />
+                             <span className="text-[9px] font-black text-emerald-400 uppercase tracking-tighter">#{t.order_number}</span>
+                          </div>
+                          {t.order_total_price && (
+                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-tighter pl-1">
+                              Jami: {parseFloat(t.order_total_price).toLocaleString()}
+                            </div>
+                          )}
+                        </div>
                       ) : t.client_name ? (
                         <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 rounded-lg border border-blue-500/20 w-fit">
                           <User className="w-3 h-3 text-blue-400" />
