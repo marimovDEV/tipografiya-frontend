@@ -84,8 +84,14 @@ export function UnitConverterHelper({
               <Input 
                 type="number" 
                 placeholder="0" 
+                min={0}
                 value={inputValue} 
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "" || parseFloat(val) >= 0) {
+                    setInputValue(val);
+                  }
+                }}
                 className="h-10 text-lg font-bold bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 focus-visible:ring-blue-500"
               />
               <select 

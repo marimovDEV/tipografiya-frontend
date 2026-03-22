@@ -271,7 +271,19 @@ export function NewMaterialDialog({ open, onOpenChange, onSuccess }: NewMaterial
                                         <FormItem>
                                             <FormLabel className="text-[11px] text-slate-500">Pachkadagi dona (soni)</FormLabel>
                                             <FormControl>
-                                                <Input {...field} type="number" placeholder="500" className="h-9" />
+                                                <Input 
+                                                    {...field} 
+                                                    type="number" 
+                                                    min={0}
+                                                    placeholder="500" 
+                                                    className="h-9" 
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        if (val === "" || parseFloat(val) >= 0) {
+                                                            field.onChange(val);
+                                                        }
+                                                    }}
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -284,7 +296,19 @@ export function NewMaterialDialog({ open, onOpenChange, onSuccess }: NewMaterial
                                         <FormItem>
                                             <FormLabel className="text-[11px] text-slate-500">Yashikdagi pachka (soni)</FormLabel>
                                             <FormControl>
-                                                <Input {...field} type="number" placeholder="5" className="h-9" />
+                                                <Input 
+                                                    {...field} 
+                                                    type="number" 
+                                                    min={0}
+                                                    placeholder="5" 
+                                                    className="h-9" 
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        if (val === "" || parseFloat(val) >= 0) {
+                                                            field.onChange(val);
+                                                        }
+                                                    }}
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -317,7 +341,18 @@ export function NewMaterialDialog({ open, onOpenChange, onSuccess }: NewMaterial
                                     <FormItem>
                                         <FormLabel>Min. Chegara</FormLabel>
                                         <FormControl>
-                                            <Input {...field} type="number" step="0.01" />
+                                            <Input 
+                                                {...field} 
+                                                type="number" 
+                                                min={0}
+                                                step="0.01" 
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    if (val === "" || parseFloat(val) >= 0) {
+                                                        field.onChange(val);
+                                                    }
+                                                }}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -341,7 +376,19 @@ export function NewMaterialDialog({ open, onOpenChange, onSuccess }: NewMaterial
                                         />
                                     )}
                                     <FormControl>
-                                        <Input {...field} type="number" step="0.01" className="h-10 text-lg font-bold bg-blue-50/30 dark:bg-blue-900/10" />
+                                        <Input 
+                                            {...field} 
+                                            type="number" 
+                                            min={0}
+                                            step="0.01" 
+                                            className="h-10 text-lg font-bold bg-blue-50/30 dark:bg-blue-900/10" 
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (val === "" || parseFloat(val) >= 0) {
+                                                    field.onChange(val);
+                                                }
+                                            }}
+                                        />
                                     </FormControl>
                                         <FormMessage />
                                     </FormItem>
