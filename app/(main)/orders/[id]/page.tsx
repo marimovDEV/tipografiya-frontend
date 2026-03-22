@@ -132,6 +132,25 @@ export default function OrderDetailPage() {
         setIsEditDialogOpen(true)
     }
 
+    const handleDeleteOrder = async () => {
+        if (!confirm("Ushbu buyurtmani o'chirib yuborishni xohlaysizmi?")) return
+        
+        try {
+            const res = await fetchWithAuth(`/api/orders/${id}/`, {
+                method: 'DELETE'
+            })
+            if (res.ok) {
+                toast.success("Buyurtma o'chirildi")
+                router.push("/orders")
+            } else {
+                toast.error("O'chirishda xatolik yuz berdi")
+            }
+        } catch (error) {
+            console.error(error)
+            toast.error("Aloqa xatosi")
+        }
+    }
+
     // Granular Progress calculation
     const calculateProgress = () => {
         if (!order?.production_steps?.length) return 0;
@@ -366,7 +385,10 @@ export default function OrderDetailPage() {
                             <DropdownMenuContent align="end" className="w-56 bg-slate-900 border-slate-800 text-slate-200">
                                 <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-slate-500">Amallar</DropdownMenuLabel>
                                 <DropdownMenuSeparator className="bg-slate-800" />
-                                <DropdownMenuItem className="text-red-400 hover:bg-red-500/10 hover:text-red-400 cursor-pointer">
+                                <DropdownMenuItem 
+                                    className="text-red-400 hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
+                                    onClick={handleDeleteOrder}
+                                >
                                     <Trash2 className="h-4 w-4 mr-2" /> O'chirish
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
