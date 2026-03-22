@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Dialog,
   DialogContent,
@@ -32,11 +32,32 @@ export function DebtPaymentModal({ isOpen, onClose, client, onSuccess }: DebtPay
     { id: "card", label: "Plastik", icon: CreditCard, color: "text-blue-500", bgColor: "bg-blue-500/10" },
   ]
   const [loading, setLoading] = useState(false)
+  const [orders, setOrders] = useState<any[]>([])
   const [formData, setFormData] = useState({
     amount: "",
     method: "cash",
     description: "",
+    order_id: "general", // "general" or order ID
   })
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchUnpaidOrders()
+    }
+  }, [isOpen, client.id])
+
+  const fetchUnpaidOrders = async () => {
+    try {
+      const resp = await fetchWithAuth(`/api/customers/${client.id}/orders/`)
+      if (resp.ok) {
+        const data = await resp.json()
+        // Filter for orders that aren't fully paid
+        setOrders(data.filter((o: any) => o.payment_status !== 'fully_paid'))
+      }
+    } catch (err) {
+      console.error("Fetch orders error:", err)
+    }
+  }
 
   const balance = Number(client.balance || 0)
   const currentDebt = balance < 0 ? Math.abs(balance) : 0
@@ -61,12 +82,19 @@ export function DebtPaymentModal({ isOpen, onClose, client, onSuccess }: DebtPay
 
     try {
       setLoading(true)
+      const payload: any = {
+        amount: amountNum,
+        method: formData.method,
+        description: formData.description,
+      }
+      
+      if (formData.order_id !== "general") {
+        payload.order_id = formData.order_id
+      }
+
       const response = await fetchWithAuth(`/api/customers/${client.id}/add_payment/`, {
         method: "POST",
-        body: JSON.stringify({
-           ...formData,
-           amount: amountNum // Ensure it's a number
-        }),
+        body: JSON.stringify(payload),
       })
 
       const data = await response.json()
@@ -186,6 +214,42 @@ export function DebtPaymentModal({ isOpen, onClose, client, onSuccess }: DebtPay
                 </Button>
               </div>
             </div>
+
+            {/* Order Selection */}
+            {orders.length > 0 && (
+              <div className="space-y-3">
+                <Label className="text-xs font-black text-slate-400 uppercase tracking-wider italic">To'lovni bog'lash (Buyurtma)</Label>
+                <Select 
+                  value={formData.order_id} 
+                  onValueChange={(val) => setFormData({ ...formData, order_id: val })}
+                >
+                  <SelectTrigger className="bg-slate-950 border-slate-700 h-12 rounded-xl text-xs font-bold">
+                    <SelectValue placeholder="Umumiy hisobga (Hech qanday buyurtmaga bog'lamasdan)" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
+                    <SelectItem value="general" className="text-xs font-bold py-3 border-b border-white/5">
+                      <div className="flex flex-col">
+                        <span>Umumiy hisobga (Buyurtmaga bog'lamasdan)</span>
+                        <span className="text-[10px] text-slate-500 font-normal">Bu to'lov birorta buyurtmani "To'langan" holatiga o'tkazmaydi</span>
+                      </div>
+                    </SelectItem>
+                    {orders.map((order) => (
+                      <SelectItem key={order.id} value={order.id.toString()} className="text-xs font-bold py-3 border-b border-white/5">
+                        <div className="flex justify-between items-center w-full gap-8">
+                          <div className="flex flex-col">
+                            <span>#{order.order_number} — {order.box_type || 'Noma\'lum mahsulot'}</span>
+                            <span className="text-[10px] text-slate-500 font-normal">Qoldiq: {(order.total_price - (order.total_paid || 0)).toLocaleString()} so'm</span>
+                          </div>
+                          {order.payment_status === 'partially_paid' && (
+                            <span className="text-[9px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded uppercase">Qisman</span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             {/* Payment Methods Grid */}
             <div className="space-y-3">
