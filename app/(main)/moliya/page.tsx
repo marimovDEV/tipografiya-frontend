@@ -53,6 +53,7 @@ import {
 import { fetchWithAuth } from "@/lib/api-client"
 import { toast } from "sonner"
 import { format } from "date-fns"
+import { generateUUID } from "@/lib/utils"
 
 const CATEGORIES = {
   income: [
@@ -122,7 +123,8 @@ export default function MoliyaPage() {
           category: formData.category,
           worker: formData.category === "Ish haq" ? formData.worker : null,
           description: formData.description,
-          date: formData.date
+          date: formData.date,
+          idempotency_key: generateUUID()
         })
       })
 

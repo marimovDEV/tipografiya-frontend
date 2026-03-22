@@ -11,6 +11,7 @@ import Link from "next/link"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { StatusPill } from "@/components/ui/status-pill"
 import { Order, OrderStatus } from "@/lib/types"
+import { getStepLabelUz, generateUUID } from "@/lib/utils"
 import { fetchWithAuth } from "@/lib/api-client"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -136,6 +137,7 @@ export default function OrdersPage() {
                 type: 'income',
                 category: 'sales',
                 payment_method: paymentMethod,
+                idempotency_key: generateUUID(),
                 notes: `Buyurtma #${selectedOrder.order_number} topshirish vaqtidagi yakuniy to'lov`
             })
         })

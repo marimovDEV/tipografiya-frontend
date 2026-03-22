@@ -27,3 +27,11 @@ export function getStepLabelUz(step: string) {
     const key = step.toLowerCase()
     return map[key] || step.charAt(0).toUpperCase() + step.slice(1)
 }
+
+export function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
