@@ -1219,7 +1219,12 @@ function ConfirmationStep({
                         type="number"
                         autoFocus
                         value={specifications.advance_payment || ''}
-                        onChange={(e) => onChange({ ...specifications, advance_payment: parseFloat(e.target.value) || 0 })}
+                        onChange={(e) => {
+                          let val = parseFloat(e.target.value) || 0;
+                          const maxVal = specifications.manual_price || 0;
+                          if (val > maxVal) val = maxVal;
+                          onChange({ ...specifications, advance_payment: val });
+                        }}
                         className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-lg font-bold text-yellow-500 focus:ring-2 focus:ring-yellow-500 transition"
                         placeholder="0"
                       />
