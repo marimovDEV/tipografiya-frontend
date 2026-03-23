@@ -142,7 +142,14 @@ export default function NewOrderWizard() {
         body: JSON.stringify(orderData),
       })
 
-      if (!response.ok) throw new Error("Failed to create order")
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        console.error("SERVER ERROR:", errData);
+        if (errData.traceback) {
+            console.error(errData.traceback);
+        }
+        throw new Error(errData.error || "Failed to create order")
+      }
 
       const order = await response.json()
       router.push(`/orders/${order.id}`)
