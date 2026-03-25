@@ -60,7 +60,7 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
   const [worker, setWorker] = useState<any>(null)
   const [stats, setStats] = useState<any>(null)
   const [history, setHistory] = useState<any[]>([])
-  const [activeTask, setActiveTask] = useState<any>(null)
+  const [activeTasks, setActiveTasks] = useState<any[]>([])
   const [attendance, setAttendance] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
@@ -118,8 +118,8 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
       if (statsRes.ok) setStats(await statsRes.json())
       if (historyRes.ok) setHistory(await historyRes.json())
       if (activeRes.ok) {
-        const activeTasks = await activeRes.json()
-        setActiveTask(activeTasks.length > 0 ? activeTasks[0] : null)
+        const activeData = await activeRes.json()
+        setActiveTasks(Array.isArray(activeData) ? activeData : [])
       }
       if (attendRes.ok && attendRes.status !== 204) setAttendance(await attendRes.json())
     } catch (error) {
@@ -641,46 +641,60 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
                 </CardHeader>
                 
                 <CardContent className="pt-6">
-                    {activeTask ? (
-                        <div className="flex gap-8">
-                            <div className="w-24 h-24 bg-slate-800 rounded-2xl flex items-center justify-center border-2 border-slate-700 shadow-xl">
-                                <Box className="w-10 h-10 text-emerald-400" />
-                            </div>
-                            <div className="flex-1 grid grid-cols-2 gap-x-8 gap-y-4">
-                                <div>
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">BUYURTMA</p>
-                                    <p className="text-lg font-black text-white italic">#{activeTask.order_number}</p>
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">BOSQICH</p>
-                                    <p className="text-lg font-black text-emerald-400">{activeTask.step_display}</p>
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">BUYURTMA MIQDORI</p>
-                                    <p className="text-lg font-black text-slate-300">{activeTask.order_quantity?.toLocaleString()} <span className="text-xs font-normal opacity-50">ta</span></p>
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">PROGRES</p>
-                                    <div className="flex items-center gap-3">
-                                        <p className="text-lg font-black text-blue-400">
-                                            {Math.round(((activeTask.produced_qty + activeTask.defect_qty) / activeTask.order_quantity) * 100)}%
-                                        </p>
-                                        <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden max-w-[100px]">
-                                            <div 
-                                                className="h-full bg-blue-500 transition-all duration-1000" 
-                                                style={{ width: `${Math.round(((activeTask.produced_qty + activeTask.defect_qty) / activeTask.order_quantity) * 100)}%` }} 
-                                            />
+                    <div className="space-y-6">
+                        {activeTasks.length > 0 ? (
+                            activeTasks.map((task) => (
+                                <div key={task.id} className="flex gap-8 p-6 bg-slate-800/20 rounded-2xl border border-white/5 hover:border-emerald-500/20 transition-all group/active">
+                                    <div className="w-24 h-24 bg-slate-800 rounded-2xl flex items-center justify-center border-2 border-slate-700 shadow-xl group-hover/active:border-emerald-500/30 transition-all">
+                                        <Box className="w-10 h-10 text-emerald-400" />
+                                    </div>
+                                    <div className="flex-1 grid grid-cols-2 gap-x-8 gap-y-4">
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">BUYURTMA</p>
+                                            <p className="text-lg font-black text-white italic">#{task.order_number}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">BOSQICH</p>
+                                            <p className="text-lg font-black text-emerald-400">{task.step_display}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">BUYURTMA MIQDORI</p>
+                                            <p className="text-lg font-black text-slate-300">{task.order_quantity?.toLocaleString()} <span className="text-xs font-normal opacity-50">ta</span></p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">PROGRES</p>
+                                            <div className="flex items-center gap-3">
+                                                <p className="text-lg font-black text-blue-400">
+                                                    {task.order_quantity > 0 ? Math.round(((task.produced_qty + task.defect_qty) / task.order_quantity) * 100) : 0}%
+                                                </p>
+                                                <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden max-w-[100px]">
+                                                    <div 
+                                                        className="h-full bg-blue-500 transition-all duration-1000" 
+                                                        style={{ width: `${task.order_quantity > 0 ? Math.round(((task.produced_qty + task.defect_qty) / task.order_quantity) * 100) : 0}%` }} 
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
+                                    <div className="flex flex-col justify-center gap-2 border-l border-slate-800 pl-6">
+                                        <Button 
+                                            size="sm" 
+                                            variant="ghost" 
+                                            className="text-[10px] font-black uppercase text-primary hover:bg-primary/10"
+                                            onClick={() => window.location.href=`/orders/${task.order}/`}
+                                        >
+                                            BATAFSIL <ArrowLeft className="w-3 h-3 rotate-180 ml-1" />
+                                        </Button>
+                                    </div>
                                 </div>
+                            ))
+                        ) : (
+                            <div className="py-8 text-center border-2 border-dashed border-slate-800 rounded-2xl">
+                                 <ClipboardList className="w-10 h-10 text-slate-700 mx-auto mb-3" />
+                                 <p className="text-sm font-black text-slate-600 uppercase tracking-widest">Hozirda faol vazifa yo'q</p>
                             </div>
-                        </div>
-                    ) : (
-                        <div className="py-8 text-center border-2 border-dashed border-slate-800 rounded-2xl">
-                             <ClipboardList className="w-10 h-10 text-slate-700 mx-auto mb-3" />
-                             <p className="text-sm font-black text-slate-600 uppercase tracking-widest">Hozirda faol vazifa yo'q</p>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </CardContent>
             </Card>
 

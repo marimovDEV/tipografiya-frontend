@@ -34,7 +34,7 @@ import { Label } from "@/components/ui/label"
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null)
   const [tasks, setTasks] = useState<any[]>([])
-  const [activeTask, setActiveTask] = useState<any>(null)
+  const [activeTasks, setActiveTasks] = useState<any[]>([])
   const [stats, setStats] = useState<any>(null)
   const [history, setHistory] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -73,11 +73,11 @@ export default function ProfilePage() {
       const historyRes = await fetchWithAuth("/api/users/work-history/")
       if (historyRes.ok) setHistory(await historyRes.json())
 
-      // 4. Active Task
+      // 4. Active Tasks
       const activeRes = await fetchWithAuth("/api/production/active/")
       if (activeRes.ok) {
         const activeData = await activeRes.json()
-        setActiveTask(activeData.length > 0 ? activeData[0] : null)
+        setActiveTasks(Array.isArray(activeData) ? activeData : [])
       }
 
       // 5. General Tasks (kept for compatibility)
@@ -351,65 +351,69 @@ export default function ProfilePage() {
                     )}
                 </CardHeader>
                 <CardContent className="p-6">
-                    {activeTask ? (
-                        <div className="grid grid-cols-12 gap-6 items-center">
-                            <div className="col-span-8 space-y-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-4 bg-slate-800/50 rounded-2xl border border-slate-700/50">
-                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Buyurtma No</p>
-                                        <p className="text-xl font-black text-white font-mono">{activeTask.order_number}</p>
+                    <div className="space-y-4">
+                        {activeTasks.length > 0 ? (
+                            activeTasks.map((task) => (
+                                <div key={task.id} className="grid grid-cols-12 gap-6 items-center p-6 bg-slate-900/50 rounded-2xl border border-white/5 hover:border-primary/30 transition-all group/task">
+                                    <div className="col-span-8 space-y-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 group-hover/task:border-primary/20 transition-all">
+                                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Buyurtma No</p>
+                                                <p className="text-xl font-black text-white font-mono">{task.order_number}</p>
+                                            </div>
+                                            <div className="flex-1 p-4 bg-primary/10 rounded-2xl border border-primary/20 group-hover/task:bg-primary/20 transition-all">
+                                                <p className="text-[10px] font-black text-primary/60 uppercase tracking-widest mb-1">Ish Bosqichi</p>
+                                                <p className="text-xl font-black text-primary uppercase">{task.step_display}</p>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-4">
+                                            <div className="text-center">
+                                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">BERILDI</p>
+                                                <p className="text-lg font-black text-white">{task.input_qty}</p>
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-[9px] font-black text-emerald-500/60 uppercase tracking-widest">TAYYOR</p>
+                                                <p className="text-lg font-black text-emerald-400">{task.produced_qty}</p>
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-[9px] font-black text-rose-500/60 uppercase tracking-widest">BRAK</p>
+                                                <p className="text-lg font-black text-rose-400">{task.defect_qty}</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="flex-1 p-4 bg-primary/10 rounded-2xl border border-primary/20">
-                                        <p className="text-[10px] font-black text-primary/60 uppercase tracking-widest mb-1">Ish Bosqichi</p>
-                                        <p className="text-xl font-black text-primary uppercase">{activeTask.step_display}</p>
+                                    <div className="col-span-4 pl-6 border-l border-slate-800 space-y-3">
+                                        <Button 
+                                            className="w-full h-12 rounded-xl bg-primary text-white font-black text-[11px] uppercase tracking-widest shadow-lg shadow-primary/20"
+                                            onClick={() => window.location.href=`/production-queue/?order=${task.order_number}`}
+                                        >
+                                            HISOBOT BERISH
+                                        </Button>
+                                        <Button 
+                                            variant="outline"
+                                            className="w-full h-12 rounded-xl border-slate-800 text-slate-400 font-black text-[11px] uppercase tracking-widest hover:bg-slate-800"
+                                            onClick={() => window.location.href=`/orders/${task.order}/`}
+                                        >
+                                            BATAFSIL KO'RISH
+                                        </Button>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-3 gap-4">
-                                    <div className="text-center">
-                                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">BERILDI</p>
-                                        <p className="text-lg font-black text-white">{activeTask.input_qty}</p>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-[9px] font-black text-emerald-500/60 uppercase tracking-widest">TAYYOR</p>
-                                        <p className="text-lg font-black text-emerald-400">{activeTask.produced_qty}</p>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-[9px] font-black text-rose-500/60 uppercase tracking-widest">BRAK</p>
-                                        <p className="text-lg font-black text-rose-400">{activeTask.defect_qty}</p>
-                                    </div>
+                            ))
+                        ) : (
+                            <div className="py-12 text-center">
+                                <div className="w-16 h-16 bg-slate-900 rounded-2xl border border-slate-800 flex items-center justify-center mx-auto mb-4 opacity-50">
+                                    <AlertTriangle className="text-slate-600" />
                                 </div>
-                            </div>
-                            <div className="col-span-4 pl-6 border-l border-slate-800 space-y-3">
+                                <p className="text-slate-500 font-black text-[11px] uppercase tracking-widest">Hozirda aktiv ishlab chiqarish vazifasi yo'q</p>
                                 <Button 
-                                    className="w-full h-12 rounded-xl bg-primary text-white font-black text-[11px] uppercase tracking-widest shadow-lg shadow-primary/20"
+                                    variant="link" 
+                                    className="text-primary font-black text-[10px] uppercase mt-2"
                                     onClick={() => window.location.href='/dashboard/'}
                                 >
-                                    HISOBOT BERISH
-                                </Button>
-                                <Button 
-                                    variant="outline"
-                                    className="w-full h-12 rounded-xl border-slate-800 text-slate-400 font-black text-[11px] uppercase tracking-widest"
-                                    onClick={() => window.location.href='/dashboard/'}
-                                >
-                                    BATAFSIL KO'RISH
+                                    VAZIFA TANLASH →
                                 </Button>
                             </div>
-                        </div>
-                    ) : (
-                        <div className="py-12 text-center">
-                            <div className="w-16 h-16 bg-slate-900 rounded-2xl border border-slate-800 flex items-center justify-center mx-auto mb-4 opacity-50">
-                                <AlertTriangle className="text-slate-600" />
-                            </div>
-                            <p className="text-slate-500 font-black text-[11px] uppercase tracking-widest">Hozirda aktiv ishlab chiqarish vazifasi yo'q</p>
-                            <Button 
-                                variant="link" 
-                                className="text-primary font-black text-[10px] uppercase mt-2"
-                                onClick={() => window.location.href='/dashboard/'}
-                            >
-                                VAZIFA TANLASH →
-                            </Button>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </CardContent>
             </Card>
 
