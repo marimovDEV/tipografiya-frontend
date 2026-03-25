@@ -344,7 +344,7 @@ export default function ProfilePage() {
                             <CardDescription className="text-xs font-bold text-slate-500 uppercase tracking-widest">Hozirgi vaqtda bajarilayotgan ishlab chiqarish bosqichi</CardDescription>
                         </div>
                     </div>
-                    {activeTask && (
+                    {activeTasks.length > 0 && (
                         <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 animate-pulse">
                             SHU YERDASIZ
                         </Badge>

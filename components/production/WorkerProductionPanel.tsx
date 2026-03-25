@@ -85,7 +85,7 @@ interface ProductionStep {
 
 export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuery?: string }) {
   const [availableOrders, setAvailableOrders] = useState<ProductionStep[]>([])
-  const [activeStep, setActiveStep] = useState<ProductionStep | null>(null)
+  const [activeSteps, setActiveSteps] = useState<ProductionStep[]>([])
   const [loading, setLoading] = useState(true)
   const [materials, setMaterials] = useState<any[]>([])
   const [stepStats, setStepStats] = useState<Record<string, { display: string, count: number, total_available: number }>>({})
@@ -96,6 +96,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
   const [expandedSteps, setExpandedSteps] = useState<Record<string, boolean>>({}) // Track which steps are expanded for reporting
   const [submitting, setSubmitting] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const [selectedStepId, setSelectedStepId] = useState<string | null>(null)
 
   // Requisition state
   const [isRequisitionOpen, setIsRequisitionOpen] = useState(false)
@@ -149,7 +150,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
       if (res.ok) {
         const data = await res.json()
         setUser({ ...user, status: data.status })
-        setActiveStep(null)
+        setActiveSteps([])
         toast.info("Ishyakunlandi. Yaxshi dam oling!")
         fetchWorkerData()
         router.push('/tasks')
@@ -209,7 +210,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
 
       if (activeRes.ok) {
         const activeData = await activeRes.json()
-        setActiveStep(activeData[0] || null)
+        setActiveSteps(Array.isArray(activeData) ? activeData : [])
       }
 
       if (availableRes.ok) {
@@ -265,7 +266,8 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
     }
     
     const stepData = reportData[stepId] || { produced: "", defects: "", producedPages: "", defectPages: "" }
-    const step = availableOrders.find(o => o.id.toString() === stepId.toString()) || activeStep
+    const step = availableOrders.find(o => o.id.toString() === stepId.toString()) || 
+                 activeSteps.find(s => s.id.toString() === stepId.toString())
     
     if (!step) return
     if (!stepData.produced && !stepData.producedPages) {
@@ -314,7 +316,8 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
       toast.error("Smenani boshlamasdan turib material olib bo'lmaydi!")
       return
     }
-    if (!activeStep || !selectedMaterial || !reqQuantity) return;
+    const targetStepId = selectedStepId || activeSteps[0]?.id;
+    if (!targetStepId || !selectedMaterial || !reqQuantity) return;
 
     try {
       const material = materials.find(m => m.id === selectedMaterial)
@@ -327,7 +330,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
 
       setReqLoading(true)
       await requestMaterialFromWarehouse({
-        production_step_id: activeStep.id,
+        production_step_id: targetStepId,
         material_id: selectedMaterial,
         quantity: qty
       })
@@ -342,17 +345,16 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
     }
   }
 
-  const handleComplete = async () => {
+  const handleComplete = async (stepId: string) => {
     if (user?.status !== 'working') {
       toast.error("Smena yakunlangan. Vazifani yakunlash uchun smenani qayta boshlang.")
       return
     }
-    if (!activeStep) return
+    if (!stepId) return
     try {
       setSubmitting(true)
-      await completeProductionStep(activeStep.id)
+      await completeProductionStep(stepId)
       toast.success("Vazifa muvaffaqiyatli yakunlandi")
-      setActiveStep(null)
       fetchWorkerData()
       fetchDailyStats()
       fetchStepStats()
@@ -372,9 +374,8 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
     try {
       setSubmitting(true)
       
-      // Find the step data
       const targetStep = availableOrders.find(o => o.id.toString() === stepId.toString()) || 
-                         (activeStep && activeStep.id.toString() === stepId.toString() ? activeStep : null);
+                         activeSteps.find(s => s.id.toString() === stepId.toString());
       
       if (!targetStep) {
         toast.error("Vazifa ma'lumotlari topilmadi")
@@ -382,7 +383,8 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
       }
 
       // If not active, claim it first
-      if (!activeStep || activeStep.id.toString() !== stepId.toString()) {
+      const isActive = activeSteps.some(s => s.id.toString() === stepId.toString());
+      if (!isActive) {
         await fetchWithAuth(`/api/production/${stepId}/claim/`, { method: "POST" })
       }
       
@@ -400,10 +402,6 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
       
       await completeProductionStep(targetStep.id)
       toast.success("Bosqich yakunlandi")
-      
-      if (activeStep?.id.toString() === stepId.toString()) {
-        setActiveStep(null)
-      }
       
       fetchWorkerData()
       fetchDailyStats()
@@ -547,456 +545,239 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                   <Zap size={20} className="animate-pulse" />
                 </div>
                 <div>
-                   <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-400">FAOL VAZIFA</h3>
-                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-0.5">Bajirilayotgan jarayon</p>
+                   <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-400">FAOL VAZIFALAR</h3>
+                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-0.5">Bajirilayotgan jarayonlar ({activeSteps.length})</p>
                 </div>
               </div>
-              {activeStep && (
-                <div className="flex items-center gap-3">
-                  <div className="text-right hidden sm:block">
-                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Progress</p>
-                    <p className="text-xs font-black text-indigo-400">
-                      {(Number(activeStep.input_qty) || 0) > 0 ? Math.round((( (Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)) / (Number(activeStep.input_qty) || 0)) * 100) : 0}%
-                    </p>
-                  </div>
-                  <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-black text-[9px] uppercase px-3 py-1 rounded-lg">
-                    JARAYONDA
-                  </Badge>
-                </div>
-              )}
             </div>
           </CardHeader>
-          <CardContent className="p-8">
-            {activeStep ? (
-              <div className="space-y-6 sm:space-y-8">
-                {/* Order Details */}
-                <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
-                  <div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-white italic tracking-tighter uppercase">#{activeStep.order_number}</h2>
-                    <p className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1 italic">{activeStep.client_name}</p>
-                  </div>
-                  <div className="text-left sm:text-right">
-                    <p className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest">Ish bosqichi</p>
-                    <Badge variant="outline" className="mt-1 border-slate-700 text-slate-300 font-black text-[10px] sm:text-[11px] uppercase px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-slate-800">
-                      {activeStep.step}
-                    </Badge>
-                  </div>
-                </div>
-
-                {/* Progress Stats */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                    <div className="p-3 sm:p-4 bg-slate-950/50 border border-slate-800 rounded-2xl sm:rounded-3xl text-center">
-                      <p className="text-[7px] sm:text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">JAMI KITOB</p>
-                      <p className="text-lg sm:text-xl font-black font-mono text-white">{Math.round(Number(activeStep.input_qty || 0))} ta</p>
-                      {activeStep.page_count && (
-                        <p className="text-[7px] font-black text-slate-600 uppercase mt-1">
-                          {Math.round(Number(activeStep.input_qty * activeStep.page_count)).toLocaleString()} bet
-                        </p>
-                      )}
-                    </div>
-                    <div className="p-3 sm:p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl sm:rounded-3xl text-center">
-                      <p className="text-[7px] sm:text-[8px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">BAJARILDI</p>
-                      <p className="text-lg sm:text-xl font-black font-mono text-emerald-400">{Math.round(Number(activeStep.produced_qty || 0))} ta</p>
-                      {activeStep.page_count && (
-                        <p className="text-[7px] font-black text-emerald-500/40 uppercase mt-1">
-                          {Math.round(Number(activeStep.produced_qty || 0) * activeStep.page_count).toLocaleString()} bet
-                        </p>
-                      )}
-                    </div>
-                    <div className="p-3 sm:p-4 bg-rose-500/5 border border-rose-500/20 rounded-2xl sm:rounded-3xl text-center">
-                      <p className="text-[7px] sm:text-[8px] font-black text-rose-500/60 uppercase tracking-widest mb-1">BRAK</p>
-                      <p className="text-lg sm:text-xl font-black font-mono text-rose-500">{Math.round(Number(activeStep.defect_qty || 0))} dona</p>
-                      {activeStep.page_count && (
-                        <p className="text-[7px] font-black text-rose-500/40 uppercase mt-1">
-                          {Math.round(Number(activeStep.defect_qty || 0) * activeStep.page_count).toLocaleString()} bet
-                        </p>
-                      )}
-                    </div>
-                    <div className="p-3 sm:p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl sm:rounded-3xl text-center col-span-2 sm:col-span-1">
-                      <p className="text-[7px] sm:text-[8px] font-black text-amber-500/60 uppercase tracking-widest mb-1">QOLGAN</p>
-                      <p className="text-lg sm:text-xl font-black font-mono text-amber-400">
-                         {Math.max(0, Math.round(Number(activeStep.input_qty || 0) - (Number(activeStep.produced_qty || 0) + Number(activeStep.defect_qty || 0))))} ta
-                      </p>
-                      {activeStep.page_count && (
-                        <p className="text-[7px] font-black text-amber-500/40 uppercase mt-1">
-                          {Math.max(0, Math.round((Number(activeStep.input_qty || 0) - (Number(activeStep.produced_qty || 0) + Number(activeStep.defect_qty || 0))) * activeStep.page_count)).toLocaleString()} bet
-                        </p>
-                      )}
-                    </div>
-                    <div className="p-3 sm:p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-2xl sm:rounded-3xl text-center col-span-2 sm:col-span-1">
-                      <p className="text-[7px] sm:text-[8px] font-black text-indigo-400/60 uppercase tracking-widest mb-1">PROGRESS</p>
-                      <p className="text-lg sm:text-xl font-black font-mono text-indigo-400">
-                         {(Number(activeStep.input_qty) || 0) > 0 
-                           ? Math.round((( (Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)) / (Number(activeStep.input_qty) || 0)) * 100) 
-                           : 0}%
-                      </p>
-                    </div>
-                 </div>
-
-                 {/* VISUAL PROGRESS BAR - NEW */}
-                 <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
-                    <div 
-                      className="h-full bg-gradient-to-r from-indigo-600 to-emerald-400 transition-all duration-500"
-                      style={{ width: `${Math.min(100, (Number(activeStep.input_qty) || 0) > 0 ? ((( (Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)) / (Number(activeStep.input_qty) || 0)) * 100) : 0)}%` }}
-                    />
-                 </div>
-
-                 {/* Specification Section - NEW */}
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-slate-800/50">
-                    <div className="space-y-4">
-                       <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                          <ClipboardList className="w-3 h-3" />
-                          TEXNIK SPETSIFIKATSIYA
-                       </h4>
-                       <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                          {[
-                            { label: "Qog'oz", value: activeStep.paper_type ? `${activeStep.paper_type} ${activeStep.paper_density || ''}gr` : null },
-                            { label: "O'lcham", value: activeStep.dimensions ? (typeof activeStep.dimensions === 'string' ? activeStep.dimensions : `${activeStep.dimensions.length}x${activeStep.dimensions.width}x${activeStep.dimensions.height}`) : null },
-                            { label: "Print", value: activeStep.print_colors },
-                            { label: "Lak", value: activeStep.lacquer_type },
-                            { label: "Kesish", value: activeStep.cutting_type },
-                            { label: "Kitob nomi", value: activeStep.book_name },
-                            { label: "Sahifa", value: activeStep.page_count },
-                            { label: "Muqova", value: activeStep.cover_type },
-                            { label: "Format", value: activeStep.format },
-                          ].filter(item => item.value).map((item, i) => (
-                            <div key={i} className="space-y-0.5">
-                               <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{item.label}</p>
-                               <p className="text-[11px] font-bold text-slate-200">{item.value}</p>
-                            </div>
-                          ))}
-                       </div>
-                       
-                       {activeStep.order_notes && (
-                         <div className="mt-4 p-3 bg-amber-500/5 border border-amber-500/10 rounded-xl">
-                            <p className="text-[8px] font-black text-amber-500/60 uppercase tracking-widest mb-1">BUYURTMA IZOHLARI</p>
-                            <p className="text-[10px] text-slate-300 leading-relaxed italic">{activeStep.order_notes}</p>
-                         </div>
-                       )}
-                    </div>
-
-                    <div className="space-y-4">
-                       <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                          <Zap className="w-3 h-3" />
-                          DIZAYN & JARAYON
-                       </h4>
-                       
-                       {activeStep.mockup_url ? (
-                         <a 
-                           href={activeStep.mockup_url} 
-                           target="_blank" 
-                           rel="noopener noreferrer"
-                           className="flex items-center gap-4 p-4 bg-indigo-600/10 border border-indigo-500/30 rounded-2xl hover:bg-indigo-600/20 transition-all group"
-                         >
-                            <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform">
-                               <Package size={20} />
-                            </div>
-                            <div className="flex-1">
-                               <p className="text-[10px] font-black text-white uppercase tracking-widest group-hover:text-indigo-400 transition-colors">Dizayn Maketini Ko&apos;rish</p>
-                               <p className="text-[8px] font-black text-indigo-400/60 uppercase tracking-widest mt-0.5">Chizmani ochish uchun bosing</p>
-                            </div>
-                            <ArrowRight className="w-4 h-4 text-indigo-500 animate-pulse" />
-                         </a>
-                       ) : (
-                         <div className="p-4 bg-slate-800/20 border border-slate-800 border-dashed rounded-2xl flex items-center justify-center">
-                            <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest italic">Maket biriktirilmagan</p>
-                         </div>
-                       )}
-
-                       {activeStep.all_steps && activeStep.all_steps.length > 0 && (
-                         <div className="space-y-2 mt-4">
-                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest ml-1">BOSHQICHALR NAVBATI</p>
-                            <div className="flex flex-wrap gap-1.5">
-                               {activeStep.all_steps.map((s, i) => (
-                                 <div key={i} className="flex items-center gap-1.5">
-                                    <Badge 
-                                      className={`${
-                                        s.status === 'completed' ? 'bg-emerald-500/20 text-emerald-500' :
-                                        s.id === activeStep.id ? 'bg-indigo-600 text-white animate-pulse' :
-                                        'bg-slate-800/50 text-slate-600'
-                                      } border-none text-[8px] font-black px-2 py-0.5 rounded-md`}
-                                    >
-                                      {s.sequence}. {s.step_display}
-                                    </Badge>
-                                    {i < (activeStep.all_steps?.length || 0) - 1 && (
-                                      <ArrowRight className="w-2.5 h-2.5 text-slate-800" />
-                                    )}
-                                 </div>
-                               ))}
-                            </div>
-                         </div>
-                       )}
-                    </div>
-                 </div>
-                  
-                  {/* HISTORY SECTION - NEW (Worker Transparency) */}
-                  <div className="pt-6 border-t border-slate-800/50">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                        <History className="w-3 h-3" />
-                        OXIRGI HARAKATLAR (LOGLAR)
-                      </h4>
-                      {activeStep.production_logs && activeStep.production_logs.length > 0 && (
-                        <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">
-                          BUGUN JAMI: {Math.round(activeStep.production_logs.reduce((sum, log) => sum + Number(log.produced_pages || 0), 0))} BET
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-2 max-h-[160px] overflow-y-auto no-scrollbar pr-2">
-                       {activeStep.production_logs && activeStep.production_logs.length > 0 ? (
-                         activeStep.production_logs.map((log) => (
-                           <div key={log.id} className="flex items-center justify-between p-3 bg-slate-950/40 border border-slate-800/50 rounded-xl hover:bg-slate-900/40 transition-colors">
-                              <div className="flex items-center gap-3">
-                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                 <div>
-                                    <p className="text-[10px] font-black text-white uppercase tracking-tighter">
-                                       +{Math.round(log.produced_pages || 0)} bet 
-                                       {log.defect_pages > 0 && <span className="text-rose-500 ml-1">(-{Math.round(log.defect_pages)} brak)</span>}
-                                    </p>
-                                    <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">
-                                       {new Date(log.created_at).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })} • {log.worker_name}
-                                    </p>
-                                 </div>
-                              </div>
-                              <Badge className="bg-slate-800 text-slate-400 border-none text-[8px] font-black uppercase">
-                                 SAVED
-                              </Badge>
-                           </div>
-                         ))
-                       ) : (
-                         <div className="py-4 text-center border border-dashed border-slate-800/50 rounded-xl">
-                            <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest italic">Hozircha tarix mavjud emas</p>
-                         </div>
-                       )}
-                    </div>
-                  </div>
-
-                  {/* STAGE SEQUENCE */}
-                 <div className="pt-6 border-t border-slate-800/50">
-                    <h4 className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6">Bosqichlar Navbati</h4>
-                    <div className="relative flex items-center justify-between px-2 sm:px-6">
-                        {/* Connecting Line behind */}
-                        <div className="absolute left-[30px] right-[30px] top-[14px] h-[2px] bg-slate-800" />
-                        
-                        {activeStep.all_steps?.map((s: any, idx: number) => (
-                           <div key={s.id} className="relative flex flex-col items-center group">
-                               {/* Dot indicator */}
-                               <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 z-10 transition-all duration-500 ${
-                                  s.status === 'completed' 
-                                  ? "bg-emerald-500/20 border-emerald-500 text-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]" 
-                                  : s.id === activeStep.id.toString()
-                                  ? "bg-indigo-600 border-indigo-600 text-white animate-pulse"
-                                  : "bg-slate-900 border-slate-800 text-slate-600"
-                               }`}>
-                                  {s.status === 'completed' ? <CheckCircle2 size={12} /> : <span className="text-[10px] font-black">{s.sequence}</span>}
-                               </div>
-                               {/* Label */}
-                               <div className={`absolute top-9 whitespace-nowrap text-center transition-all duration-300 flex flex-col items-center gap-1.5 ${
-                                  s.id === activeStep.id.toString() ? "text-indigo-400 font-black" : "text-slate-600 font-bold"
-                               }`}>
-                                  <p className="text-[8px] uppercase tracking-tighter">
-                                     {getStepLabelUz(s.step)}
-                                  </p>
-                                  {s.status !== 'completed' && (
-                                    <Button
-                                      className={`h-5 text-[7px] px-2 rounded-md font-black uppercase tracking-widest transition-all ${
-                                        s.id === activeStep.id.toString()
-                                        ? "bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-600 hover:text-white"
-                                        : "bg-slate-800/50 text-slate-500 border border-slate-700/50 hover:bg-slate-700 hover:text-slate-300"
-                                      }`}
-                                      disabled={submitting}
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        handleQuickFinish(s.id)
-                                      }}
-                                    >
-                                      Tugatish
-                                    </Button>
-                                  )}
-                               </div>
-                           </div>
-                        ))}
-                    </div>
-                 </div>
-
-                {/* Input Controls */}
-                <div className="space-y-6 pt-4 border-t border-slate-800/50">
-                   {/* Page-based reporting if applicable */}
-                   {activeStep.page_count && activeStep.page_count > 0 && (
-                     <div className="p-6 bg-indigo-500/5 border border-indigo-500/20 rounded-[2rem] space-y-4">
-                        <div className="flex items-center justify-between">
-                           <div>
-                              <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Sahifa & List kalkulyatori</h4>
-                              <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-0.5 italic">Tizim 1 bosma listni 16 sahifa deb hisoblaydi</p>
-                           </div>
-                           <Badge className="bg-indigo-500/20 text-indigo-400 font-black text-[9px] uppercase px-3 py-1.5 rounded-xl">
-                              1 kitob = {activeStep.page_count} bet
-                           </Badge>
+          <CardContent className="p-0">
+            {activeSteps.length > 0 ? (
+              <div className="divide-y divide-slate-800">
+                {activeSteps.map((step) => (
+                  <div key={step.id} className="p-8 space-y-8 animate-in fade-in duration-500">
+                    {/* Top Header for each task */}
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-3">
+                            <h2 className="text-2xl sm:text-3xl font-black text-white italic tracking-tighter uppercase">#{step.order_number}</h2>
+                            <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-black text-[9px] uppercase px-3 py-1 rounded-lg animate-pulse">
+                                JARAYONDA
+                            </Badge>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                           <div className="space-y-2">
-                         <div className="flex items-center justify-between">
-                            <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Bitgan sahifa (bet)</Label>
-                            {activeStep.production_logs && activeStep.production_logs.length > 0 && (
-                              <p className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mr-1 underline underline-offset-2">
-                                Oxirgi: +{Math.round(activeStep.production_logs[0].produced_pages)}
-                              </p>
-                            )}
-                         </div>
-                              <Input
-                                type="number"
-                                placeholder="0"
-                                className="h-12 bg-slate-950 border-slate-800 rounded-xl text-lg font-black font-mono focus:ring-indigo-500/20 text-white"
-                                value={reportData[activeStep.id]?.producedPages || ""}
-                                onChange={e => {
-                                  const val = e.target.value
-                                  const numVal = parseFloat(val) || 0
-                                  const calcBooks = activeStep.page_count ? numVal / activeStep.page_count : 0
-                                  const remainingQty = Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)))
-                                  const finalVal = Math.min(calcBooks, remainingQty)
-                                  
-                                  setReportData(prev => ({
-                                    ...prev,
-                                    [activeStep.id]: {
-                                      ...prev[activeStep.id],
-                                      producedPages: val,
-                                      produced: finalVal.toFixed(2)
-                                    }
-                                  }))
-                                }}
-                              />
-                              {reportData[activeStep.id]?.producedPages && (
-                                <p className="text-[8px] font-black text-indigo-500/60 uppercase ml-1">
-                                  ≈ {(parseFloat(reportData[activeStep.id]?.producedPages) / 16).toFixed(1)} bosma list
-                                </p>
-                              )}
-                           </div>
-                           <div className="space-y-2">
-                              <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Brak sahifa (bet)</Label>
-                              <Input 
-                                type="number" 
-                                placeholder="0"
-                                className="h-12 bg-slate-950 border-slate-800 rounded-xl text-lg font-black font-mono focus:ring-rose-500/20 text-rose-500"
-                                value={reportData[activeStep.id]?.defectPages || ""}
-                                onChange={e => {
-                                  const val = e.target.value
-                                  const numVal = parseFloat(val) || 0
-                                  const calcBooks = activeStep.page_count ? numVal / activeStep.page_count : 0
-                                  const remainingQty = Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)))
-                                  const finalVal = Math.min(calcBooks, remainingQty)
+                        <p className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1 italic">{step.client_name}</p>
+                      </div>
+                      <div className="text-left sm:text-right">
+                        <p className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest">Ish bosqichi</p>
+                        <Badge variant="outline" className="mt-1 border-slate-700 text-slate-300 font-black text-[10px] sm:text-[11px] uppercase px-3 sm:px-4 py-1.5 rounded-xl bg-slate-800 shadow-premium">
+                          {step.step}
+                        </Badge>
+                      </div>
+                    </div>
 
-                                  setReportData(prev => ({
-                                    ...prev,
-                                    [activeStep.id]: {
-                                      ...prev[activeStep.id],
-                                      defectPages: val,
-                                      defects: finalVal.toFixed(2)
-                                    }
-                                  }))
-                                }}
-                              />
-                           </div>
+                    {/* Progress Stats */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                        <div className="p-4 bg-slate-950/50 border border-slate-800 rounded-3xl text-center">
+                          <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">JAMI KITOB</p>
+                          <p className="text-xl font-black font-mono text-white">{Math.round(Number(step.input_qty || 0))} ta</p>
                         </div>
-                        {reportData[activeStep.id]?.producedPages && (
-                           <div className="p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-xl flex items-center justify-between">
-                              <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">
-                                 HISOBLANGAN KITOB:
-                              </p>
-                              <p className="text-xs font-black text-emerald-400 font-mono">
-                                {reportData[activeStep.id]?.produced} dona
-                              </p>
-                           </div>
+                        <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-3xl text-center">
+                          <p className="text-[8px] font-black text-emerald-500/60 uppercase tracking-widest mb-1">BAJARILDI</p>
+                          <p className="text-xl font-black font-mono text-emerald-400">{Math.round(Number(step.produced_qty || 0))} ta</p>
+                        </div>
+                        <div className="p-4 bg-rose-500/5 border border-rose-500/20 rounded-3xl text-center">
+                          <p className="text-[8px] font-black text-rose-500/60 uppercase tracking-widest mb-1">BRAK</p>
+                          <p className="text-xl font-black font-mono text-rose-500">{Math.round(Number(step.defect_qty || 0))} dona</p>
+                        </div>
+                        <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-3xl text-center col-span-2 sm:col-span-1">
+                          <p className="text-[8px] font-black text-amber-500/60 uppercase tracking-widest mb-1">QOLGAN</p>
+                          <p className="text-xl font-black font-mono text-amber-400">
+                             {Math.max(0, Math.round(Number(step.input_qty || 0) - (Number(step.produced_qty || 0) + Number(step.defect_qty || 0))))} ta
+                          </p>
+                        </div>
+                        <div className="p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-3xl text-center col-span-2 sm:col-span-1">
+                          <p className="text-[8px] font-black text-indigo-400/60 uppercase tracking-widest mb-1">PROGRESS</p>
+                          <p className="text-xl font-black font-mono text-indigo-400">
+                             {(Number(step.input_qty) || 0) > 0 
+                               ? Math.round((( (Number(step.produced_qty) || 0) + (Number(step.defect_qty) || 0)) / (Number(step.input_qty) || 0)) * 100) 
+                               : 0}%
+                          </p>
+                        </div>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                        <div 
+                        className="h-full bg-gradient-to-r from-indigo-600 to-emerald-400 transition-all duration-500"
+                        style={{ width: `${Math.min(100, (Number(step.input_qty) || 0) > 0 ? ((( (Number(step.produced_qty) || 0) + (Number(step.defect_qty) || 0)) / (Number(step.input_qty) || 0)) * 100) : 0)}%` }}
+                        />
+                    </div>
+
+                    {/* Technical Specs */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-slate-800/50">
+                        <div className="space-y-4">
+                        <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                            <ClipboardList className="w-3 h-3" />
+                            TEXNIK SPETSIFIKATSIYA
+                        </h4>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                            {[
+                                { label: "Qog'oz", value: step.paper_type ? `${step.paper_type} ${step.paper_density || ''}gr` : null },
+                                { label: "O'lcham", value: step.dimensions ? (typeof step.dimensions === 'string' ? step.dimensions : `${step.dimensions.length}x${step.dimensions.width}x${step.dimensions.height}`) : null },
+                                { label: "Print", value: step.print_colors },
+                                { label: "Lak", value: step.lacquer_type },
+                                { label: "Kesish", value: step.cutting_type },
+                                { label: "Kitob nomi", value: step.book_name },
+                                { label: "Sahifa", value: step.page_count },
+                            ].filter(item => item.value).map((item, i) => (
+                                <div key={i} className="space-y-0.5">
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{item.label}</p>
+                                <p className="text-[11px] font-bold text-slate-200">{item.value}</p>
+                                </div>
+                            ))}
+                        </div>
+                        </div>
+
+                        <div className="space-y-4">
+                        <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                            <Zap className="w-3 h-3" />
+                            HARAKATLAR
+                        </h4>
+                        {step.mockup_url && (
+                            <a 
+                            href={step.mockup_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-4 p-4 bg-indigo-600/10 border border-indigo-500/30 rounded-2xl hover:bg-indigo-600/20 transition-all group"
+                            >
+                                <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                                <Package size={18} />
+                                </div>
+                                <div className="flex-1">
+                                <p className="text-[10px] font-black text-white uppercase tracking-widest">Maketni Ko&apos;rish</p>
+                                </div>
+                                <ArrowRight className="w-4 h-4 text-indigo-500" />
+                            </a>
                         )}
-                     </div>
-                   )}
+                        
+                        <div className="flex flex-wrap gap-1.5">
+                            {step.all_steps?.map((s, i) => (
+                                <Badge 
+                                    key={i}
+                                    className={`${
+                                        s.status === 'completed' ? 'bg-emerald-500/20 text-emerald-500' :
+                                        s.id === step.id ? 'bg-indigo-600 text-white' :
+                                        'bg-slate-800/50 text-slate-600'
+                                    } border-none text-[8px] font-black px-2 py-0.5 rounded-md`}
+                                >
+                                    {s.step_display}
+                                </Badge>
+                            ))}
+                        </div>
+                        </div>
+                    </div>
 
-                   <div className="grid grid-cols-2 gap-4 sm:gap-6">
-                      <div className="space-y-2">
-                         <Label className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
-                            {activeStep.page_count ? "Hisoblangan kitob (dona)" : "Bajarildi (dona)"}
-                         </Label>
-                         <Input 
-                            type="number" 
-                            step="0.0001"
-                            placeholder="0.00"
-                            className="h-12 sm:h-14 bg-slate-950 border-slate-800 rounded-xl sm:rounded-2xl text-lg sm:text-xl font-black font-mono focus:ring-indigo-500/20 text-white"
-                            value={reportData[activeStep.id]?.produced || ""}
-                            onChange={e => {
-                              const val = e.target.value;
-                              const numVal = parseFloat(val) || 0;
-                              const remainingQty = Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)));
-                              
-                              setReportData(prev => ({
-                                ...prev,
-                                [activeStep.id]: {
-                                  ...prev[activeStep.id],
-                                  produced: numVal > remainingQty ? remainingQty.toString() : val
-                                }
-                              }))
-                              if (numVal > remainingQty) toast.warning("Qolgan miqdordan ko'p yozib bo'lmaydi");
-                            }}
-                          />
-                      </div>
-                      <div className="space-y-2">
-                         <Label className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
-                            {activeStep.page_count ? "Hisoblangan brak (dona)" : "Brak (nuqson)"}
-                         </Label>
-                         <Input 
-                            type="number" 
-                            step="0.0001"
-                            placeholder="0.00"
-                            className="h-12 sm:h-14 bg-slate-950 border-slate-800 rounded-xl sm:rounded-2xl text-lg sm:text-xl font-black font-mono focus:ring-rose-500/20 text-rose-500"
-                            value={reportData[activeStep.id]?.defects || ""}
-                            onChange={e => {
-                              const val = e.target.value;
-                              const numVal = parseFloat(val) || 0;
-                              const remainingQty = Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)));
-                              
-                              setReportData(prev => ({
-                                ...prev,
-                                [activeStep.id]: {
-                                  ...prev[activeStep.id],
-                                  defects: numVal > remainingQty ? remainingQty.toString() : val
-                                }
-                              }))
-                              if (numVal > remainingQty) toast.warning("Qolgan miqdordan ko'p yozib bo'lmaydi");
-                            }}
-                          />
-                      </div>
-                   </div>
-                   
-                   <div className="flex flex-col sm:flex-row gap-4">
-                      <Button 
-                        variant="outline" 
-                        className="h-12 sm:h-14 rounded-xl sm:rounded-2xl border-slate-800 bg-slate-900 text-slate-400 font-black text-[10px] sm:text-[11px] uppercase tracking-widest hover:bg-slate-800 order-2 sm:order-1"
-                        onClick={() => setIsRequisitionOpen(true)}
-                      >
-                        <Package className="w-4 h-4 mr-2" />
-                        Material Olish
-                      </Button>
-                       <div className="flex gap-4 flex-1 order-1 sm:order-2">
-                         <Button 
-                          className="flex-[2] h-12 sm:h-14 rounded-xl sm:rounded-2xl bg-indigo-600 text-white font-black text-[10px] sm:text-[11px] uppercase tracking-[0.15em] shadow-lg shadow-indigo-500/30 hover:bg-indigo-500 transition-all border-none"
-                          onClick={() => handleReport(activeStep.id)}
-                          disabled={submitting}
-                        >
-                          {submitting ? "..." : "MIQDORNI SAQLASH"}
-                        </Button>
-                        <Button 
-                          className={`${
-                            (Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)))) > 0.0001
-                            ? 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'
-                            : 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-500'
-                          } flex-1 h-12 sm:h-14 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-[0.15em] transition-all border-none`}
-                          onClick={handleComplete}
-                          disabled={submitting || (Math.max(0, (Number(activeStep.input_qty) || 0) - ((Number(activeStep.produced_qty) || 0) + (Number(activeStep.defect_qty) || 0)))) > 0.0001}
-                        >
-                          {submitting ? "..." : "ETAPNI TUGATISH"}
-                        </Button>
-                       </div>
-                   </div>
-                </div>
+                    {/* Reporting Controls for each task */}
+                    <div className="space-y-6 pt-6 border-t border-slate-800/50">
+                        {step.page_count && step.page_count > 0 && (
+                            <div className="p-6 bg-indigo-500/5 border border-indigo-500/20 rounded-3xl space-y-4">
+                                <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Sahifa kalkulyatori ({step.page_count} bet/kitob)</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Bitgan (bet)</Label>
+                                        <Input
+                                            type="number"
+                                            className="h-12 bg-slate-950 border-slate-800 rounded-xl text-lg font-black font-mono text-white"
+                                            value={reportData[step.id]?.producedPages || ""}
+                                            onChange={e => {
+                                                const val = e.target.value;
+                                                const numVal = parseFloat(val) || 0;
+                                                const calcBooks = step.page_count ? numVal / step.page_count : 0;
+                                                const remainingQty = Math.max(0, (Number(step.input_qty) || 0) - ((Number(step.produced_qty) || 0) + (Number(step.defect_qty) || 0)));
+                                                const finalVal = Math.min(calcBooks, remainingQty).toFixed(2);
+                                                
+                                                setReportData(prev => ({
+                                                    ...prev,
+                                                    [step.id]: { ...prev[step.id], producedPages: val, produced: finalVal }
+                                                }));
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Brak (bet)</Label>
+                                        <Input
+                                            type="number"
+                                            className="h-12 bg-slate-950 border-slate-800 rounded-xl text-lg font-black font-mono text-rose-500"
+                                            value={reportData[step.id]?.defectPages || ""}
+                                            onChange={e => {
+                                                const val = e.target.value;
+                                                const numVal = parseFloat(val) || 0;
+                                                const calcBooks = step.page_count ? numVal / step.page_count : 0;
+                                                const remainingQty = Math.max(0, (Number(step.input_qty) || 0) - ((Number(step.produced_qty) || 0) + (Number(step.defect_qty) || 0)));
+                                                const finalVal = Math.min(calcBooks, remainingQty).toFixed(2);
+
+                                                setReportData(prev => ({
+                                                    ...prev,
+                                                    [step.id]: { ...prev[step.id], defectPages: val, defects: finalVal }
+                                                }));
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Bajarildi (dona)</Label>
+                                <Input 
+                                    type="number" 
+                                    className="h-12 bg-slate-950 border-slate-800 rounded-xl text-lg font-black font-mono text-white"
+                                    value={reportData[step.id]?.produced || ""}
+                                    onChange={e => setReportData(prev => ({ ...prev, [step.id]: { ...prev[step.id], produced: e.target.value } }))}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Brak (dona)</Label>
+                                <Input 
+                                    type="number" 
+                                    className="h-12 bg-slate-950 border-slate-800 rounded-xl text-lg font-black font-mono text-rose-500"
+                                    value={reportData[step.id]?.defects || ""}
+                                    onChange={e => setReportData(prev => ({ ...prev, [step.id]: { ...prev[step.id], defects: e.target.value } }))}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-4">
+                            <Button 
+                                variant="outline" 
+                                className="h-12 flex-1 rounded-xl border-slate-800 bg-slate-900 text-slate-400 font-black text-[10px] uppercase tracking-widest"
+                                onClick={() => {
+                                    setSelectedStepId(step.id);
+                                    setIsRequisitionOpen(true);
+                                }}
+                            >
+                                <Package className="w-4 h-4 mr-2" />
+                                Material
+                            </Button>
+                            <Button 
+                                className="h-12 flex-[2] rounded-xl bg-indigo-600 text-white font-black text-[10px] uppercase shadow-lg shadow-indigo-500/20"
+                                onClick={() => handleReport(step.id)}
+                                disabled={submitting}
+                            >
+                                {submitting ? "..." : "SAQLASH"}
+                            </Button>
+                            <Button 
+                                className="h-12 flex-1 rounded-xl bg-emerald-600 text-white font-black text-[10px] uppercase shadow-lg shadow-emerald-500/20"
+                                onClick={() => handleComplete(step.id)}
+                                disabled={submitting}
+                            >
+                                {submitting ? "..." : "FINISH"}
+                            </Button>
+                        </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               <div className="py-24 text-center">
@@ -1009,7 +790,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                 </p>
               </div>
             )}
-          </CardContent>
+          </CardContent>ent>
         </Card>
 
         {/* RECENT LOGS - SMALL */}
