@@ -1102,119 +1102,15 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                     </div>
                     <Button 
                       size="sm" 
-                      variant={expandedSteps[order.id] ? "default" : "outline"}
-                      onClick={() => setExpandedSteps(prev => ({ ...prev, [order.id]: !prev[order.id] }))}
-                      className={`rounded-xl h-10 px-5 font-black text-[10px] uppercase tracking-widest transition-all ${
-                        expandedSteps[order.id]
-                        ? "bg-indigo-600 text-white"
-                        : "bg-indigo-600/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-600 hover:text-white"
-                      }`}
+                      variant="outline"
+                      onClick={() => handleStart(order.id)}
+                      className="rounded-xl h-10 px-5 font-black text-[10px] uppercase tracking-widest transition-all bg-indigo-600/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-600 hover:text-white group"
                     >
-                      {expandedSteps[order.id] ? "YOPISH" : "HISOBOT"}
-                      {expandedSteps[order.id] ? <ChevronDown className="w-3.5 h-3.5 ml-2" /> : <ArrowRight className="w-3.5 h-3.5 ml-2 opacity-50 group-hover:translate-x-1 transition-transform" />}
+                      BOSHLASH
+                      <ArrowRight className="w-3.5 h-3.5 ml-2 opacity-50 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </div>
 
-                  {/* Inline Reporting Form */}
-                  {expandedSteps[order.id] && (
-                    <div className="mt-6 pt-6 border-t border-slate-700/50 space-y-4 animate-in slide-in-from-top-4 duration-300">
-                       {order.page_count && (
-                         <div className="grid grid-cols-2 gap-3">
-                            <div className="space-y-1.5">
-                               <Label className="text-[8px] font-black text-slate-500 uppercase ml-1">Bitgan (bet)</Label>
-                               <Input 
-                                 type="number"
-                                 className="h-10 bg-slate-950 border-slate-900 rounded-lg text-sm font-black font-mono text-white"
-                                 value={reportData[order.id]?.producedPages || ""}
-                                 onChange={e => {
-                                   const val = e.target.value
-                                   const numVal = parseFloat(val) || 0
-                                   const calcBooks = order.page_count ? numVal / order.page_count : 0
-                                   const remainingQty = Math.max(0, (Number(order.input_qty) || 0) - ((Number(order.produced_qty) || 0) + (Number(order.defect_qty) || 0)))
-                                   const finalVal = Math.min(calcBooks, remainingQty)
-                                   
-                                   setReportData(prev => ({
-                                     ...prev,
-                                     [order.id]: {
-                                       ...prev[order.id],
-                                       producedPages: val,
-                                       produced: finalVal.toFixed(2)
-                                     }
-                                   }))
-                                 }}
-                               />
-                            </div>
-                            <div className="space-y-1.5">
-                               <Label className="text-[8px] font-black text-slate-500 uppercase ml-1">Brak (bet)</Label>
-                               <Input 
-                                 type="number"
-                                 className="h-10 bg-slate-950 border-slate-900 rounded-lg text-sm font-black font-mono text-rose-500"
-                                 value={reportData[order.id]?.defectPages || ""}
-                                 onChange={e => {
-                                   const val = e.target.value
-                                   const numVal = parseFloat(val) || 0
-                                   const calcBooks = order.page_count ? numVal / order.page_count : 0
-                                   const remainingQty = Math.max(0, (Number(order.input_qty) || 0) - ((Number(order.produced_qty) || 0) + (Number(order.defect_qty) || 0)))
-                                   const finalVal = Math.min(calcBooks, remainingQty)
-                                   
-                                   setReportData(prev => ({
-                                     ...prev,
-                                     [order.id]: {
-                                       ...prev[order.id],
-                                       defectPages: val,
-                                       defects: finalVal.toFixed(2)
-                                     }
-                                   }))
-                                 }}
-                               />
-                            </div>
-                         </div>
-                       )}
-
-                       <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1.5">
-                             <Label className="text-[8px] font-black text-slate-500 uppercase ml-1">Dona (tayyor)</Label>
-                             <Input 
-                               type="number"
-                               step="0.0001"
-                               className="h-10 bg-slate-950 border-slate-900 rounded-lg text-sm font-black font-mono text-white"
-                               value={reportData[order.id]?.produced || ""}
-                               onChange={e => {
-                                 const val = e.target.value
-                                 setReportData(prev => ({
-                                   ...prev,
-                                   [order.id]: { ...prev[order.id], produced: val }
-                                 }))
-                               }}
-                             />
-                          </div>
-                          <div className="space-y-1.5">
-                             <Label className="text-[8px] font-black text-slate-500 uppercase ml-1">Dona (brak)</Label>
-                             <Input 
-                               type="number"
-                               step="0.0001"
-                               className="h-10 bg-slate-950 border-slate-900 rounded-lg text-sm font-black font-mono text-rose-500"
-                               value={reportData[order.id]?.defects || ""}
-                               onChange={e => {
-                                 const val = e.target.value
-                                 setReportData(prev => ({
-                                   ...prev,
-                                   [order.id]: { ...prev[order.id], defects: val }
-                                 }))
-                               }}
-                             />
-                          </div>
-                       </div>
-                       
-                       <Button 
-                         className="w-full h-10 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-lg shadow-indigo-500/20"
-                         disabled={submitting || (!reportData[order.id]?.produced && !reportData[order.id]?.producedPages)}
-                         onClick={() => handleReport(order.id)}
-                       >
-                         {submitting ? "..." : "TASDIQLASH VA SAQLASH"}
-                       </Button>
-                    </div>
-                  )}
                 </div>
               )) : (
                  <div className="py-24 text-center opacity-40">
