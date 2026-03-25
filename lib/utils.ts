@@ -24,6 +24,7 @@ export function getStepLabelUz(step: string) {
         'ready': 'Tayyor (Ombor)',
         'tayyor_sklad': 'Tayyor (Sklad)'
     }
+    if (!step) return 'Noma\'lum'
     const key = step.toLowerCase()
     return map[key] || step.charAt(0).toUpperCase() + step.slice(1)
 }

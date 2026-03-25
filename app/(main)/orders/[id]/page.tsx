@@ -250,7 +250,7 @@ export default function OrderDetailPage() {
                         <div>
                             <div className="flex items-center gap-3">
                                 <h1 className="text-2xl font-black tracking-tight text-white uppercase italic">
-                                    #{order.order_number?.split('-').pop()}
+                                    #{order.order_number ? order.order_number.split('-').pop() : '...'}
                                 </h1>
                                 <Badge className={`${getStatusBadgeColor(order.status)} px-3 py-1 font-black text-[10px] tracking-tighter uppercase italic rounded-lg`}>
                                     {getStatusLabel(order.status)}
@@ -434,7 +434,22 @@ export default function OrderDetailPage() {
                     <div className="flex items-center gap-3 relative z-10">
                         <Button 
                             className="bg-emerald-500 text-emerald-950 font-black border-none hover:bg-emerald-400 uppercase text-xs tracking-widest px-8 h-12 rounded-xl transition-all shadow-xl shadow-emerald-500/20 active:scale-95 group-hover:scale-105"
-                            onClick={() => router.push(`/api/orders/${order.id}/deliver/`)}
+                            onClick={async () => {
+                                setUpdating(true);
+                                try {
+                                    const res = await fetchWithAuth(`/api/orders/${order.id}/deliver/`, { method: "POST" });
+                                    if (res.ok) {
+                                        toast.success("Buyurtma muvaffaqiyatli topshirildi");
+                                        fetchOrder();
+                                    } else {
+                                        toast.error("Xatolik yuz berdi");
+                                    }
+                                } catch (e) {
+                                    toast.error("Aloqa xatosi");
+                                } finally {
+                                    setUpdating(false);
+                                }
+                            }}
                         >
                             <Truck className="h-5 w-5 mr-3" /> Mijozga topshirish
                         </Button>

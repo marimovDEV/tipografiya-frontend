@@ -445,7 +445,8 @@ export async function reportStepProgress(params: {
     })
 
     if (!response.ok) {
-        throw new Error("Failed to report progress")
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || errorData.detail || "Failed to report progress");
     }
 
     return response.json()

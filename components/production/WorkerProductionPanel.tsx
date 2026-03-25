@@ -302,8 +302,8 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
       
       fetchWorkerData()
       fetchDailyStats()
-    } catch (error) {
-      toast.error("Hisobotni yuborishda xatolik")
+    } catch (error: any) {
+      toast.error(error.message || "Hisobotni yuborishda xatolik")
     } finally {
       setSubmitting(false)
     }
