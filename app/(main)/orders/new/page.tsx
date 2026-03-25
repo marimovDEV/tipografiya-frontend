@@ -329,7 +329,7 @@ function TemplateStep({
 
   async function loadTemplates() {
     try {
-      const response = await getProductTemplates({ is_active: true, category: 'book' })
+      const response = await getProductTemplates({ is_active: true })
       console.log('Order wizard templates:', response)
 
       // Handle both array and {results: []} response formats
