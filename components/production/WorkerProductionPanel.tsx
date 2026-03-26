@@ -790,7 +790,7 @@ export default function WorkerProductionPanel({ searchQuery = "" }: { searchQuer
                 </p>
               </div>
             )}
-          </CardContent>ent>
+          </CardContent>
         </Card>
 
         {/* RECENT LOGS - SMALL */}
