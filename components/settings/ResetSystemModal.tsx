@@ -112,7 +112,7 @@ export function ResetSystemModal({ isOpen, onClose }: ResetSystemModalProps) {
                 type="text"
                 required
                 value={formData.confirmation}
-                onChange={(e) => setFormData({ ...formData, confirmation: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, confirmation: e.target.value.toUpperCase() })}
                 className="bg-slate-950 border-slate-700 h-12 rounded-xl focus:ring-red-500 font-black uppercase tracking-widest text-red-500 placeholder:text-slate-800"
                 placeholder="RESET"
               />
