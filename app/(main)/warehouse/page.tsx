@@ -25,6 +25,7 @@ import { NewMaterialDialog } from "@/components/warehouse/new-material-dialog"
 import { EditMaterialDialog } from "@/components/warehouse/edit-material-dialog"
 import { PlusCircle, Plus } from "lucide-react"
 import { WasteMaterialDialog } from "@/components/warehouse/WasteMaterialDialog"
+import { ResetWarehouseModal } from "@/components/warehouse/ResetWarehouseModal"
 
 export default function EnhancedWarehousePage() {
   const [activeTab, setActiveTab] = useState("overview")
@@ -45,6 +46,7 @@ export default function EnhancedWarehousePage() {
 
   const [receiptDialogOpen, setReceiptDialogOpen] = useState(false)
   const [newMaterialDialogOpen, setNewMaterialDialogOpen] = useState(false)
+  const [resetModalOpen, setResetModalOpen] = useState(false)
 
   useEffect(() => {
     loadAllData()
@@ -122,6 +124,14 @@ export default function EnhancedWarehousePage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200"
+            onClick={() => setResetModalOpen(true)}
+          >
+             <RotateCcw className="mr-2 h-4 w-4" />
+             Omborni Tozalash
+          </Button>
           <Button variant="outline" onClick={() => setNewMaterialDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Yangi Material
@@ -232,6 +242,18 @@ export default function EnhancedWarehousePage() {
                     >
                       <Pencil className="w-4 h-4 mr-2" />
                       Tahrir
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      className="col-span-2 mt-1"
+                      onClick={() => {
+                        setMaterialToDelete(item)
+                        setDeleteConfirmOpen(true)
+                      }}
+                    >
+                      <Trash className="w-4 h-4 mr-2" />
+                      O'chirish
                     </Button>
                   </div>
                 </CardContent>
@@ -383,6 +405,12 @@ export default function EnhancedWarehousePage() {
         onSuccess={() => {
           loadAllData()
         }}
+      />
+
+      <ResetWarehouseModal 
+        isOpen={resetModalOpen}
+        onClose={() => setResetModalOpen(false)}
+        onSuccess={() => loadAllData()}
       />
     </div >
   )
