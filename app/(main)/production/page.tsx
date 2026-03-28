@@ -61,7 +61,7 @@ export default function ProductionPage() {
       const data = await response.json()
       const allOrders: Order[] = data.results || data
       const productionOrders = allOrders.filter((order) =>
-        ["approved", "in_production", "ready"].includes(order.status)
+        ["pending", "approved", "in_production", "ready"].includes(order.status)
       )
       setOrders(productionOrders)
     } catch (error) {
